@@ -3,13 +3,15 @@ import 'calculos.dart';
 import 'components/custom_appbar.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String tipoUsuario; // ✅ Agora armazenamos o tipo de usuário
+
+  const HomePage({super.key, required this.tipoUsuario});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Home',
+      appBar: CustomAppBar(
+        title: 'Home - $tipoUsuario', // ✅ Exibe o tipo do usuário
       ),
       body: Center(
         child: Padding(
@@ -17,16 +19,13 @@ class HomePage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildButton(
-                  context, 'Cálculos', 'assets/imagens/calculos.png', true),
+              _buildButton(context, 'Cálculos', 'assets/imagens/calculos.png', true),
               const SizedBox(width: 20),
-              _buildButton(context, 'Atendimento',
-                  'assets/imagens/atendimentos.png', false),
+              _buildButton(context, 'Atendimento', 'assets/imagens/atendimentos.png', false),
               const SizedBox(width: 20),
               Stack(
                 children: [
-                  _buildButton(context, 'Relatórios',
-                      'assets/imagens/relatorios.png', false),
+                  _buildButton(context, 'Relatórios', 'assets/imagens/relatorios.png', false),
                   Positioned(
                     right: 5,
                     top: 5,
@@ -36,7 +35,7 @@ class HomePage extends StatelessWidget {
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
-                      child: Text(
+                      child: const Text(
                         '1',
                         style: TextStyle(
                           color: Colors.white,
@@ -55,8 +54,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(
-      BuildContext context, String text, String imagePath, bool isClickable) {
+  Widget _buildButton(BuildContext context, String text, String imagePath, bool isClickable) {
     return GestureDetector(
       onTap: isClickable
           ? () {
