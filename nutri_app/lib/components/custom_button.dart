@@ -9,25 +9,47 @@ class CustomButton extends StatelessWidget {
     super.key,
     required this.text,
     required this.onPressed,
-    this.color = Colors.blue, // Cor padrão
+    this.color = const Color(0xFF007AFF),
   });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF007AFF).withOpacity(0.24),
+            offset: const Offset(0, 1),
+            blurRadius: 2.5,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: const Color(0xFF007AFF).withOpacity(0.12),
+            offset: const Offset(0, 0),
+            blurRadius: 0,
+            spreadRadius: 0.5,
+          ),
+        ],
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          shadowColor: Colors.transparent,
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontFamily: 'Poppins',
+          ),
         ),
       ),
     );

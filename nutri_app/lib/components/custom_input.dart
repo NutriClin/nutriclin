@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomInput extends StatelessWidget {
   final String label;
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final bool obscureText;
   final double width;
 
-  const CustomTextField({
+  const CustomInput({
     super.key,
     required this.label,
     required this.width,
@@ -26,10 +26,10 @@ class CustomTextField extends StatelessWidget {
             width: width,
             child: Text(
               label,
-              style: const TextStyle(
-                color: Colors.grey,
+              style: TextStyle(
+                color: Colors.black,
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
               ),
             ),
           ),
@@ -40,11 +40,21 @@ class CustomTextField extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
+                boxShadow: [
+                  // Primeira sombra conforme a imagem, corrigida para baixo
                   BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
+                    color: Colors.black.withOpacity(0.2), // 30% de opacidade
+                    offset: const Offset(0,
+                        2), // Aumentado para Y: 2 para mover a sombra mais para baixo
+                    blurRadius: 2.5, // Blur de 2.5
+                    spreadRadius: 0, // Sem spread
+                  ),
+                  // Segunda sombra adicional conforme solicitado
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // 5% de opacidade
+                    offset: Offset.zero, // Sem deslocamento
+                    blurRadius: 0.5, // Sem blur
+                    spreadRadius: 0.5, // Spread de 0.5
                   ),
                 ],
               ),
@@ -55,6 +65,7 @@ class CustomTextField extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  fontFamily: 'Poppins',
                 ),
                 decoration: const InputDecoration(
                   border: InputBorder.none,

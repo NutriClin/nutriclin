@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:nutri_app/components/input_custom.dart';
+import 'package:nutri_app/components/custom_input.dart';
 import '../home.dart';
 import 'components/custom_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'components/custom_card.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -40,26 +41,13 @@ class LoginPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // Card responsivo
-                      Container(
+                      CustomCard(
                         width: cardWidth,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
                         child: Column(
                           children: [
-                            CustomTextField(label: 'RA:', width: 50),
+                            CustomInput(label: 'RA:', width: 50),
                             const SizedBox(height: 15),
-                            CustomTextField(label: 'Senha:',width: 50),
+                            CustomInput(label: 'Senha:', width: 50),
                             const SizedBox(height: 15),
                             CustomButton(
                               text: "Entrar",

@@ -67,3 +67,9 @@ flutter:
     - assets/imagens/calculos.png
     - assets/imagens/relatorios.png
     - assets/imagens/campologo.svg
+    - assets/fonts/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
