@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'calculos.dart'; 
-
+import 'calculos.dart';
+import 'components/custom_appbar.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -8,36 +8,55 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Home',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 216, 216, 216),
+      appBar: const CustomAppBar(
+        title: 'Home',
       ),
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: _buildButton(context, 'Cálculos', 'assets/imagens/calculos.png', true),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: _buildButton(context, 'Atendimento', 'assets/imagens/atendimentos.png', false),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: _buildButton(context, 'Relatórios', 'assets/imagens/relatorios.png', false),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildButton(
+                  context, 'Cálculos', 'assets/imagens/calculos.png', true),
+              const SizedBox(width: 20),
+              _buildButton(context, 'Atendimento',
+                  'assets/imagens/atendimentos.png', false),
+              const SizedBox(width: 20),
+              Stack(
+                children: [
+                  _buildButton(context, 'Relatórios',
+                      'assets/imagens/relatorios.png', false),
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '1',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildButton(BuildContext context, String text, String imagePath, bool isClickable) {
+  Widget _buildButton(
+      BuildContext context, String text, String imagePath, bool isClickable) {
     return GestureDetector(
       onTap: isClickable
           ? () {

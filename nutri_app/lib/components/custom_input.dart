@@ -41,20 +41,17 @@ class CustomInput extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
-                  // Primeira sombra conforme a imagem, corrigida para baixo
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2), // 30% de opacidade
-                    offset: const Offset(0,
-                        2), // Aumentado para Y: 2 para mover a sombra mais para baixo
-                    blurRadius: 2.5, // Blur de 2.5
-                    spreadRadius: 0, // Sem spread
+                    color: Colors.black.withOpacity(0.2),
+                    offset: const Offset(0, 2),
+                    blurRadius: 2.5,
+                    spreadRadius: 0,
                   ),
-                  // Segunda sombra adicional conforme solicitado
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2), // 5% de opacidade
-                    offset: Offset.zero, // Sem deslocamento
-                    blurRadius: 0.5, // Sem blur
-                    spreadRadius: 0.5, // Spread de 0.5
+                    color: Colors.black.withOpacity(0.2),
+                    offset: Offset.zero,
+                    blurRadius: 0.5,
+                    spreadRadius: 0.5,
                   ),
                 ],
               ),
