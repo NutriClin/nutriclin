@@ -1,19 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/services/auth_service.dart';
 import '../home.dart';
 import 'components/custom_button.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'components/custom_card.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final AuthService _authService = AuthService(); 
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
+  bool isLoading = false;
+
+void _login() async {
+  String email = emailController.text.trim();
+  String senha = senhaController.text.trim();
+  
+  if (email.isEmpty || senha.isEmpty) {
+    _mostrarMensagem("Por favor, preencha todos os campos!");
+    return;
+  }
+  
+  setState(() {
+    isLoading = true;
+  });
+  
+  print('Iniciando tentativa de login');
+  Map<String, dynamic>? usuario = await _authService.login(email, senha);
+  print('Resultado do login: $usuario');
+  
+  setState(() {
+    isLoading = false;
+  });
+  
+  if (usuario != null) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(tipoUsuario: usuario['tipo_usuario']),
+      ),
+    );
+  } else {
+    _mostrarMensagem("Erro ao fazer login. Verifique suas credenciais.");
+  }
+}
+
+  void _mostrarMensagem(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensagem)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth = screenWidth < 600
-        ? screenWidth * 0.9 // Em telas pequenas (celular), 90% da largura
-        : screenWidth * 0.4; // Em telas maiores, 40% da largura
+    double cardWidth = screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
 
     return Scaffold(
       body: LayoutBuilder(
@@ -41,23 +89,27 @@ class LoginPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
+                      // Card de Login
                       CustomCard(
                         width: cardWidth,
                         child: Column(
                           children: [
-                            CustomInput(label: 'RA:', width: 50),
+                            CustomInput(
+                              label: 'Email:', 
+                              width: 50,
+                              controller: emailController, // Conectar ao controlador
+                            ),
                             const SizedBox(height: 15),
-                            CustomInput(label: 'Senha:', width: 50),
+                            CustomInput(
+                              label: 'Senha:', 
+                              width: 50,
+                              controller: senhaController, // Conectar ao controlador
+                              obscureText: true, // Esconder senha
+                            ),
                             const SizedBox(height: 15),
                             CustomButton(
-                              text: "Entrar",
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomePage()),
-                                );
-                              },
+                              text: isLoading ? "Entrando..." : "Entrar",
+                              onPressed: isLoading ? () {} : _login, // Desabilita se estiver carregando
                             ),
                           ],
                         ),

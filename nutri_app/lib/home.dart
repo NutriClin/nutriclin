@@ -4,7 +4,9 @@ import 'package:nutri_app/calculos.dart';
 import 'components/custom_appbar.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String tipoUsuario; // ✅ Agora armazenamos o tipo de usuário
+
+  const HomePage({super.key, required this.tipoUsuario});
 
   @override
   Widget build(BuildContext context) {
