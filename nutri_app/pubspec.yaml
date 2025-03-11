@@ -62,11 +62,12 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/imagens/campologo.png
-    - assets/imagens/atendimentos.png
-    - assets/imagens/calculos.png
-    - assets/imagens/relatorios.png
+    - assets/imagens/atendimentos.svg
+    - assets/imagens/calculos.svg
+    - assets/imagens/relatorios.svg
     - assets/imagens/campologo.svg
+    - assets/imagens/calculadora.svg
+    - assets/imagens/stethoscope.svg
     - assets/fonts/
 
   fonts:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'calculos.dart';
+import 'package:nutri_app/components/custom_box.dart';
+import 'package:nutri_app/calculos.dart';
 import 'components/custom_appbar.dart';
 
 class HomePage extends StatelessWidget {
@@ -8,35 +9,54 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Home',
-      ),
+      appBar: const CustomAppBar(title: 'Home'),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildButton(
-                  context, 'Cálculos', 'assets/imagens/calculos.png', true),
+              CustomBox(
+                text: 'Cálculos',
+                imagePath: 'assets/imagens/calculadora.svg',
+                onTap: () {
+                  print("Clicou no box Cálculos");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CalculosPage()),
+                  );
+                },
+              ),
               const SizedBox(width: 20),
-              _buildButton(context, 'Atendimento',
-                  'assets/imagens/atendimentos.png', false),
+              CustomBox(
+                text: 'Atendimento',
+                imagePath: 'assets/imagens/stethoscope.svg',
+                onTap: () {
+                  print("Clicou no box Atendimento");
+                },
+              ),
               const SizedBox(width: 20),
               Stack(
                 children: [
-                  _buildButton(context, 'Relatórios',
-                      'assets/imagens/relatorios.png', false),
+                  CustomBox(
+                    text: 'Relatórios',
+                    imagePath: 'assets/imagens/relatorios.svg',
+                    
+                    onTap: () {
+                      print("Clicou no box Relatórios");
+                    },
+                  ),
                   Positioned(
                     right: 5,
                     top: 5,
                     child: Container(
                       padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
-                      child: Text(
+                      child: const Text(
                         '1',
                         style: TextStyle(
                           color: Colors.white,
@@ -50,45 +70,6 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton(
-      BuildContext context, String text, String imagePath, bool isClickable) {
-    return GestureDetector(
-      onTap: isClickable
-          ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalculosPage()),
-              );
-            }
-          : null,
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              blurRadius: 8,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(imagePath, width: 50, height: 50),
-            const SizedBox(height: 8),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
         ),
       ),
     );
