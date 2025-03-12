@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
-import 'components/custom_header.dart';
+import 'components/custom_appbar.dart';
 
 class UsuarioPage extends StatefulWidget {
   const UsuarioPage({super.key});
@@ -40,12 +40,11 @@ class _UsuarioPageState extends State<UsuarioPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(title: 'Usuários'),
+      appBar: const CustomAppBar(title: 'Usuários'),
       body: Column(
         children: [
           const SizedBox(height: 10),
           CustomInputSearch(
-            label: 'Email:',
             width: 50,
             controller: _searchController,
           ),

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
 class CustomInputSearch extends StatefulWidget {
-  final String label;
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final double width;
 
   const CustomInputSearch({
     super.key,
-    required this.label,
     required this.width,
     this.controller,
     this.keyboardType = TextInputType.text,
@@ -25,23 +23,12 @@ class _CustomInputSearchState extends State<CustomInputSearch> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            width: widget.width,
-            child: Text(
-              widget.label,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ),
           const SizedBox(width: 10),
           Expanded(
             child: Container(
               height: 36,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 129, 129, 129),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
