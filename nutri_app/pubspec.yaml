@@ -70,6 +70,7 @@ flutter:
     - assets/imagens/campologo.svg
     - assets/imagens/calculadora.svg
     - assets/imagens/stethoscope.svg
+    - assets/imagens/user-group.svg
     - assets/fonts/
 
   fonts:

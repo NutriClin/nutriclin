@@ -4,76 +4,95 @@ import 'package:nutri_app/calculos.dart';
 import 'components/custom_appbar.dart';
 
 class HomePage extends StatelessWidget {
-  final String tipoUsuario; // ✅ Agora armazenamos o tipo de usuário
+  final String tipoUsuario;
 
   const HomePage({super.key, required this.tipoUsuario});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Home'),
+      appBar: CustomAppBar(title: 'Home'),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomBox(
-                text: 'Cálculos',
-                imagePath: 'assets/imagens/calculadora.svg',
-                onTap: () {
-                  print("Clicou no box Cálculos");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CalculosPage()),
-                  );
-                },
-              ),
-              const SizedBox(width: 20),
-              CustomBox(
-                text: 'Atendimento',
-                imagePath: 'assets/imagens/stethoscope.svg',
-                onTap: () {
-                  print("Clicou no box Atendimento");
-                },
-              ),
-              const SizedBox(width: 20),
-              Stack(
-                children: [
-                  CustomBox(
-                    text: 'Relatórios',
-                    imagePath: 'assets/imagens/relatorios.svg',
-                    
-                    onTap: () {
-                      print("Clicou no box Relatórios");
-                    },
-                  ),
-                  Positioned(
-                    right: 5,
-                    top: 5,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(
-                        color: Colors.blue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Text(
-                        '1',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            children: _buildCards(context),
           ),
         ),
       ),
     );
+  }
+
+  // Método para retornar os cards com base no tipo de usuário
+  List<Widget> _buildCards(BuildContext context) {
+    List<Widget> cards = [];
+
+    // Adiciona o card de Cálculos, que será exibido para todos os tipos de usuário
+    cards.add(
+      CustomBox(
+        text: 'Cálculos',
+        imagePath: 'assets/imagens/calculadora.svg',
+        onTap: () {
+          print("Clicou no box Cálculos");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CalculosPage()),
+          );
+        },
+      ),
+    );
+    cards.add(const SizedBox(width: 20));
+
+    // Exibe os cards dependendo do tipo de usuário
+    if (tipoUsuario == 'Coordenador') {
+      cards.addAll([
+        CustomBox(
+          text: 'Usuários',
+          imagePath: 'assets/imagens/user-group.svg',
+          onTap: () {
+            print("Clicou no box Relatórios");
+          },
+        ),
+        const SizedBox(width: 20),
+        CustomBox(
+          text: 'Relatórios',
+          imagePath: 'assets/imagens/relatorios.svg',
+          onTap: () {
+            print("Clicou no box Relatórios");
+          },
+        ),
+      ]);
+    } else if (tipoUsuario == 'Professor') {
+      cards.addAll([
+        CustomBox(
+          text: 'Relatórios Específicos',
+          imagePath: 'assets/imagens/relatorios.svg',
+          onTap: () {
+            print("Clicou no box Relatórios Específicos");
+          },
+        ),
+      ]);
+    } else if (tipoUsuario == 'Aluno') {
+      cards.addAll([
+        CustomBox(
+          text: 'Atendimento',
+          imagePath: 'assets/imagens/stethoscope.svg',
+          onTap: () {
+            print("Clicou no box Atendimento");
+          },
+        ),
+        const SizedBox(width: 20),
+        CustomBox(
+          text: 'Relatórios',
+          imagePath: 'assets/imagens/relatorios.svg',
+          onTap: () {
+            print("Clicou no box relatorios");
+          },
+        ),
+      ]);
+    }
+
+    return cards;
   }
 }

@@ -69,8 +69,8 @@ class CustomBox extends StatelessWidget {
                 children: [
                   SvgPicture.asset(
                     imagePath,
-                    width: 25,
-                    height: 25,
+                    width: 32,
+                    height: 32,
                     fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 8),
