@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/calculos.dart';
 import 'components/custom_appbar.dart';
+import 'usuarios.dart';
 
 class HomePage extends StatelessWidget {
   final String tipoUsuario;
@@ -29,20 +30,20 @@ class HomePage extends StatelessWidget {
     List<Widget> cards = [];
 
     // Adiciona o card de Cálculos, que será exibido para todos os tipos de usuário
-    cards.add(
-      CustomBox(
-        text: 'Cálculos',
-        imagePath: 'assets/imagens/calculadora.svg',
-        onTap: () {
-          print("Clicou no box Cálculos");
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CalculosPage()),
-          );
-        },
-      ),
-    );
-    cards.add(const SizedBox(width: 20));
+    // cards.add(
+    //   CustomBox(
+    //     text: 'Cálculos',
+    //     imagePath: 'assets/imagens/calculadora.svg',
+    //     onTap: () {
+    //       print("Clicou no box Cálculos");
+    //       Navigator.push(
+    //         context,
+    //         MaterialPageRoute(builder: (context) => const CalculosPage()),
+    //       );
+    //     },
+    //   ),
+    // );
+    // cards.add(const SizedBox(width: 20));
 
     // Exibe os cards dependendo do tipo de usuário
     if (tipoUsuario == 'Coordenador') {
@@ -51,28 +52,34 @@ class HomePage extends StatelessWidget {
           text: 'Usuários',
           imagePath: 'assets/imagens/user-group.svg',
           onTap: () {
-            print("Clicou no box Relatórios");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    const UsuarioPage(),
+              ),
+            );
           },
         ),
-        const SizedBox(width: 20),
-        CustomBox(
-          text: 'Relatórios',
-          imagePath: 'assets/imagens/relatorios.svg',
-          onTap: () {
-            print("Clicou no box Relatórios");
-          },
-        ),
+        // const SizedBox(width: 20),
+        // CustomBox(
+        //   text: 'Relatórios',
+        //   imagePath: 'assets/imagens/relatorios.svg',
+        //   onTap: () {
+        //     print("Clicou no box Relatórios");
+        //   },
+        // ),
       ]);
     } else if (tipoUsuario == 'Professor') {
-      cards.addAll([
-        CustomBox(
-          text: 'Relatórios Específicos',
-          imagePath: 'assets/imagens/relatorios.svg',
-          onTap: () {
-            print("Clicou no box Relatórios Específicos");
-          },
-        ),
-      ]);
+      // cards.addAll([
+      //   CustomBox(
+      //     text: 'Relatórios Específicos',
+      //     imagePath: 'assets/imagens/relatorios.svg',
+      //     onTap: () {
+      //       print("Clicou no box Relatórios Específicos");
+      //     },
+      //   ),
+      // ]);
     } else if (tipoUsuario == 'Aluno') {
       cards.addAll([
         CustomBox(
