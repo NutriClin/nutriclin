@@ -5,6 +5,7 @@ import 'package:nutri_app/services/auth_service.dart';
 import '../home.dart';
 import 'components/custom_button.dart';
 import 'components/custom_card.dart';
+import 'components/custom_input_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,43 +15,43 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final AuthService _authService = AuthService(); 
+  final AuthService _authService = AuthService();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
   bool isLoading = false;
 
-void _login() async {
-  String email = emailController.text.trim();
-  String senha = senhaController.text.trim();
-  
-  if (email.isEmpty || senha.isEmpty) {
-    _mostrarMensagem("Por favor, preencha todos os campos!");
-    return;
+  void _login() async {
+    String email = emailController.text.trim();
+    String senha = senhaController.text.trim();
+
+    if (email.isEmpty || senha.isEmpty) {
+      _mostrarMensagem("Por favor, preencha todos os campos!");
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    print('Iniciando tentativa de login');
+    Map<String, dynamic>? usuario = await _authService.login(email, senha);
+    print('Resultado do login: $usuario');
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (usuario != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(tipoUsuario: usuario['tipo_usuario']),
+        ),
+      );
+    } else {
+      _mostrarMensagem("Erro ao fazer login. Verifique suas credenciais.");
+    }
   }
-  
-  setState(() {
-    isLoading = true;
-  });
-  
-  print('Iniciando tentativa de login');
-  Map<String, dynamic>? usuario = await _authService.login(email, senha);
-  print('Resultado do login: $usuario');
-  
-  setState(() {
-    isLoading = false;
-  });
-  
-  if (usuario != null) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(tipoUsuario: usuario['tipo_usuario']),
-      ),
-    );
-  } else {
-    _mostrarMensagem("Erro ao fazer login. Verifique suas credenciais.");
-  }
-}
 
   void _mostrarMensagem(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +62,8 @@ void _login() async {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth = screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
+    double cardWidth =
+        screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
 
     return Scaffold(
       body: LayoutBuilder(
@@ -95,21 +97,24 @@ void _login() async {
                         child: Column(
                           children: [
                             CustomInput(
-                              label: 'Email:', 
+                              label: 'Email:',
                               width: 50,
-                              controller: emailController, // Conectar ao controlador
+                              controller:
+                                  emailController,
                             ),
                             const SizedBox(height: 15),
-                            CustomInput(
-                              label: 'Senha:', 
+                            CustomInputPassword(
+                              label: 'Senha:',
                               width: 50,
-                              controller: senhaController, // Conectar ao controlador
-                              obscureText: true, // Esconder senha
+                              controller: senhaController,
+                              obscureText: true,
                             ),
                             const SizedBox(height: 15),
                             CustomButton(
                               text: isLoading ? "Entrando..." : "Entrar",
-                              onPressed: isLoading ? () {} : _login, // Desabilita se estiver carregando
+                              onPressed: isLoading
+                                  ? () {}
+                                  : _login,
                             ),
                           ],
                         ),
