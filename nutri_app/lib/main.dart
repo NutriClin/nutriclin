@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:nutri_app/home.dart';
+import 'package:nutri_app/usuarios.dart';
 import './firebase/firebase_options.dart';
 import 'login.dart';
 // import 'home.dart';
@@ -26,10 +28,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       
-      initialRoute: '/login',
+      initialRoute: '/usuario',
       routes: {
         '/login': (context) => const LoginPage(),
-        // '/home': (context) => const HomePage(),
+        '/usuario': (context) => const UsuarioPage(),
       },
     );
   }

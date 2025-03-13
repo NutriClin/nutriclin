@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
+import 'package:nutri_app/components/custom_list.dart';
 import 'components/custom_appbar.dart';
 
 class UsuarioPage extends StatefulWidget {
@@ -13,89 +14,85 @@ class _UsuarioPageState extends State<UsuarioPage> {
   final TextEditingController _searchController = TextEditingController();
 
   // Lista de relatórios simulada
-  final List<Map<String, dynamic>> reports = [
+  final List<Map<String, dynamic>> allReports = [
     {
-      "name": "Bryan Mernick",
-      "date": "Feb 11, 2025 as 9:00 Hrs",
+      "nome": "Bryan Mernick",
+      "data": DateTime(2025, 2, 11, 9, 0),
       "status": "Pendente",
-      "statusColor": Colors.red,
-      "isPriority": true
     },
     {
-      "name": "Giovane Galvão",
-      "date": "Feb 10, 2025 as 13:42 Hrs",
+      "nome": "Giovane Galvão",
+      "data": DateTime(2025, 2, 10, 13, 42),
       "status": "Entregue",
-      "statusColor": Colors.green,
-      "isPriority": false
     },
     {
-      "name": "Isabelle Cordova Gom...",
-      "date": "Feb 10, 2025 as 11:00 Hrs",
+      "nome": "Isabelle Cordova Gomez",
+      "data": DateTime(2025, 2, 10, 11, 0),
       "status": "Entregue",
-      "statusColor": Colors.green,
-      "isPriority": false
     },
   ];
 
+  List<Map<String, dynamic>> filteredReports = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredReports =
+        List.from(allReports); // Inicializa a lista filtrada com todos os itens
+    _searchController.addListener(_filterReports);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_filterReports);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterReports() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredReports = allReports.where((report) {
+        return report["nome"].toLowerCase().contains(query);
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Ordenando a lista: "Pendente" primeiro e depois por data (mais novo por último)
+    filteredReports.sort((a, b) {
+      if (a['status'] == 'Pendente' && b['status'] != 'Pendente') {
+        return -1;
+      } else if (a['status'] != 'Pendente' && b['status'] == 'Pendente') {
+        return 1;
+      } else {
+        return a['data'].compareTo(b['data']);
+      }
+    });
+
     return Scaffold(
       appBar: const CustomAppBar(title: 'Usuários'),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          CustomInputSearch(
-            width: 50,
-            controller: _searchController,
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: reports.length,
-              itemBuilder: (context, index) {
-                return ReportItem(report: reports[index]);
-              },
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            CustomInputSearch(
+              controller: _searchController,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Componente para os itens da lista de relatórios
-class ReportItem extends StatelessWidget {
-  final Map<String, dynamic> report;
-
-  const ReportItem({super.key, required this.report});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          leading: report["isPriority"]
-              ? const Icon(Icons.arrow_upward, color: Colors.blue)
-              : null,
-          title: Text(
-            report["name"],
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(
-            report["date"],
-            style: const TextStyle(color: Colors.grey),
-          ),
-          trailing: Text(
-            report["status"],
-            style: TextStyle(
-              color: report["statusColor"],
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredReports.length,
+                itemBuilder: (context, index) {
+                  return CustomList(report: filteredReports[index]);
+                },
+              ),
             ),
-          ),
-          onTap: () {}, // Ação ao clicar no item
+          ],
         ),
-        const Divider(indent: 20, endIndent: 20, height: 1),
-      ],
+      ),
     );
   }
 }

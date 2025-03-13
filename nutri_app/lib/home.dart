@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_box.dart';
-import 'package:nutri_app/calculos.dart';
 import 'components/custom_appbar.dart';
 import 'usuarios.dart';
 

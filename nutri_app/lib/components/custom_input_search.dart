@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 class CustomInputSearch extends StatefulWidget {
   final TextEditingController? controller;
   final TextInputType keyboardType;
-  final double width;
 
   const CustomInputSearch({
     super.key,
-    required this.width,
     this.controller,
     this.keyboardType = TextInputType.text,
   });
@@ -57,7 +55,6 @@ class _CustomInputSearchState extends State<CustomInputSearch> {
                 decoration: const InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     prefixIcon: Icon(Icons.search)),
               ),
             ),
