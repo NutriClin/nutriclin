@@ -12,13 +12,20 @@ class CustomList extends StatelessWidget {
       children: [
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 5),
-          title: Text(
-            report["nome"],
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              fontFamily: 'Poppins',
-            ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  report["nome"],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
           subtitle: Text(
             "${report["data"].day}/${report["data"].month}/${report["data"].year} às ${report["data"].hour}:${report["data"].minute.toString().padLeft(2, '0')} Hrs",
@@ -39,6 +46,7 @@ class CustomList extends StatelessWidget {
                   fontSize: 16,
                   fontFamily: 'Poppins',
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(width: 20),
               const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),

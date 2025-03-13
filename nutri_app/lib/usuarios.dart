@@ -59,6 +59,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     // Ordenando a lista: "Pendente" primeiro e depois por data (mais novo por último)
     filteredReports.sort((a, b) {
