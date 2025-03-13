@@ -15,6 +15,31 @@ class CustomInputSearch extends StatefulWidget {
 }
 
 class _CustomInputSearchState extends State<CustomInputSearch> {
+  bool _showClearIcon = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller?.addListener(_updateClearIcon);
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_updateClearIcon);
+    super.dispose();
+  }
+
+  void _updateClearIcon() {
+    setState(() {
+      _showClearIcon = widget.controller?.text.isNotEmpty ?? false;
+    });
+  }
+
+  void _clearSearch() {
+    widget.controller?.clear();
+    _updateClearIcon();
+  }
+
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
@@ -33,7 +58,6 @@ class _CustomInputSearchState extends State<CustomInputSearch> {
                     color: Colors.black.withOpacity(0.2),
                     offset: const Offset(0, 2),
                     blurRadius: 2.5,
-                    spreadRadius: 0,
                   ),
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -52,10 +76,17 @@ class _CustomInputSearchState extends State<CustomInputSearch> {
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Poppins',
                 ),
-                decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    prefixIcon: Icon(Icons.search)),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _showClearIcon
+                      ? GestureDetector(
+                          onTap: _clearSearch,
+                          child: const Icon(Icons.clear, color: Colors.grey),
+                        )
+                      : null,
+                ),
               ),
             ),
           ),
