@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_box.dart';
-import 'components/custom_appbar.dart';
 import 'usuarios.dart';
 
 class HomePage extends StatelessWidget {

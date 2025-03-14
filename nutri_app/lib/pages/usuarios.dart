@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
-import 'package:nutri_app/components/custom_list.dart';
-import 'components/custom_appbar.dart';
+import 'package:nutri_app/components/custom_list_usuario.dart';
+import 'package:nutri_app/pages/usuario_detalhe.dart';
 
 class UsuarioPage extends StatefulWidget {
   const UsuarioPage({super.key});
@@ -18,17 +19,17 @@ class _UsuarioPageState extends State<UsuarioPage> {
     {
       "nome": "Bryan Mernick",
       "data": DateTime(2025, 2, 11, 9, 0),
-      "status": "Pendente",
+      "status": "Ativo",
     },
     {
       "nome": "Giovane Galvão",
       "data": DateTime(2025, 2, 10, 13, 42),
-      "status": "Entregue",
+      "status": "Desativado",
     },
     {
       "nome": "Isabelle Cordova Gomez",
       "data": DateTime(2025, 2, 10, 11, 0),
-      "status": "Entregue",
+      "status": "Ativo",
     },
   ];
 
@@ -37,8 +38,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
   @override
   void initState() {
     super.initState();
-    filteredReports =
-        List.from(allReports); // Inicializa a lista filtrada com todos os itens
+    filteredReports = List.from(allReports);
     _searchController.addListener(_filterReports);
   }
 
@@ -59,17 +59,10 @@ class _UsuarioPageState extends State<UsuarioPage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
-    // Ordenando a lista: "Pendente" primeiro e depois por data (mais novo por último)
+    // Ordenando a lista: mais novo por último
     filteredReports.sort((a, b) {
-      if (a['status'] == 'Pendente' && b['status'] != 'Pendente') {
-        return -1;
-      } else if (a['status'] != 'Pendente' && b['status'] == 'Pendente') {
-        return 1;
-      } else {
-        return a['data'].compareTo(b['data']);
-      }
+      return a['data'].compareTo(b['data']);
     });
 
     return Scaffold(
@@ -87,13 +80,32 @@ class _UsuarioPageState extends State<UsuarioPage> {
               child: ListView.builder(
                 itemCount: filteredReports.length,
                 itemBuilder: (context, index) {
-                  return CustomList(report: filteredReports[index]);
+                  return CustomListUsuario(report: filteredReports[index]);
                 },
               ),
             ),
           ],
         ),
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UsuarioDetalhe(idUsuario: 123,),
+                ),
+              );
+            },
+            backgroundColor: const Color(0xFF007AFF),
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

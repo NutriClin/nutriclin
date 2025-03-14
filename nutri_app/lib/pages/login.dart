@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/components/custom_input_password.dart';
+import 'package:nutri_app/pages/home.dart';
 import 'package:nutri_app/services/auth_service.dart';
-import '../home.dart';
-import 'components/custom_button.dart';
-import 'components/custom_card.dart';
-import 'components/custom_input_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

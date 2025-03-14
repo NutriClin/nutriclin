@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class CustomList extends StatelessWidget {
+class CustomListUsuario extends StatelessWidget {
   final Map<String, dynamic> report;
 
-  const CustomList({super.key, required this.report});
+  const CustomListUsuario({super.key, required this.report});
 
   @override
   Widget build(BuildContext context) {
-    bool isPendente = report["status"] == "Pendente";
+    bool isDesativado = report["status"] == "Desativado";
     return Column(
       children: [
         ListTile(
@@ -41,7 +41,7 @@ class CustomList extends StatelessWidget {
               Text(
                 report["status"],
                 style: TextStyle(
-                  color: isPendente ? Colors.red : Colors.green,
+                  color: isDesativado ? Colors.red : Colors.green,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                   fontFamily: 'Poppins',

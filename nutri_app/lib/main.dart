@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:nutri_app/home.dart';
-import 'package:nutri_app/usuarios.dart';
+import 'package:nutri_app/pages/usuarios.dart';
 import './firebase/firebase_options.dart';
-import 'login.dart';
+import 'pages/login.dart';
 // import 'home.dart';
 
 void main() async {
