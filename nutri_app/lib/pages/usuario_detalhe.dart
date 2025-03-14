@@ -5,7 +5,9 @@ import 'package:nutri_app/components/custom_input.dart';
 
 class UsuarioDetalhe extends StatelessWidget {
   final int idUsuario;
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController nomeController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+
 
   UsuarioDetalhe({super.key, required this.idUsuario});
 
@@ -30,7 +32,6 @@ class UsuarioDetalhe extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
-                      // Form
                       CustomCard(
                         width: cardWidth,
                         child: Column(
@@ -38,13 +39,14 @@ class UsuarioDetalhe extends StatelessWidget {
                             CustomInput(
                               label: 'Nome:',
                               width: 50,
-                              controller: emailController,
+                              controller: nomeController,
                             ),
                             const SizedBox(height: 15),
                             CustomInput(
                               label: 'Email:',
                               width: 50,
                               controller: emailController,
+                              enabled: false,
                             ),
                             const SizedBox(height: 15),
                           ],

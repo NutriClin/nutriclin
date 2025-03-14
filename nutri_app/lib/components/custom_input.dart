@@ -6,6 +6,7 @@ class CustomInput extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final double width;
+  final bool enabled;
 
   const CustomInput({
     super.key,
@@ -14,6 +15,7 @@ class CustomInput extends StatelessWidget {
     this.controller,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
+    this.enabled = true,
   });
 
   @override
@@ -26,7 +28,7 @@ class CustomInput extends StatelessWidget {
             width: width,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -38,38 +40,37 @@ class CustomInput extends StatelessWidget {
             child: Container(
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    offset: const Offset(0, 2),
-                    blurRadius: 2.5,
-                    spreadRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    offset: Offset.zero,
-                    blurRadius: 0.5,
-                    spreadRadius: 0.5,
-                  ),
-                ],
-              ),
+                  color: enabled ? Colors.white : const Color(0xFFEEE9EF),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: const Offset(0, 2),
+                      blurRadius: 2.5,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      offset: Offset.zero,
+                      blurRadius: 0.5,
+                      spreadRadius: 0.5,
+                    ),
+                  ]),
               child: TextField(
                 controller: controller,
                 keyboardType: keyboardType,
                 textAlignVertical: TextAlignVertical.bottom,
+                obscureText: obscureText,
+                enabled: enabled,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Poppins',
+                  color: Colors.black,
                 ),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
                 ),
               ),
             ),
