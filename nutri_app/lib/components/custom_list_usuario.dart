@@ -7,7 +7,6 @@ class CustomListUsuario extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isDesativado = report["ativo"] == false; // Verifica se o usuário está desativado
     return Column(
       children: [
         ListTile(
@@ -41,7 +40,7 @@ class CustomListUsuario extends StatelessWidget {
               Text(
                 report["tipo_usuario"], // Exibe o tipo de usuário (Aluno, Professor, etc)
                 style: TextStyle(
-                  color: isDesativado ? Colors.red : Colors.green,
+                  color: report["ativo"] == true  ? Colors.green : Colors.red,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                   fontFamily: 'Poppins',
