@@ -99,7 +99,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UsuarioDetalhe(idUsuario: 0),
+                  builder: (context) => UsuarioDetalhe(idUsuario: ""),
                 ),
               );
             },

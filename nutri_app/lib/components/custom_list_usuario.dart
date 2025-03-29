@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutri_app/pages/usuario_detalhe.dart';
 
 class CustomListUsuario extends StatelessWidget {
   final Map<String, dynamic> report;
@@ -38,9 +39,9 @@ class CustomListUsuario extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                report["tipo_usuario"], // Exibe o tipo de usuário (Aluno, Professor, etc)
+                report["tipo_usuario"],
                 style: TextStyle(
-                  color: report["ativo"] == true  ? Colors.green : Colors.red,
+                  color: report["ativo"] == true ? Colors.green : Colors.red,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                   fontFamily: 'Poppins',
@@ -51,7 +52,15 @@ class CustomListUsuario extends StatelessWidget {
               const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
             ],
           ),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UsuarioDetalhe(
+                    idUsuario: report["id"]), // <-- Alterado aqui
+              ),
+            );
+          },
         ),
         const Divider(),
       ],

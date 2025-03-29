@@ -6,23 +6,48 @@ import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
 
 class UsuarioDetalhe extends StatefulWidget {
-  final int idUsuario;
-  UsuarioDetalhe({super.key, required this.idUsuario});
+  final String? idUsuario;
+  const UsuarioDetalhe({super.key, this.idUsuario});
 
   @override
   _UsuarioDetalheState createState() => _UsuarioDetalheState();
 }
 
 class _UsuarioDetalheState extends State<UsuarioDetalhe> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
   String _tipoUsuario = 'Aluno'; // Padrão para novo usuário
+  bool _ativo = true; // Estado inicial para usuários ativos
 
-  Future<void> _criarUsuario() async {
+  bool _isEditMode = false; // Define se é edição ou criação
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.idUsuario != null && widget.idUsuario!.isNotEmpty) {
+      _buscarUsuario(widget.idUsuario!);
+      _isEditMode = true;
+    }
+  }
+
+  Future<void> _buscarUsuario(String id) async {
+    var doc = await _firestore.collection('usuarios').doc(id).get();
+    if (doc.exists) {
+      var dados = doc.data()!;
+      setState(() {
+        nomeController.text = dados['nome'] ?? '';
+        emailController.text = dados['email'] ?? '';
+        _tipoUsuario = dados['tipo_usuario'] ?? 'Aluno';
+        _ativo = dados['ativo'] ?? true;
+      });
+    }
+  }
+
+  Future<void> _salvarUsuario() async {
     try {
       User? usuarioAtual = _auth.currentUser;
       if (usuarioAtual == null) {
@@ -38,37 +63,55 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
 
       if (tipoAtual != 'Coordenador') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Apenas Coordenadores podem cadastrar usuários!')),
+          const SnackBar(
+              content: Text('Apenas Coordenadores podem gerenciar usuários!')),
         );
         return;
       }
 
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: senhaController.text,
-      );
+      if (_isEditMode) {
+        // Atualizar usuário existente
+        await _firestore.collection('usuarios').doc(widget.idUsuario).update({
+          'nome': nomeController.text,
+          'email': emailController.text,
+          'tipo_usuario': _tipoUsuario,
+          'ativo': _ativo,
+        });
 
-      // Salvando usuário no Firestore
-      await _firestore.collection('usuarios').doc(userCredential.user!.uid).set({
-        'nome': nomeController.text,
-        'email': emailController.text,
-        'tipo_usuario': _tipoUsuario,
-        'ativo': true,
-        'data': FieldValue.serverTimestamp(),
-      });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuário atualizado com sucesso!')),
+        );
+      } else {
+        // Criar novo usuário
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: senhaController.text,
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuário cadastrado com sucesso!')),
-      );
+        await _firestore
+            .collection('usuarios')
+            .doc(userCredential.user!.uid)
+            .set({
+          'nome': nomeController.text,
+          'email': emailController.text,
+          'tipo_usuario': _tipoUsuario,
+          'ativo': true,
+          'data': FieldValue.serverTimestamp(),
+        });
 
-      // Limpa os campos após o cadastro
-      nomeController.clear();
-      emailController.clear();
-      senhaController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuário cadastrado com sucesso!')),
+        );
+
+        // Limpa os campos após o cadastro
+        nomeController.clear();
+        emailController.clear();
+        senhaController.clear();
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao cadastrar usuário: $e')),
+        SnackBar(content: Text('Erro ao salvar usuário: $e')),
       );
     }
   }
@@ -80,7 +123,8 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
         screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
 
     return Scaffold(
-      appBar: CustomAppBar(title: 'Cadastro de Usuário'),
+      appBar: CustomAppBar(
+          title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário'),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -106,20 +150,24 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               label: 'Email:',
                               width: 50,
                               controller: emailController,
+                              enabled:
+                                  !_isEditMode, // Desabilita edição do email ao editar
                             ),
-                            const SizedBox(height: 15),
-                            CustomInput(
-                              label: 'Senha:',
-                              width: 50,
-                              controller: senhaController,
-                              obscureText: true,
-                            ),
+                            if (!_isEditMode) ...[
+                              const SizedBox(height: 15),
+                              CustomInput(
+                                label: 'Senha:',
+                                width: 50,
+                                controller: senhaController,
+                                obscureText: true,
+                              ),
+                            ],
                             const SizedBox(height: 15),
                             DropdownButton<String>(
                               value: _tipoUsuario,
                               items: ['Aluno', 'Professor', 'Coordenador']
-                                  .map((tipo) =>
-                                      DropdownMenuItem(value: tipo, child: Text(tipo)))
+                                  .map((tipo) => DropdownMenuItem(
+                                      value: tipo, child: Text(tipo)))
                                   .toList(),
                               onChanged: (valor) {
                                 setState(() {
@@ -127,10 +175,20 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                 });
                               },
                             ),
+                            const SizedBox(height: 15),
+                            SwitchListTile(
+                              title: const Text('Ativo'),
+                              value: _ativo,
+                              onChanged: (valor) {
+                                setState(() {
+                                  _ativo = valor;
+                                });
+                              },
+                            ),
                             const SizedBox(height: 20),
                             ElevatedButton(
-                              onPressed: _criarUsuario,
-                              child: const Text('Salvar'),
+                              onPressed: _salvarUsuario,
+                              child: Text(_isEditMode ? 'Atualizar' : 'Salvar'),
                             ),
                           ],
                         ),
