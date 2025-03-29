@@ -25,14 +25,15 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   String _tipoUsuario = 'Aluno';
   bool _ativo = true;
 
-  bool _isEditMode = false;
+  late bool _isEditMode;
+  late bool _isAtivo = true;
 
   @override
   void initState() {
     super.initState();
-    if (widget.idUsuario != null && widget.idUsuario!.isNotEmpty) {
+    _isEditMode = widget.idUsuario != null && widget.idUsuario!.isNotEmpty;
+    if (_isEditMode) {
       _buscarUsuario(widget.idUsuario!);
-      _isEditMode = true;
     }
   }
 
@@ -45,6 +46,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
         emailController.text = dados['email'] ?? '';
         _tipoUsuario = dados['tipo_usuario'] ?? 'Aluno';
         _ativo = dados['ativo'] ?? true;
+        _isAtivo = dados['ativo'] ?? true;
       });
     }
   }
@@ -71,7 +73,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
         return;
       }
 
-      if (_isEditMode) {
+      if (widget.idUsuario != null && widget.idUsuario!.isNotEmpty) {
         await _firestore.collection('usuarios').doc(widget.idUsuario).update({
           'nome': nomeController.text,
           'email': emailController.text,
@@ -143,23 +145,23 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               label: 'Nome:',
                               width: 80,
                               controller: nomeController,
+                              enabled: !_isAtivo,
                             ),
                             const SizedBox(height: 15),
                             CustomInput(
                               label: 'Email:',
                               width: 80,
                               controller: emailController,
-                              enabled: !_isEditMode,
+                              enabled: !_isAtivo,
                             ),
-                            if (!_isEditMode) ...[
-                              const SizedBox(height: 15),
-                              CustomInput(
-                                label: 'Senha:',
-                                width: 80,
-                                controller: senhaController,
-                                obscureText: true,
-                              ),
-                            ],
+                            const SizedBox(height: 15),
+                            CustomInput(
+                              label: 'Senha:',
+                              width: 80,
+                              controller: senhaController,
+                              obscureText: true,
+                              enabled: !_isAtivo,
+                            ),
                             const SizedBox(height: 15),
                             CustomDropdown(
                               label: 'Cargo:',
@@ -172,21 +174,40 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               },
                               width: 80,
                             ),
-                            const SizedBox(height: 15),
-                            SwitchListTile(
-                              title: const Text('Ativo'),
-                              value: _ativo,
-                              onChanged: (valor) {
-                                setState(() {
-                                  _ativo = valor;
-                                });
-                              },
-                            ),
                             const SizedBox(height: 20),
-                            CustomButton(
-                              text: _isEditMode ? 'Atualizar' : 'Salvar',
-                              onPressed: _salvarUsuario,
-                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: _isAtivo ? 'Ativar' : 'Desativar',
+                                  onPressed: () {
+                                    setState(() {
+                                      _isAtivo = !_isAtivo;
+                                    });
+                                  },
+                                  color: Colors.white,
+                                  textColor: _isAtivo ? Color(0xFFF34C759) : Color(0xFFFF3B30),
+                                  boxShadowColor: Colors.black,
+                                ),
+
+                                Row(
+                                  children: [
+                                    CustomButton(
+                                      text: 'Voltar',
+                                      onPressed: _salvarUsuario,
+                                      color: Colors.white,
+                                      textColor: Colors.black,
+                                      boxShadowColor: Colors.black,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    CustomButton(
+                                      text: 'Salvar',
+                                      onPressed: _salvarUsuario,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
                           ],
                         ),
                       ),

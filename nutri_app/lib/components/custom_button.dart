@@ -4,12 +4,16 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final Color color;
+  final Color textColor;
+  final Color boxShadowColor;
 
   const CustomButton({
     super.key,
     required this.text,
     required this.onPressed,
     this.color = const Color(0xFF007AFF),
+    this.textColor = Colors.white,
+    this.boxShadowColor = const Color(0xFF007AFF),
   });
 
   @override
@@ -20,13 +24,13 @@ class CustomButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF007AFF).withOpacity(0.24),
+            color: boxShadowColor.withOpacity(0.24),
             offset: const Offset(0, 1),
             blurRadius: 2.5,
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: const Color(0xFF007AFF).withOpacity(0.12),
+            color: boxShadowColor.withOpacity(0.12),
             offset: const Offset(0, 0),
             blurRadius: 0,
             spreadRadius: 0.5,
@@ -45,8 +49,8 @@ class CustomButton extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: textColor,
             fontSize: 16,
             fontFamily: 'Poppins',
           ),
