@@ -145,14 +145,14 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               label: 'Nome:',
                               width: 80,
                               controller: nomeController,
-                              enabled: !_isAtivo,
+                              enabled: _isAtivo,
                             ),
                             const SizedBox(height: 15),
                             CustomInput(
                               label: 'Email:',
                               width: 80,
                               controller: emailController,
-                              enabled: !_isAtivo,
+                              enabled: _isAtivo,
                             ),
                             const SizedBox(height: 15),
                             CustomInput(
@@ -160,13 +160,14 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               width: 80,
                               controller: senhaController,
                               obscureText: true,
-                              enabled: !_isAtivo,
+                              enabled: _isAtivo,
                             ),
                             const SizedBox(height: 15),
                             CustomDropdown(
                               label: 'Cargo:',
                               value: _tipoUsuario,
                               items: ['Aluno', 'Professor', 'Coordenador'],
+                              enabled: _isAtivo,
                               onChanged: (valor) {
                                 setState(() {
                                   _tipoUsuario = valor!;
@@ -179,17 +180,18 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomButton(
-                                  text: _isAtivo ? 'Ativar' : 'Desativar',
+                                  text: _isAtivo ? 'Desativar' : 'Ativar',
                                   onPressed: () {
                                     setState(() {
                                       _isAtivo = !_isAtivo;
                                     });
                                   },
                                   color: Colors.white,
-                                  textColor: _isAtivo ? Color(0xFFF34C759) : Color(0xFFFF3B30),
+                                  textColor: _isAtivo
+                                      ? Color(0xFFFF3B30)
+                                      : Color(0xFFF34C759),
                                   boxShadowColor: Colors.black,
                                 ),
-
                                 Row(
                                   children: [
                                     CustomButton(
