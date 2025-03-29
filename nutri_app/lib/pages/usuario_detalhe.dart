@@ -196,7 +196,9 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   children: [
                                     CustomButton(
                                       text: 'Voltar',
-                                      onPressed: _salvarUsuario,
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
                                       color: Colors.white,
                                       textColor: Colors.black,
                                       boxShadowColor: Colors.black,
