@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/components/custom_button.dart';
 
 class UsuarioDetalhe extends StatefulWidget {
   final String? idUsuario;
@@ -20,10 +22,10 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
-  String _tipoUsuario = 'Aluno'; // Padrão para novo usuário
-  bool _ativo = true; // Estado inicial para usuários ativos
+  String _tipoUsuario = 'Aluno';
+  bool _ativo = true;
 
-  bool _isEditMode = false; // Define se é edição ou criação
+  bool _isEditMode = false;
 
   @override
   void initState() {
@@ -70,7 +72,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       }
 
       if (_isEditMode) {
-        // Atualizar usuário existente
         await _firestore.collection('usuarios').doc(widget.idUsuario).update({
           'nome': nomeController.text,
           'email': emailController.text,
@@ -82,7 +83,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
           const SnackBar(content: Text('Usuário atualizado com sucesso!')),
         );
       } else {
-        // Criar novo usuário
         UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
           email: emailController.text,
@@ -104,7 +104,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
           const SnackBar(content: Text('Usuário cadastrado com sucesso!')),
         );
 
-        // Limpa os campos após o cadastro
         nomeController.clear();
         emailController.clear();
         senhaController.clear();
@@ -142,38 +141,36 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                           children: [
                             CustomInput(
                               label: 'Nome:',
-                              width: 50,
+                              width: 80,
                               controller: nomeController,
                             ),
                             const SizedBox(height: 15),
                             CustomInput(
                               label: 'Email:',
-                              width: 50,
+                              width: 80,
                               controller: emailController,
-                              enabled:
-                                  !_isEditMode, // Desabilita edição do email ao editar
+                              enabled: !_isEditMode,
                             ),
                             if (!_isEditMode) ...[
                               const SizedBox(height: 15),
                               CustomInput(
                                 label: 'Senha:',
-                                width: 50,
+                                width: 80,
                                 controller: senhaController,
                                 obscureText: true,
                               ),
                             ],
                             const SizedBox(height: 15),
-                            DropdownButton<String>(
+                            CustomDropdown(
+                              label: 'Cargo:',
                               value: _tipoUsuario,
-                              items: ['Aluno', 'Professor', 'Coordenador']
-                                  .map((tipo) => DropdownMenuItem(
-                                      value: tipo, child: Text(tipo)))
-                                  .toList(),
+                              items: ['Aluno', 'Professor', 'Coordenador'],
                               onChanged: (valor) {
                                 setState(() {
                                   _tipoUsuario = valor!;
                                 });
                               },
+                              width: 80,
                             ),
                             const SizedBox(height: 15),
                             SwitchListTile(
@@ -186,9 +183,9 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               },
                             ),
                             const SizedBox(height: 20),
-                            ElevatedButton(
+                            CustomButton(
+                              text: _isEditMode ? 'Atualizar' : 'Salvar',
                               onPressed: _salvarUsuario,
-                              child: Text(_isEditMode ? 'Atualizar' : 'Salvar'),
                             ),
                           ],
                         ),
