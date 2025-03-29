@@ -33,10 +33,13 @@ class _UsuarioPageState extends State<UsuarioPage> {
 
   /// Busca todos os usuários no Firestore
   Future<void> _buscarUsuarios() async {
-    FirebaseFirestore.instance.collection('usuarios').snapshots().listen((snapshot) {
+    FirebaseFirestore.instance
+        .collection('usuarios')
+        .snapshots()
+        .listen((snapshot) {
       List<Map<String, dynamic>> listaUsuarios = snapshot.docs.map((doc) {
-        Timestamp timestamp = doc['data']; 
-        DateTime data = timestamp.toDate(); 
+        Timestamp timestamp = doc['data'];
+        DateTime data = timestamp.toDate();
 
         return {
           'id': doc.id,
@@ -47,12 +50,12 @@ class _UsuarioPageState extends State<UsuarioPage> {
           'data': data,
         };
       }).toList();
-      
+
       setState(() {
         usuarios = listaUsuarios;
         usuariosFiltrados = List.from(usuarios);
       });
-    }); 
+    });
   }
 
   /// Filtra os usuários pelo nome
@@ -83,7 +86,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
                       itemCount: usuariosFiltrados.length,
                       itemBuilder: (context, index) {
                         var usuario = usuariosFiltrados[index];
-                        return CustomListUsuario(report: usuario); 
+                        return CustomListUsuario(report: usuario);
                       },
                     ),
             ),
@@ -104,6 +107,9 @@ class _UsuarioPageState extends State<UsuarioPage> {
               );
             },
             backgroundColor: const Color(0xFF007AFF),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
             child: const Icon(Icons.add, color: Colors.white),
           ),
         ),
