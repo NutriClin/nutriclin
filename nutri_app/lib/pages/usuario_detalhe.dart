@@ -96,6 +96,67 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     );
   }
 
+  // Função para exibir o modal de alterar senha
+  void _mostrarAlterarSenhaModal() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final TextEditingController novaSenhaController =
+            TextEditingController();
+
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 40),
+          backgroundColor: Colors.transparent,
+          child: CustomCard(
+            width: MediaQuery.of(context).size.width * 1,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 15),
+                CustomInput(
+                  label: 'Nova Senha:',
+                  controller: novaSenhaController,
+                  enabled: true,
+                  width: 100,
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CustomButton(
+                      text: 'Voltar',
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      color: Colors.white,
+                      textColor: Colors.black,
+                      boxShadowColor: Colors.black,
+                    ),
+                    const SizedBox(width: 5),
+                    CustomButton(
+                      text: 'Salvar',
+                      onPressed: () async {
+                        String resultado =
+                            await _usuarioController.atualizarSenha(
+                          emailController.text,
+                          novaSenhaController.text,
+                        );
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(resultado)),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -184,7 +245,8 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                 const SizedBox(width: 5),
                                 CustomButton(
                                   text: 'Alterar Senha',
-                                  onPressed: () {},
+                                  onPressed:
+                                      _mostrarAlterarSenhaModal, // Chama o modal
                                   isLoading: isLoading,
                                 ),
                                 const SizedBox(width: 5),

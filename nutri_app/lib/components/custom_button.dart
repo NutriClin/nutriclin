@@ -7,6 +7,7 @@ class CustomButton extends StatelessWidget {
   final Color textColor;
   final Color boxShadowColor;
   final bool isLoading;
+  final bool enabled;
 
   const CustomButton({
     super.key,
@@ -16,14 +17,14 @@ class CustomButton extends StatelessWidget {
     this.textColor = Colors.white,
     this.boxShadowColor = const Color(0xFF007AFF),
     this.isLoading = false,
+    this.enabled = true,
   });
 
   @override
-
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isLoading ? const Color(0xFFEEE9EF) : color,
+        color: enabled ? (isLoading ? const Color(0xFFEEE9EF) : color) : color,
         borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
@@ -41,7 +42,7 @@ class CustomButton extends StatelessWidget {
         ],
       ),
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: enabled ? (!isLoading ? onPressed : null) : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           shape: RoundedRectangleBorder(
