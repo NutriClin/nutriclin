@@ -6,6 +6,7 @@ class CustomButton extends StatelessWidget {
   final Color color;
   final Color textColor;
   final Color boxShadowColor;
+  final bool isLoading;
 
   const CustomButton({
     super.key,
@@ -14,13 +15,15 @@ class CustomButton extends StatelessWidget {
     this.color = const Color(0xFF007AFF),
     this.textColor = Colors.white,
     this.boxShadowColor = const Color(0xFF007AFF),
+    this.isLoading = false,
   });
 
   @override
+
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: color,
+        color: isLoading ? const Color(0xFFEEE9EF) : color,
         borderRadius: BorderRadius.circular(5),
         boxShadow: [
           BoxShadow(
@@ -38,7 +41,7 @@ class CustomButton extends StatelessWidget {
         ],
       ),
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           shape: RoundedRectangleBorder(

@@ -6,7 +6,7 @@ class CustomDropdown extends StatelessWidget {
   final String value;
   final ValueChanged<String?> onChanged;
   final double width;
-  final bool enabled; // Novo parâmetro
+  final bool enabled;
 
   const CustomDropdown({
     super.key,
@@ -15,7 +15,7 @@ class CustomDropdown extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.width,
-    this.enabled = true, // Parâmetro com valor padrão como true
+    this.enabled = true,
   });
 
   @override
@@ -29,6 +29,7 @@ class CustomDropdown extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
+                fontWeight: FontWeight.w500,
                 color: Colors.black,
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -41,7 +42,7 @@ class CustomDropdown extends StatelessWidget {
               height: 36,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: enabled ? Colors.white : Color(0xFFEEE9EF),
+                color: enabled ? Colors.white : const Color(0xFFEEE9EF),
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
@@ -69,6 +70,7 @@ class CustomDropdown extends StatelessWidget {
                     fontFamily: 'Poppins',
                     color: Colors.black,
                   ),
+                  enableFeedback: enabled,
                   onChanged: enabled ? onChanged : null,
                   items: items
                       .map((item) => DropdownMenuItem(

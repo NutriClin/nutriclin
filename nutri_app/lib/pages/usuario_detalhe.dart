@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/controllers/usuario_controller.dart';
 
 class UsuarioDetalhe extends StatefulWidget {
   final String? idUsuario;
@@ -16,17 +15,16 @@ class UsuarioDetalhe extends StatefulWidget {
 }
 
 class _UsuarioDetalheState extends State<UsuarioDetalhe> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UsuarioController _usuarioController = UsuarioController();
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
   String _tipoUsuario = 'Aluno';
   bool _ativo = true;
-
   late bool _isEditMode;
   late bool _isAtivo = true;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -38,9 +36,8 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   }
 
   Future<void> _buscarUsuario(String id) async {
-    var doc = await _firestore.collection('usuarios').doc(id).get();
-    if (doc.exists) {
-      var dados = doc.data()!;
+    var dados = await _usuarioController.buscarUsuario(id);
+    if (dados != null) {
       setState(() {
         nomeController.text = dados['nome'] ?? '';
         emailController.text = dados['email'] ?? '';
@@ -52,69 +49,51 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   }
 
   Future<void> _salvarUsuario() async {
-    try {
-      User? usuarioAtual = _auth.currentUser;
-      if (usuarioAtual == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro: Usuário não autenticado!')),
-        );
-        return;
-      }
+    setState(() {
+      isLoading = true;
+    });
 
-      DocumentSnapshot userDoc =
-          await _firestore.collection('usuarios').doc(usuarioAtual.uid).get();
-      String tipoAtual = userDoc['tipo_usuario'];
+    String resultado = await _usuarioController.salvarUsuario(
+      idUsuario: widget.idUsuario,
+      nome: nomeController.text,
+      email: emailController.text,
+      tipoUsuario: _tipoUsuario,
+      senha: senhaController.text,
+      ativo: _ativo,
+    );
 
-      if (tipoAtual != 'Coordenador') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Apenas Coordenadores podem gerenciar usuários!')),
-        );
-        return;
-      }
+    setState(() {
+      isLoading = false;
+    });
 
-      if (widget.idUsuario != null && widget.idUsuario!.isNotEmpty) {
-        await _firestore.collection('usuarios').doc(widget.idUsuario).update({
-          'nome': nomeController.text,
-          'email': emailController.text,
-          'tipo_usuario': _tipoUsuario,
-          'ativo': _ativo,
-        });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(resultado)),
+    );
+  }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário atualizado com sucesso!')),
-        );
-      } else {
-        UserCredential userCredential =
-            await _auth.createUserWithEmailAndPassword(
-          email: emailController.text,
-          password: senhaController.text,
-        );
+  Future<void> _ativarDesativarUsuario() async {
+    setState(() {
+      isLoading = true;
+    });
 
-        await _firestore
-            .collection('usuarios')
-            .doc(userCredential.user!.uid)
-            .set({
-          'nome': nomeController.text,
-          'email': emailController.text,
-          'tipo_usuario': _tipoUsuario,
-          'ativo': true,
-          'data': FieldValue.serverTimestamp(),
-        });
+    String resultado = await _usuarioController.ativarDesativarUsuario(
+      idUsuario: widget.idUsuario,
+      ativo: !_ativo,
+    );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário cadastrado com sucesso!')),
-        );
+    setState(() {
+      isLoading = false;
+    });
 
-        nomeController.clear();
-        emailController.clear();
-        senhaController.clear();
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar usuário: $e')),
-      );
+    if (resultado.contains('sucesso')) {
+      setState(() {
+        _isAtivo = !_isAtivo;
+      });
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(resultado)),
+    );
   }
 
   @override
@@ -181,16 +160,13 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               children: [
                                 CustomButton(
                                   text: _isAtivo ? 'Desativar' : 'Ativar',
-                                  onPressed: () {
-                                    setState(() {
-                                      _isAtivo = !_isAtivo;
-                                    });
-                                  },
+                                  onPressed: _ativarDesativarUsuario,
                                   color: Colors.white,
                                   textColor: _isAtivo
                                       ? Color(0xFFFF3B30)
                                       : Color(0xFFF34C759),
                                   boxShadowColor: Colors.black,
+                                  isLoading: isLoading,
                                 ),
                                 Row(
                                   children: [
@@ -207,6 +183,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                     CustomButton(
                                       text: 'Salvar',
                                       onPressed: _salvarUsuario,
+                                      isLoading: isLoading,
                                     ),
                                   ],
                                 ),
