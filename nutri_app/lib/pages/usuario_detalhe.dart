@@ -134,14 +134,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               enabled: _isAtivo,
                             ),
                             const SizedBox(height: 15),
-                            CustomInput(
-                              label: 'Senha:',
-                              width: 80,
-                              controller: senhaController,
-                              obscureText: true,
-                              enabled: _isAtivo,
-                            ),
-                            const SizedBox(height: 15),
                             CustomDropdown(
                               label: 'Cargo:',
                               value: _tipoUsuario,
@@ -154,6 +146,17 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               },
                               width: 80,
                             ),
+                            _isEditMode
+                                ? SizedBox.shrink()
+                                : const SizedBox(height: 15),
+                            _isEditMode
+                                ? SizedBox.shrink()
+                                : CustomInput(
+                                    label: 'Senha:',
+                                    width: 80,
+                                    controller: senhaController,
+                                    enabled: _isAtivo,
+                                  ),
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -168,25 +171,28 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   boxShadowColor: Colors.black,
                                   isLoading: isLoading,
                                 ),
-                                Row(
-                                  children: [
-                                    CustomButton(
-                                      text: 'Voltar',
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      color: Colors.white,
-                                      textColor: Colors.black,
-                                      boxShadowColor: Colors.black,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    CustomButton(
-                                      text: 'Salvar',
-                                      onPressed: _salvarUsuario,
-                                      isLoading: isLoading,
-                                    ),
-                                  ],
+                                const SizedBox(width: 5),
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
                                 ),
+                                const SizedBox(width: 5),
+                                CustomButton(
+                                  text: 'Alterar Senha',
+                                  onPressed: () {},
+                                  isLoading: isLoading,
+                                ),
+                                const SizedBox(width: 5),
+                                CustomButton(
+                                  text: 'Salvar',
+                                  onPressed: _salvarUsuario,
+                                  isLoading: isLoading,
+                                )
                               ],
                             )
                           ],

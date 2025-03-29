@@ -72,6 +72,20 @@ class UsuarioController {
     }
   }
 
+  Future<String> atualizarSenha(String email, String novaSenha) async {
+    try {
+      User? usuarioAtual = _auth.currentUser;
+      if (usuarioAtual == null) {
+        return 'Erro: Usuário não autenticado!';
+      }
+
+      await usuarioAtual.updatePassword(novaSenha);
+      return 'Senha atualizada com sucesso!';
+    } catch (e) {
+      return 'Erro ao atualizar senha: $e';
+    }
+  }
+
   Future<String> ativarDesativarUsuario({
     required String? idUsuario,
     required bool ativo,
@@ -93,7 +107,7 @@ class UsuarioController {
       await _firestore.collection('usuarios').doc(idUsuario).update({
         'ativo': ativo,
       });
-      return 'Usuário atualizado com sucesso!';
+      return 'Usuário ${ativo ? "ativado" : "desativado"} com sucesso!';
     } catch (e) {
       return 'Erro ao salvar usuário: $e';
     }
