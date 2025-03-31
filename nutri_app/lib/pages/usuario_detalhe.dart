@@ -19,7 +19,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
 
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController();
   String _tipoUsuario = 'Aluno';
   bool _ativo = true;
   late bool _isEditMode;
@@ -58,7 +57,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       nome: nomeController.text,
       email: emailController.text,
       tipoUsuario: _tipoUsuario,
-      senha: senhaController.text,
       ativo: _ativo,
     );
 
@@ -224,17 +222,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               },
                               width: 60,
                             ),
-                            _isEditMode
-                                ? SizedBox.shrink()
-                                : const SizedBox(height: 15),
-                            _isEditMode
-                                ? SizedBox.shrink()
-                                : CustomInput(
-                                    label: 'Senha:',
-                                    width: 60,
-                                    controller: senhaController,
-                                    enabled: _isAtivo,
-                                  ),
                             const SizedBox(height: 20),
                             Row(
                               children: [

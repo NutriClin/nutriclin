@@ -40,6 +40,7 @@ dependencies:
   firebase_auth: ^5.5.1
   cloud_firestore: ^5.6.5
   flutter_svg: ^2.0.17
+  flutter_email_sender: ^7.0.0
 
 dev_dependencies:
   flutter_test:

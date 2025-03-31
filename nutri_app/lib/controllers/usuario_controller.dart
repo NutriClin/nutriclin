@@ -17,62 +17,58 @@ class UsuarioController {
     return null;
   }
 
-  Future<String> salvarUsuario({
-    required String? idUsuario,
-    required String nome,
-    required String email,
-    required String tipoUsuario,
-    required String senha,
-    required bool ativo,
-  }) async {
-    try {
-      User? usuarioAtual = _auth.currentUser;
-      if (usuarioAtual == null) {
-        return 'Erro: Usuário não autenticado!';
-      }
-
-      DocumentSnapshot userDoc =
-          await _firestore.collection('usuarios').doc(usuarioAtual.uid).get();
-      String tipoAtual = userDoc['tipo_usuario'];
-
-      if (tipoAtual != 'Coordenador') {
-        return 'Apenas Coordenadores podem gerenciar usuários!';
-      }
-
-      if (idUsuario != null && idUsuario.isNotEmpty) {
-        await _firestore.collection('usuarios').doc(idUsuario).update({
-          'nome': nome,
-          'email': email,
-          'tipo_usuario': tipoUsuario,
-          'ativo': ativo,
-        });
-        return 'Usuário atualizado com sucesso!';
-      } else {
-        UserCredential userCredential =
-            await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: senha,
-        );
-
-        await _firestore
-            .collection('usuarios')
-            .doc(userCredential.user!.uid)
-            .set({
-          'nome': nome,
-          'email': email,
-          'tipo_usuario': tipoUsuario,
-          'ativo': true,
-          'data': FieldValue.serverTimestamp(),
-        });
-
-        await usuarioAtual.verifyBeforeUpdateEmail(email);
-
-        return 'Usuário cadastrado com sucesso!';
-      }
-    } catch (e) {
-      return 'Erro ao salvar usuário: $e';
+Future<String> salvarUsuario({
+  required String? idUsuario,
+  required String nome,
+  required String email,
+  required String tipoUsuario,
+  required bool ativo,
+}) async {
+  try {
+    User? usuarioAtual = _auth.currentUser;
+    if (usuarioAtual == null) {
+      return 'Erro: Usuário não autenticado!';
     }
+
+    DocumentSnapshot userDoc =
+        await _firestore.collection('usuarios').doc(usuarioAtual.uid).get();
+    String tipoAtual = userDoc['tipo_usuario'];
+
+    if (tipoAtual != 'Coordenador') {
+      return 'Apenas Coordenadores podem gerenciar usuários!';
+    }
+
+    if (idUsuario != null && idUsuario.isNotEmpty) {
+      await _firestore.collection('usuarios').doc(idUsuario).update({
+        'nome': nome,
+        'email': email,
+        'tipo_usuario': tipoUsuario,
+        'ativo': ativo,
+      });
+      return 'Usuário atualizado com sucesso!';
+    } else {
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: 'Temporaria123',
+      );
+
+      await _firestore.collection('usuarios').doc(userCredential.user!.uid).set({
+        'nome': nome,
+        'email': email,
+        'tipo_usuario': tipoUsuario,
+        'ativo': true,
+        'data': FieldValue.serverTimestamp(),
+      });
+
+      await _auth.sendPasswordResetEmail(email: email);
+
+      return 'Usuário cadastrado! Um e-mail foi enviado para ele definir a senha.';
+    }
+  } catch (e) {
+    return 'Erro ao salvar usuário: $e';
   }
+}
+
 
   Future<String> atualizarSenha(String email, String novaSenha) async {
     try {
@@ -137,6 +133,4 @@ class UsuarioController {
       return 'Erro ao salvar usuário: $e';
     }
   }
-
-  
 }
