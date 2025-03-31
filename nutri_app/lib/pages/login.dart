@@ -20,38 +20,44 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController senhaController = TextEditingController();
   bool isLoading = false;
 
-  void _login() async {
-    String email = emailController.text.trim();
-    String senha = senhaController.text.trim();
+void _login() async {
+  String email = emailController.text.trim();
+  String senha = senhaController.text.trim();
 
-    if (email.isEmpty || senha.isEmpty) {
-      _mostrarMensagem("Por favor, preencha todos os campos!");
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    print('Iniciando tentativa de login');
-    Map<String, dynamic>? usuario = await _authService.login(email, senha);
-    print('Resultado do login: $usuario');
-
-    setState(() {
-      isLoading = false;
-    });
-
-    if (usuario != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(tipoUsuario: usuario['tipo_usuario']),
-        ),
-      );
-    } else {
-      _mostrarMensagem("Erro ao fazer login. Verifique suas credenciais.");
-    }
+  if (email.isEmpty || senha.isEmpty) {
+    _mostrarMensagem("Por favor, preencha todos os campos!");
+    return;
   }
+
+  // if (!email.endsWith("@camporeal.edu.br")) {
+  //   _mostrarMensagem("Deve ser usado email da instituição Campo Real.");
+  //   return;
+  // }
+
+  setState(() {
+    isLoading = true;
+  });
+
+  print('Iniciando tentativa de login');
+  Map<String, dynamic>? usuario = await _authService.login(email, senha);
+  print('Resultado do login: $usuario');
+
+  setState(() {
+    isLoading = false;
+  });
+
+  if (usuario != null) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(tipoUsuario: usuario['tipo_usuario']),
+      ),
+    );
+  } else {
+    _mostrarMensagem("Erro ao fazer login. Verifique suas credenciais.");
+  }
+}
+
 
   void _mostrarMensagem(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(

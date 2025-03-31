@@ -47,27 +47,40 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     }
   }
 
-  Future<void> _salvarUsuario() async {
-    setState(() {
-      isLoading = true;
-    });
+Future<void> _salvarUsuario() async {
+  String email = emailController.text.trim();
 
-    String resultado = await _usuarioController.salvarUsuario(
-      idUsuario: widget.idUsuario,
-      nome: nomeController.text,
-      email: emailController.text,
-      tipoUsuario: _tipoUsuario,
-      ativo: _ativo,
-    );
-
-    setState(() {
-      isLoading = false;
-    });
-
+  if (!email.endsWith('@camporeal.edu.br')) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(resultado)),
+      SnackBar(
+        content: Text('Deve ser usado email da instituição Campo Real.'),
+        backgroundColor: Colors.red,
+      ),
     );
+    return;
   }
+
+  setState(() {
+    isLoading = true;
+  });
+
+  String resultado = await _usuarioController.salvarUsuario(
+    idUsuario: widget.idUsuario,
+    nome: nomeController.text,
+    email: email,
+    tipoUsuario: _tipoUsuario,
+    ativo: _ativo,
+  );
+
+  setState(() {
+    isLoading = false;
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(resultado)),
+  );
+}
+
 
   Future<void> _ativarDesativarUsuario() async {
     setState(() {

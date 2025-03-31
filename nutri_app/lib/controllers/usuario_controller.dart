@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
 
 class UsuarioController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -16,6 +17,13 @@ class UsuarioController {
     }
     return null;
   }
+
+String _gerarSenhaTemporaria() {
+  const String caracteres =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*()-_=+';
+  Random random = Random();
+  return List.generate(12, (index) => caracteres[random.nextInt(caracteres.length)]).join();
+}
 
 Future<String> salvarUsuario({
   required String? idUsuario,
@@ -47,9 +55,11 @@ Future<String> salvarUsuario({
       });
       return 'Usuário atualizado com sucesso!';
     } else {
+      String senhaTemporaria = _gerarSenhaTemporaria();
+
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
-        password: 'Temporaria123',
+        password: senhaTemporaria,
       );
 
       await _firestore.collection('usuarios').doc(userCredential.user!.uid).set({
