@@ -65,6 +65,8 @@ class UsuarioController {
           'data': FieldValue.serverTimestamp(),
         });
 
+        await usuarioAtual.verifyBeforeUpdateEmail(email);
+
         return 'Usuário cadastrado com sucesso!';
       }
     } catch (e) {
@@ -80,6 +82,7 @@ class UsuarioController {
       }
 
       await usuarioAtual.updatePassword(novaSenha);
+
       return 'Senha atualizada com sucesso!';
     } catch (e) {
       return 'Erro ao atualizar senha: $e';

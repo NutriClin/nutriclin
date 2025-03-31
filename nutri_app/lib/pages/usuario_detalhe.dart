@@ -96,7 +96,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     );
   }
 
-  // Função para exibir o modal de alterar senha
   void _mostrarAlterarSenhaModal() {
     showDialog(
       context: context,
@@ -112,7 +111,20 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 15),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Redefinir senha',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Poppins',
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 CustomInput(
                   label: 'Nova Senha:',
                   controller: novaSenhaController,
@@ -121,7 +133,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                 ),
                 const SizedBox(height: 15),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     CustomButton(
                       text: 'Voltar',
@@ -220,7 +232,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   ),
                             const SizedBox(height: 20),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomButton(
                                   text: _isAtivo ? 'Desativar' : 'Ativar',
@@ -232,29 +243,35 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   boxShadowColor: Colors.black,
                                   isLoading: isLoading,
                                 ),
-                                const SizedBox(width: 5),
-                                CustomButton(
-                                  text: 'Voltar',
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  color: Colors.white,
-                                  textColor: Colors.black,
-                                  boxShadowColor: Colors.black,
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      const SizedBox(width: 5),
+                                      CustomButton(
+                                        text: 'Voltar',
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        color: Colors.white,
+                                        textColor: Colors.black,
+                                        boxShadowColor: Colors.black,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      CustomButton(
+                                        text: 'Alterar Senha',
+                                        onPressed: _mostrarAlterarSenhaModal,
+                                        isLoading: isLoading,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      CustomButton(
+                                        text: 'Salvar',
+                                        onPressed: _salvarUsuario,
+                                        isLoading: isLoading,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(width: 5),
-                                CustomButton(
-                                  text: 'Alterar Senha',
-                                  onPressed:
-                                      _mostrarAlterarSenhaModal, // Chama o modal
-                                  isLoading: isLoading,
-                                ),
-                                const SizedBox(width: 5),
-                                CustomButton(
-                                  text: 'Salvar',
-                                  onPressed: _salvarUsuario,
-                                  isLoading: isLoading,
-                                )
                               ],
                             )
                           ],
