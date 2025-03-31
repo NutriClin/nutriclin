@@ -29,20 +29,6 @@ class CustomBox extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 3,
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-              ),
-            ),
             Container(
               width: cardWidth,
               padding: const EdgeInsets.all(15),
@@ -51,15 +37,9 @@ class CustomBox extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 50,
-                    offset: const Offset(0, 8),
-                    spreadRadius: 5,
-                  ),
-                  BoxShadow(
                     color: Colors.black.withOpacity(0.15),
-                    blurRadius: 3,
-                    offset: const Offset(0, 3),
+                    blurRadius: 2.5,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
