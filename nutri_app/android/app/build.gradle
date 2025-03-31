@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.camporeal.nutriclin"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -28,6 +28,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -48,3 +49,5 @@ dependencies {
     implementation "com.google.firebase:firebase-auth"
     implementation "com.google.firebase:firebase-firestore"
 }
+
+apply plugin: 'com.google.gms.google-services'

@@ -82,8 +82,8 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Logo
                       SizedBox(
-                        width: 400,
-                        height: 400,
+                        width: 300,
+                        height: 300,
                         child: SvgPicture.asset(
                           'assets/imagens/campologo.svg',
                           fit: BoxFit.contain,

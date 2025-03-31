@@ -1,0 +1,2 @@
+C:/Users/BRYAN/nutriclin/nutri_app/android/app/.cxx/Debug/4z245d18/x86/CMakeFiles/edit_cache.dir
+C:/Users/BRYAN/nutriclin/nutri_app/android/app/.cxx/Debug/4z245d18/x86/CMakeFiles/rebuild_cache.dir

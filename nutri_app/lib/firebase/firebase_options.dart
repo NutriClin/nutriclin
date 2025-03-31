@@ -21,25 +21,13 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -60,4 +48,40 @@ class DefaultFirebaseOptions {
     authDomain: 'nutriclin-f4e29.firebaseapp.com',
     storageBucket: 'nutriclin-f4e29.firebasestorage.app',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAvyFXMsyMTI26pACuuErq_EsmBUCWrT6E',
+    appId: '1:386693907771:ios:c5407af3d8669d9855a31e',
+    messagingSenderId: '386693907771',
+    projectId: 'nutriclin-f4e29',
+    storageBucket: 'nutriclin-f4e29.firebasestorage.app',
+    iosBundleId: 'com.example.nutriApp',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAvyFXMsyMTI26pACuuErq_EsmBUCWrT6E',
+    appId: '1:386693907771:ios:c5407af3d8669d9855a31e',
+    messagingSenderId: '386693907771',
+    projectId: 'nutriclin-f4e29',
+    storageBucket: 'nutriclin-f4e29.firebasestorage.app',
+    iosBundleId: 'com.example.nutriApp',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyAViaKtP-7ULdGMGvyfsNxoaaufrpvzL5Y',
+    appId: '1:386693907771:android:9a441f722d90957255a31e',
+    messagingSenderId: '386693907771',
+    projectId: 'nutriclin-f4e29',
+    storageBucket: 'nutriclin-f4e29.firebasestorage.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDeGZLNjufr_fhsow-ZjWglXdxBPI7f2L8',
+    appId: '1:386693907771:web:642e771dd0547bd855a31e',
+    messagingSenderId: '386693907771',
+    projectId: 'nutriclin-f4e29',
+    authDomain: 'nutriclin-f4e29.firebaseapp.com',
+    storageBucket: 'nutriclin-f4e29.firebasestorage.app',
+  );
+
 }
