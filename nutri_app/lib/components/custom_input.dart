@@ -40,25 +40,27 @@ class CustomInput extends StatelessWidget {
             child: Container(
               height: 36,
               decoration: BoxDecoration(
-                  color: enabled ? Colors.white : const Color(0xFFEEE9EF),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      offset: const Offset(0, 2),
-                      blurRadius: 2.5,
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      offset: Offset.zero,
-                      blurRadius: 0.5,
-                      spreadRadius: 0.5,
-                    ),
-                  ]),
+                color: enabled ? Colors.white : const Color(0xFFEEE9EF),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    offset: const Offset(0, 2),
+                    blurRadius: 2.5,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    offset: Offset.zero,
+                    blurRadius: 0.5,
+                    spreadRadius: 0.5,
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
               child: TextField(
                 controller: controller,
                 keyboardType: keyboardType,
-                textAlignVertical: TextAlignVertical.bottom,
+                textAlignVertical: TextAlignVertical.center,
                 obscureText: obscureText,
                 enabled: enabled,
                 style: const TextStyle(
