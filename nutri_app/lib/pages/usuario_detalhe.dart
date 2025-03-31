@@ -100,9 +100,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     showDialog(
       context: context,
       builder: (context) {
-        final TextEditingController novaSenhaController =
-            TextEditingController();
-
         return Dialog(
           insetPadding: EdgeInsets.symmetric(horizontal: 40),
           backgroundColor: Colors.transparent,
@@ -124,12 +121,13 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                     textAlign: TextAlign.left,
                   ),
                 ),
-                const SizedBox(height: 20),
-                CustomInput(
-                  label: 'Nova Senha:',
-                  controller: novaSenhaController,
-                  enabled: true,
-                  width: 100,
+                const SizedBox(height: 15),
+                const Text(
+                  'Tem certeza que deseja redefinir a senha deste usuário?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
                 const SizedBox(height: 15),
                 Row(
@@ -146,13 +144,10 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                     ),
                     const SizedBox(width: 5),
                     CustomButton(
-                      text: 'Salvar',
+                      text: 'Confirmar',
                       onPressed: () async {
-                        String resultado =
-                            await _usuarioController.atualizarSenha(
-                          emailController.text,
-                          novaSenhaController.text,
-                        );
+                        String resultado = await _usuarioController
+                            .enviarRedefinicaoSenha(widget.idUsuario!);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(resultado)),

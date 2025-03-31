@@ -89,6 +89,28 @@ class UsuarioController {
     }
   }
 
+  Future<String> enviarRedefinicaoSenha(String idUsuario) async {
+    try {
+      User? usuarioAtual = _auth.currentUser;
+      if (usuarioAtual == null) return 'Erro: Usuário não autenticado!';
+
+      DocumentSnapshot userDoc =
+          await _firestore.collection('usuarios').doc(usuarioAtual.uid).get();
+      if (userDoc['tipo_usuario'] != 'Coordenador') {
+        return 'Apenas Coordenadores podem solicitar redefinição!';
+      }
+
+      DocumentSnapshot usuarioAlvoDoc =
+          await _firestore.collection('usuarios').doc(idUsuario).get();
+      String emailUsuarioAlvo = usuarioAlvoDoc['email'];
+
+      await _auth.sendPasswordResetEmail(email: emailUsuarioAlvo);
+      return 'E-mail de redefinição enviado!';
+    } catch (e) {
+      return 'Erro: ${e.toString()}';
+    }
+  }
+
   Future<String> ativarDesativarUsuario({
     required String? idUsuario,
     required bool ativo,
@@ -115,4 +137,6 @@ class UsuarioController {
       return 'Erro ao salvar usuário: $e';
     }
   }
+
+  
 }
