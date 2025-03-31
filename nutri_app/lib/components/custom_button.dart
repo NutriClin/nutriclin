@@ -22,41 +22,45 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: enabled ? (isLoading ? const Color(0xFFEEE9EF) : color) : color,
-        borderRadius: BorderRadius.circular(5),
-        boxShadow: [
-          BoxShadow(
-            color: boxShadowColor.withOpacity(0.24),
-            offset: const Offset(0, 1),
-            blurRadius: 2.5,
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: boxShadowColor.withOpacity(0.12),
-            offset: const Offset(0, 0),
-            blurRadius: 0,
-            spreadRadius: 0.5,
-          ),
-        ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: 24,
       ),
-      child: ElevatedButton(
-        onPressed: enabled ? (!isLoading ? onPressed : null) : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-          shadowColor: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color:
+              enabled ? (isLoading ? const Color(0xFFEEE9EF) : color) : color,
+          borderRadius: BorderRadius.circular(5),
+          boxShadow: [
+            BoxShadow(
+              color: boxShadowColor.withOpacity(0.24),
+              offset: const Offset(0, 1),
+              blurRadius: 2.5,
+              spreadRadius: 0,
+            ),
+          ],
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontFamily: 'Poppins',
+        child: TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.all(5),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+          onPressed: enabled ? (!isLoading ? onPressed : null) : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 16,
+                fontFamily: 'Poppins',
+                height: 1.0,
+              ),
+            ),
           ),
         ),
       ),

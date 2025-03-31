@@ -195,17 +195,27 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                           children: [
                             CustomInput(
                               label: 'Nome:',
-                              width: 80,
+                              width: 60,
                               controller: nomeController,
                               enabled: _isAtivo,
                             ),
                             const SizedBox(height: 15),
                             CustomInput(
                               label: 'Email:',
-                              width: 80,
+                              width: 60,
                               controller: emailController,
                               enabled: _isAtivo,
                             ),
+                            !_isEditMode
+                                ? SizedBox.shrink()
+                                : const SizedBox(height: 15),
+                            !_isEditMode
+                                ? SizedBox.shrink()
+                                : CustomButton(
+                                    text: 'Redefinir Senha',
+                                    onPressed: _mostrarAlterarSenhaModal,
+                                    isLoading: isLoading,
+                                  ),
                             const SizedBox(height: 15),
                             CustomDropdown(
                               label: 'Cargo:',
@@ -217,7 +227,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   _tipoUsuario = valor!;
                                 });
                               },
-                              width: 80,
+                              width: 60,
                             ),
                             _isEditMode
                                 ? SizedBox.shrink()
@@ -226,7 +236,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                 ? SizedBox.shrink()
                                 : CustomInput(
                                     label: 'Senha:',
-                                    width: 80,
+                                    width: 60,
                                     controller: senhaController,
                                     enabled: _isAtivo,
                                   ),
@@ -239,41 +249,26 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   color: Colors.white,
                                   textColor: _isAtivo
                                       ? Color(0xFFFF3B30)
-                                      : Color(0xFFF34C759),
+                                      : Color(0xFF34C759),
                                   boxShadowColor: Colors.black,
                                   isLoading: isLoading,
                                 ),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      const SizedBox(width: 5),
-                                      CustomButton(
-                                        text: 'Voltar',
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        color: Colors.white,
-                                        textColor: Colors.black,
-                                        boxShadowColor: Colors.black,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      CustomButton(
-                                        text: 'Alterar Senha',
-                                        onPressed: _mostrarAlterarSenhaModal,
-                                        isLoading: isLoading,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      CustomButton(
-                                        text: 'Salvar',
-                                        onPressed: _salvarUsuario,
-                                        isLoading: isLoading,
-                                      ),
-                                    ],
-                                  ),
+                                Expanded(child: SizedBox.shrink()),
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                SizedBox(width: 8),
+                                CustomButton(
+                                  text: 'Salvar',
+                                  onPressed: _salvarUsuario,
+                                  isLoading: isLoading,
                                 ),
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),
