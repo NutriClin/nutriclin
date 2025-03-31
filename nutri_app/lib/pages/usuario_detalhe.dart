@@ -52,7 +52,7 @@ Future<void> _salvarUsuario() async {
 
   if (!email.endsWith('@camporeal.edu.br')) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Deve ser usado email da instituição Campo Real.'),
         backgroundColor: Colors.red,
       ),

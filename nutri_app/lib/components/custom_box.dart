@@ -37,7 +37,7 @@ class CustomBox extends StatelessWidget {
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
                       blurRadius: 3,
-                      spreadRadius: -3,
+                      spreadRadius: 0,
                     ),
                   ],
                 ),
