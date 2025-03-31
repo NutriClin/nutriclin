@@ -39,7 +39,7 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
             width: widget.width,
             child: Text(
               widget.label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -71,7 +71,7 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
               child: TextField(
                 controller: widget.controller,
                 keyboardType: widget.keyboardType,
-                obscureText: !_isPasswordVisible,
+                obscureText: !_isPasswordVisible, // Invertido para o toggle
                 textAlignVertical: TextAlignVertical.center,
                 style: const TextStyle(
                   fontSize: 14,
@@ -83,31 +83,20 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                   suffixIcon: widget.obscureText
-                      ? GestureDetector(
-                          onTapDown: (_) {
-                            setState(() {
-                              _isPasswordVisible =
-                                  true;
-                            });
-                          },
-                          onTapUp: (_) {
-                            setState(() {
-                              _isPasswordVisible =
-                                  false;
-                            });
-                          },
-                          onTapCancel: () {
-                            setState(() {
-                              _isPasswordVisible =
-                                  false;
-                            });
-                          },
-                          child: Icon(
+                      ? IconButton(
+                          // Substitui GestureDetector por IconButton
+                          icon: Icon(
                             _isPasswordVisible
                                 ? Icons.visibility_off
                                 : Icons.visibility,
                             size: 20,
                           ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible =
+                                  !_isPasswordVisible; // Alterna o estado
+                            });
+                          },
                         )
                       : null,
                 ),
