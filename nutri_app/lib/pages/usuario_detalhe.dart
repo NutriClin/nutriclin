@@ -35,7 +35,12 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   }
 
   Future<void> _buscarUsuario(String id) async {
+    setState(() {
+      isLoading = true;
+    });
+
     var dados = await _usuarioController.buscarUsuario(id);
+
     if (dados != null) {
       setState(() {
         nomeController.text = dados['nome'] ?? '';
@@ -43,44 +48,50 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
         _tipoUsuario = dados['tipo_usuario'] ?? 'Aluno';
         _ativo = dados['ativo'] ?? true;
         _isAtivo = dados['ativo'] ?? true;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
       });
     }
   }
 
-Future<void> _salvarUsuario() async {
-  String email = emailController.text.trim();
+  Future<void> _salvarUsuario() async {
+    String email = emailController.text.trim();
 
-  if (!email.endsWith('@camporeal.edu.br')) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Deve ser usado email da instituição Campo Real.'),
-        backgroundColor: Colors.red,
-      ),
+    if (!email.endsWith('@camporeal.edu.br')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Deve ser usado email da instituição Campo Real.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    String resultado = await _usuarioController.salvarUsuario(
+      idUsuario: widget.idUsuario,
+      nome: nomeController.text,
+      email: email,
+      tipoUsuario: _tipoUsuario,
+      ativo: _ativo,
     );
-    return;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(resultado)),
+    );
+
+    Navigator.pop(context);
   }
-
-  setState(() {
-    isLoading = true;
-  });
-
-  String resultado = await _usuarioController.salvarUsuario(
-    idUsuario: widget.idUsuario,
-    nome: nomeController.text,
-    email: email,
-    tipoUsuario: _tipoUsuario,
-    ativo: _ativo,
-  );
-
-  setState(() {
-    isLoading = false;
-  });
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(resultado)),
-  );
-}
-
 
   Future<void> _ativarDesativarUsuario() async {
     setState(() {
@@ -114,61 +125,77 @@ Future<void> _salvarUsuario() async {
         return Dialog(
           insetPadding: EdgeInsets.symmetric(horizontal: 40),
           backgroundColor: Colors.transparent,
-          child: CustomCard(
-            width: MediaQuery.of(context).size.width * 1,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Redefinir senha',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Poppins',
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  'Tem certeza que deseja redefinir a senha deste usuário?',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+          child: Stack(
+            children: [
+              CustomCard(
+                width: MediaQuery.of(context).size.width * 1,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    CustomButton(
-                      text: 'Voltar',
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      color: Colors.white,
-                      textColor: Colors.black,
-                      boxShadowColor: Colors.black,
+                    const Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Redefinir senha',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Poppins',
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
                     ),
-                    const SizedBox(width: 5),
-                    CustomButton(
-                      text: 'Confirmar',
-                      onPressed: () async {
-                        String resultado = await _usuarioController
-                            .enviarRedefinicaoSenha(widget.idUsuario!);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(resultado)),
-                        );
-                      },
+                    const SizedBox(height: 15),
+                    const Text(
+                      'Tem certeza que deseja redefinir a senha deste usuário?',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        CustomButton(
+                          text: 'Voltar',
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          color: Colors.white,
+                          textColor: Colors.black,
+                          boxShadowColor: Colors.black,
+                        ),
+                        const SizedBox(width: 5),
+                        CustomButton(
+                          text: 'Confirmar',
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            String resultado = await _usuarioController
+                                .enviarRedefinicaoSenha(widget.idUsuario!);
+
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(resultado)),
+                            );
+
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -181,100 +208,112 @@ Future<void> _salvarUsuario() async {
     double cardWidth =
         screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
 
-    return Scaffold(
-      appBar: CustomAppBar(
-          title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário'),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      CustomCard(
-                        width: cardWidth,
-                        child: Column(
-                          children: [
-                            CustomInput(
-                              label: 'Nome:',
-                              width: 60,
-                              controller: nomeController,
-                              enabled: _isAtivo,
-                            ),
-                            const SizedBox(height: 15),
-                            CustomInput(
-                              label: 'Email:',
-                              width: 60,
-                              controller: emailController,
-                              enabled: _isAtivo,
-                            ),
-                            !_isEditMode
-                                ? SizedBox.shrink()
-                                : const SizedBox(height: 15),
-                            !_isEditMode
-                                ? SizedBox.shrink()
-                                : CustomButton(
-                                    text: 'Redefinir Senha',
-                                    onPressed: _mostrarAlterarSenhaModal,
-                                    isLoading: isLoading,
-                                  ),
-                            const SizedBox(height: 15),
-                            CustomDropdown(
-                              label: 'Cargo:',
-                              value: _tipoUsuario,
-                              items: ['Aluno', 'Professor', 'Coordenador'],
-                              enabled: _isAtivo,
-                              onChanged: (valor) {
-                                setState(() {
-                                  _tipoUsuario = valor!;
-                                });
-                              },
-                              width: 60,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: CustomAppBar(
+              title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário'),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 40),
+                          CustomCard(
+                            width: cardWidth,
+                            child: Column(
                               children: [
-                                CustomButton(
-                                  text: _isAtivo ? 'Desativar' : 'Ativar',
-                                  onPressed: _ativarDesativarUsuario,
-                                  color: Colors.white,
-                                  textColor: _isAtivo
-                                      ? Color(0xFFFF3B30)
-                                      : Color(0xFF34C759),
-                                  boxShadowColor: Colors.black,
-                                  isLoading: isLoading,
+                                CustomInput(
+                                  label: 'Nome:',
+                                  width: 60,
+                                  controller: nomeController,
+                                  enabled: _isAtivo,
                                 ),
-                                Expanded(child: SizedBox.shrink()),
-                                CustomButton(
-                                  text: 'Voltar',
-                                  onPressed: () => Navigator.pop(context),
-                                  color: Colors.white,
-                                  textColor: Colors.black,
-                                  boxShadowColor: Colors.black,
+                                const SizedBox(height: 15),
+                                CustomInput(
+                                  label: 'Email:',
+                                  width: 60,
+                                  controller: emailController,
+                                  enabled: _isAtivo,
                                 ),
-                                SizedBox(width: 8),
-                                CustomButton(
-                                  text: 'Salvar',
-                                  onPressed: _salvarUsuario,
-                                  isLoading: isLoading,
+                                !_isEditMode
+                                    ? SizedBox.shrink()
+                                    : const SizedBox(height: 15),
+                                !_isEditMode
+                                    ? SizedBox.shrink()
+                                    : CustomButton(
+                                        text: 'Redefinir Senha',
+                                        onPressed: _mostrarAlterarSenhaModal,
+                                      ),
+                                const SizedBox(height: 15),
+                                CustomDropdown(
+                                  label: 'Cargo:',
+                                  value: _tipoUsuario,
+                                  items: ['Aluno', 'Professor', 'Coordenador'],
+                                  enabled: _isAtivo,
+                                  onChanged: (valor) {
+                                    setState(() {
+                                      _tipoUsuario = valor!;
+                                    });
+                                  },
+                                  width: 60,
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    CustomButton(
+                                      text: _isAtivo ? 'Desativar' : 'Ativar',
+                                      onPressed: _ativarDesativarUsuario,
+                                      color: Colors.white,
+                                      textColor: _isAtivo
+                                          ? Color(0xFFFF3B30)
+                                          : Color(0xFF34C759),
+                                      boxShadowColor: Colors.black,
+                                    ),
+                                    Expanded(child: SizedBox.shrink()),
+                                    CustomButton(
+                                      text: 'Voltar',
+                                      onPressed: () => Navigator.pop(context),
+                                      color: Colors.white,
+                                      textColor: Colors.black,
+                                      boxShadowColor: Colors.black,
+                                    ),
+                                    SizedBox(width: 8),
+                                    CustomButton(
+                                      text: 'Salvar',
+                                      onPressed: _salvarUsuario,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              );
+            },
+          ),
+        ),
+        if (isLoading)
+          ModalBarrier(
+            dismissible: false,
+            color: Colors.black.withOpacity(0.5),
+          ),
+        if (isLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
-          );
-        },
-      ),
+          ),
+      ],
     );
   }
 }

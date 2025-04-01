@@ -6,6 +6,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_input_password.dart';
 import 'package:nutri_app/pages/home.dart';
 import 'package:nutri_app/services/auth_service.dart';
+import 'package:toastification/toastification.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -49,13 +50,43 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } else {
-      _mostrarMensagem("Erro ao fazer login. Verifique suas credenciais.");
+      _mostrarMensagem("Email ou senha inválidos.");
     }
   }
 
   void _mostrarMensagem(String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem)),
+    toastification.show(
+      context: context,
+      type: ToastificationType.error,
+      style: ToastificationStyle.flat,
+      description: Text(mensagem),
+      alignment: Alignment.topCenter,
+      autoCloseDuration: const Duration(seconds: 5),
+      animationBuilder: (context, animation, alignment, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      icon: Icon(Icons.error),
+      primaryColor: Colors.red,
+      backgroundColor: Colors.red[50],
+      foregroundColor: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x07000000),
+          blurRadius: 16,
+          offset: Offset(0, 16),
+          spreadRadius: 0,
+        )
+      ],
+      showProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      dragToClose: true,
     );
   }
 
