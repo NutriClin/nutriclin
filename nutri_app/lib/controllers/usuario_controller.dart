@@ -43,7 +43,7 @@ Future<String> salvarUsuario({
     String tipoAtual = userDoc['tipo_usuario'];
 
     if (tipoAtual != 'Coordenador') {
-      return 'Apenas Coordenadores podem gerenciar usuários!';
+      return 'Erro: Apenas Coordenadores podem gerenciar usuários!';
     }
 
     if (idUsuario != null && idUsuario.isNotEmpty) {
@@ -53,7 +53,7 @@ Future<String> salvarUsuario({
         'tipo_usuario': tipoUsuario,
         'ativo': ativo,
       });
-      return 'Usuário atualizado com sucesso!';
+      return 'Usuário salvo com sucesso!';
     } else {
       String senhaTemporaria = _gerarSenhaTemporaria();
 
@@ -72,10 +72,10 @@ Future<String> salvarUsuario({
 
       await _auth.sendPasswordResetEmail(email: email);
 
-      return 'Usuário cadastrado! Um e-mail foi enviado para ele definir a senha.';
+      return 'Usuário cadastrado com sucesso! Um email foi enviado para ele definir a senha.';
     }
   } catch (e) {
-    return 'Erro ao salvar usuário: $e';
+    return 'Erro: ao salvar usuário: $e';
   }
 }
 
@@ -132,7 +132,7 @@ Future<String> salvarUsuario({
       String tipoAtual = userDoc['tipo_usuario'];
 
       if (tipoAtual != 'Coordenador') {
-        return 'Apenas Coordenadores podem gerenciar usuários!';
+        return 'Erro: Apenas Coordenadores podem gerenciar usuários!';
       }
 
       await _firestore.collection('usuarios').doc(idUsuario).update({
@@ -140,7 +140,7 @@ Future<String> salvarUsuario({
       });
       return 'Usuário ${ativo ? "ativado" : "desativado"} com sucesso!';
     } catch (e) {
-      return 'Erro ao salvar usuário: $e';
+      return 'Erro: ao salvar usuário: $e';
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/controllers/usuario_controller.dart';
+import 'package:toastification/toastification.dart';
 
 class UsuarioDetalhe extends StatefulWidget {
   final String? idUsuario;
@@ -16,7 +17,6 @@ class UsuarioDetalhe extends StatefulWidget {
 
 class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   final UsuarioController _usuarioController = UsuarioController();
-
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   String _tipoUsuario = 'Aluno';
@@ -24,6 +24,42 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   late bool _isEditMode;
   late bool _isAtivo = true;
   bool isLoading = false;
+
+  void _mostrarToast(String mensagem, {bool isError = true}) {
+    toastification.show(
+      context: context,
+      type: isError ? ToastificationType.error : ToastificationType.success,
+      style: ToastificationStyle.flat,
+      description: Text(mensagem),
+      alignment: Alignment.topCenter,
+      autoCloseDuration: const Duration(seconds: 5),
+      animationBuilder: (context, animation, alignment, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      icon: Icon(isError ? Icons.error : Icons.check_circle),
+      primaryColor: isError ? Colors.red : Colors.green,
+      backgroundColor: isError ? Colors.red[50] : Colors.green[50],
+      foregroundColor: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x07000000),
+          blurRadius: 16,
+          offset: Offset(0, 16),
+          spreadRadius: 0,
+        )
+      ],
+      showProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      dragToClose: true,
+    );
+  }
 
   @override
   void initState() {
@@ -39,34 +75,82 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       isLoading = true;
     });
 
-    var dados = await _usuarioController.buscarUsuario(id);
+    try {
+      var dados = await _usuarioController.buscarUsuario(id);
 
-    if (dados != null) {
-      setState(() {
-        nomeController.text = dados['nome'] ?? '';
-        emailController.text = dados['email'] ?? '';
-        _tipoUsuario = dados['tipo_usuario'] ?? 'Aluno';
-        _ativo = dados['ativo'] ?? true;
-        _isAtivo = dados['ativo'] ?? true;
-        isLoading = false;
-      });
-    } else {
+      if (dados != null) {
+        setState(() {
+          nomeController.text = dados['nome'] ?? '';
+          emailController.text = dados['email'] ?? '';
+          _tipoUsuario = dados['tipo_usuario'] ?? 'Aluno';
+          _ativo = dados['ativo'] ?? true;
+          _isAtivo = dados['ativo'] ?? true;
+        });
+      } else {
+        _mostrarToast('Falha ao carregar dados do usuário');
+      }
+    } catch (e) {
+      _mostrarToast('Erro ao buscar usuário: ${e.toString()}');
+    } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  Future<void> _salvarUsuario() async {
+  bool _nomeError = false;
+  bool _emailError = false;
+  String _nomeErrorMessage = '';
+  String _emailErrorMessage = '';
+
+  // Método para validar todos os campos
+  bool _validarCampos() {
+    bool valido = true;
+    String nome = nomeController.text.trim();
     String email = emailController.text.trim();
 
-    if (!email.endsWith('@camporeal.edu.br')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Deve ser usado email da instituição Campo Real.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (nome.isEmpty) {
+      _nomeError = true;
+      _nomeErrorMessage = 'Nome é obrigatório';
+      valido = false;
+    } else if (nome.length < 3) {
+      _nomeError = true;
+      _nomeErrorMessage = 'Nome deve conter pelo menos 3 caracteres';
+      valido = false;
+    } else if (!RegExp(r'^[a-zA-ZÀ-ÿ\s]+$').hasMatch(nome)) {
+      _nomeError = true;
+      _nomeErrorMessage = 'Nome deve conter apenas letras e espaços';
+      valido = false;
+    } else {
+      _nomeError = false;
+      _nomeErrorMessage = '';
+    }
+
+    if (email.isEmpty) {
+      _emailError = true;
+      _emailErrorMessage = 'Email é obrigatório';
+      valido = false;
+    } else if (!email.endsWith('@camporeal.edu.br')) {
+      _emailError = true;
+      _emailErrorMessage = 'Deve ser email da instituição Campo Real';
+      valido = false;
+    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      _emailError = true;
+      _emailErrorMessage = 'Email inválido';
+      valido = false;
+    } else {
+      _emailError = false;
+      _emailErrorMessage = '';
+    }
+
+    setState(() {});
+
+    return valido;
+  }
+
+  Future<void> _salvarUsuario() async {
+    if (!_validarCampos()) {
+      _mostrarToast('Por favor, verefique o formulário!');
       return;
     }
 
@@ -74,23 +158,28 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       isLoading = true;
     });
 
-    String resultado = await _usuarioController.salvarUsuario(
-      idUsuario: widget.idUsuario,
-      nome: nomeController.text,
-      email: email,
-      tipoUsuario: _tipoUsuario,
-      ativo: _ativo,
-    );
+    try {
+      String resultado = await _usuarioController.salvarUsuario(
+        idUsuario: widget.idUsuario,
+        nome: nomeController.text.trim(),
+        email: emailController.text.trim(),
+        tipoUsuario: _tipoUsuario,
+        ativo: _ativo,
+      );
 
-    setState(() {
-      isLoading = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(resultado)),
-    );
-
-    Navigator.pop(context);
+      if (resultado.contains('sucesso')) {
+        _mostrarToast(resultado, isError: false);
+        Navigator.pop(context);
+      } else {
+        _mostrarToast(resultado);
+      }
+    } catch (e) {
+      _mostrarToast('Erro ao salvar usuário: ${e.toString()}');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> _ativarDesativarUsuario() async {
@@ -98,24 +187,27 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       isLoading = true;
     });
 
-    String resultado = await _usuarioController.ativarDesativarUsuario(
-      idUsuario: widget.idUsuario,
-      ativo: !_ativo,
-    );
+    try {
+      String resultado = await _usuarioController.ativarDesativarUsuario(
+        idUsuario: widget.idUsuario,
+        ativo: !_ativo,
+      );
 
-    setState(() {
-      isLoading = false;
-    });
-
-    if (resultado.contains('sucesso')) {
+      if (resultado.contains('sucesso')) {
+        setState(() {
+          _isAtivo = !_isAtivo;
+        });
+        _mostrarToast(resultado, isError: false);
+      } else {
+        _mostrarToast(resultado);
+      }
+    } catch (e) {
+      _mostrarToast('Erro ao alterar status do usuário: ${e.toString()}');
+    } finally {
       setState(() {
-        _isAtivo = !_isAtivo;
+        isLoading = false;
       });
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(resultado)),
-    );
   }
 
   void _mostrarAlterarSenhaModal() {
@@ -175,19 +267,23 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               isLoading = true;
                             });
 
-                            String resultado = await _usuarioController
-                                .enviarRedefinicaoSenha(widget.idUsuario!);
+                            try {
+                              String resultado = await _usuarioController
+                                  .enviarRedefinicaoSenha(widget.idUsuario!);
 
-                            setState(() {
-                              isLoading = false;
-                            });
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(resultado)),
-                            );
-
-                            Navigator.pop(context);
-                            Navigator.pop(context);
+                              if (resultado.contains('sucesso')) {
+                                _mostrarToast(resultado, isError: false);
+                              } else {
+                                _mostrarToast(resultado);
+                              }
+                            } catch (e) {
+                              _mostrarToast(
+                                  'Erro ao redefinir senha: ${e.toString()}');
+                            } finally {
+                              setState(() {
+                                isLoading = false;
+                              });
+                            }
                           },
                         ),
                       ],
@@ -233,6 +329,14 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   width: 60,
                                   controller: nomeController,
                                   enabled: _isAtivo,
+                                  error: _nomeError,
+                                  errorMessage: _nomeErrorMessage,
+                                  obrigatorio: true,
+                                  onChanged: (value) {
+                                    if (_nomeError) {
+                                      _validarCampos();
+                                    }
+                                  },
                                 ),
                                 const SizedBox(height: 15),
                                 CustomInput(
@@ -240,6 +344,14 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   width: 60,
                                   controller: emailController,
                                   enabled: _isAtivo,
+                                  error: _emailError,
+                                  errorMessage: _emailErrorMessage,
+                                  obrigatorio: true,
+                                  onChanged: (value) {
+                                    if (_emailError) {
+                                      _validarCampos();
+                                    }
+                                  },
                                 ),
                                 !_isEditMode
                                     ? SizedBox.shrink()
