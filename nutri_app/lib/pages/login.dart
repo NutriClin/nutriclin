@@ -22,6 +22,8 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   void _login() async {
+    FocusScope.of(context).unfocus();
+
     String email = emailController.text.trim();
     String senha = senhaController.text.trim();
 

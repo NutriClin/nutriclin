@@ -59,14 +59,14 @@ class HomePage extends StatelessWidget {
             );
           },
         ),
-        // const SizedBox(width: 20),
-        // CustomBox(
-        //   text: 'Relatórios',
-        //   imagePath: 'assets/imagens/relatorios.svg',
-        //   onTap: () {
-        //     print("Clicou no box Relatórios");
-        //   },
-        // ),
+        const SizedBox(width: 20),
+        CustomBox(
+          text: 'Relatórios',
+          imagePath: 'assets/imagens/relatorios.svg',
+          onTap: () {
+            print("Clicou no box Relatórios");
+          },
+        ),
       ]);
     } else if (tipoUsuario == 'Professor') {
       // cards.addAll([
