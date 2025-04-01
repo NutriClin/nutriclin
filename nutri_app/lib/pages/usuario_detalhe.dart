@@ -198,6 +198,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
           _isAtivo = !_isAtivo;
         });
         _mostrarToast(resultado, isError: false);
+        Navigator.pop(context);
       } else {
         _mostrarToast(resultado);
       }

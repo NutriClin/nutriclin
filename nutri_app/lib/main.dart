@@ -24,15 +24,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Nutri App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF5F5F5)),
         useMaterial3: true,
       ),
-      
-      initialRoute: '/usuario',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/usuario': (context) => const UsuarioPage(),
-        '/home': (context) => const HomePage(tipoUsuario: 'Coordenador',),
+        '/home': (context) => const HomePage(
+              tipoUsuario: 'Coordenador',
+            ),
       },
     );
   }
