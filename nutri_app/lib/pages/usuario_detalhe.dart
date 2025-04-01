@@ -150,7 +150,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
 
   Future<void> _salvarUsuario() async {
     if (!_validarCampos()) {
-      _mostrarToast('Por favor, verefique o formulário!');
+      _mostrarToast('Por favor, verifique o formulário!');
       return;
     }
 
