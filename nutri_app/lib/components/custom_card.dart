@@ -13,7 +13,6 @@ class CustomCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
-
   Widget build(BuildContext context) {
     return Container(
       width: width,
@@ -23,22 +22,9 @@ class CustomCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            offset: const Offset(0, 8),
-            blurRadius: 40,
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            offset: const Offset(0, 8),
-            blurRadius: 40,
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            offset: const Offset(0, 0),
-            blurRadius: 3,
-            spreadRadius: 0,
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 2.5,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
