@@ -410,7 +410,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                       onPressed: _mostrarAlterarSenhaModal,
                                       color: Colors.white,
                                       textColor: Colors.red,
-                                      boxShadowColor: Colors.red,
+                                      boxShadowColor: Colors.black,
                                     ),
                                   ),
                                 const SizedBox(height: 20),
