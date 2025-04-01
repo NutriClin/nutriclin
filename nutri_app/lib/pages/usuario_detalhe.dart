@@ -103,7 +103,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   String _nomeErrorMessage = '';
   String _emailErrorMessage = '';
 
-  // Método para validar todos os campos
   bool _validarCampos() {
     bool valido = true;
     String nome = nomeController.text.trim();
@@ -182,7 +181,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     }
   }
 
-  Future<void> _ativarDesativarUsuario() async {
+  Future<void> _toggleAtivoStatus(bool newValue) async {
     setState(() {
       isLoading = true;
     });
@@ -190,20 +189,28 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     try {
       String resultado = await _usuarioController.ativarDesativarUsuario(
         idUsuario: widget.idUsuario,
-        ativo: !_ativo,
+        ativo: newValue,
       );
 
       if (resultado.contains('sucesso')) {
         setState(() {
-          _isAtivo = !_isAtivo;
+          _isAtivo = newValue;
+          _ativo = newValue;
         });
         _mostrarToast(resultado, isError: false);
-        Navigator.pop(context);
       } else {
         _mostrarToast(resultado);
+        setState(() {
+          _isAtivo = !newValue;
+          _ativo = !newValue;
+        });
       }
     } catch (e) {
       _mostrarToast('Erro ao alterar status do usuário: ${e.toString()}');
+      setState(() {
+        _isAtivo = !newValue;
+        _ativo = !newValue;
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -354,15 +361,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                     }
                                   },
                                 ),
-                                !_isEditMode
-                                    ? SizedBox.shrink()
-                                    : const SizedBox(height: 15),
-                                !_isEditMode
-                                    ? SizedBox.shrink()
-                                    : CustomButton(
-                                        text: 'Redefinir Senha',
-                                        onPressed: _mostrarAlterarSenhaModal,
-                                      ),
                                 const SizedBox(height: 15),
                                 CustomDropdown(
                                   label: 'Cargo:',
@@ -376,33 +374,68 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                   },
                                   width: 60,
                                 ),
-                                const SizedBox(height: 20),
-                                Row(
-                                  children: [
-                                    CustomButton(
-                                      text: _isAtivo ? 'Desativar' : 'Ativar',
-                                      onPressed: _ativarDesativarUsuario,
-                                      color: Colors.white,
-                                      textColor: _isAtivo
-                                          ? Color(0xFFFF3B30)
-                                          : Color(0xFF34C759),
-                                      boxShadowColor: Colors.black,
-                                    ),
-                                    Expanded(child: SizedBox.shrink()),
-                                    CustomButton(
-                                      text: 'Voltar',
-                                      onPressed: () => Navigator.pop(context),
-                                      color: Colors.white,
-                                      textColor: Colors.black,
-                                      boxShadowColor: Colors.black,
-                                    ),
-                                    SizedBox(width: 8),
-                                    CustomButton(
-                                      text: 'Salvar',
-                                      onPressed: _salvarUsuario,
-                                    ),
-                                  ],
+                                const SizedBox(height: 15),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: Row(
+                                    children: [
+                                      const Text(
+                                        'Ativo:',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 15),
+                                      Switch(
+                                        value: _isAtivo,
+                                        onChanged: (value) {
+                                          _toggleAtivoStatus(value);
+                                        },
+                                        activeColor: const Color(0xFF007AFF),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                if (_isEditMode) const SizedBox(height: 15),
+                                if (_isEditMode)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0),
+                                    child: CustomButton(
+                                      text: 'Redefinir Senha',
+                                      onPressed: _mostrarAlterarSenhaModal,
+                                      color: Colors.white,
+                                      textColor: Colors.red,
+                                      boxShadowColor: Colors.red,
+                                    ),
+                                  ),
+                                const SizedBox(height: 20),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      CustomButton(
+                                        text: 'Voltar',
+                                        onPressed: () => Navigator.pop(context),
+                                        color: Colors.white,
+                                        textColor: Colors.black,
+                                        boxShadowColor: Colors.black,
+                                      ),
+                                      CustomButton(
+                                        text: 'Salvar',
+                                        onPressed: _salvarUsuario,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
                               ],
                             ),
                           ),

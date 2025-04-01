@@ -59,10 +59,10 @@ class CustomDropdown extends StatelessWidget {
                   icon:
                       const Icon(Icons.arrow_drop_down, color: Colors.black54),
                   style: const TextStyle(
-                    fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    fontFamily: 'Poppins',
                     color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
                   ),
                   enableFeedback: enabled,
                   onChanged: enabled ? onChanged : null,
