@@ -99,6 +99,7 @@ class _GETPageState extends State<GETPage> {
 
     // Fator de Atividade (FAO/OMS 1985)
     double factor = switch (selectedActivity) {
+      'Sedentário' => 1.2,
       'Leve' => 1.55,
       'Moderada' => (selectedGender == 'Masculino') ? 1.80 : 1.65,
       'Intensa' => (selectedGender == 'Masculino') ? 2.10 : 1.80,
@@ -205,7 +206,7 @@ class _GETPageState extends State<GETPage> {
                       CustomDropdown(
                         label: 'Atividade Física:',
                         value: selectedActivity,
-                        items: ['Selecione', 'Leve', 'Moderada', 'Intensa'],
+                        items: ['Selecione', 'Sedentário', 'Leve', 'Moderada', 'Intensa'],
                         onChanged: (value) =>
                             setState(() => selectedActivity = value!),
                         width: 80,
