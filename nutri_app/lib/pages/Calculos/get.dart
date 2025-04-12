@@ -206,7 +206,13 @@ class _GETPageState extends State<GETPage> {
                       CustomDropdown(
                         label: 'Atividade Física:',
                         value: selectedActivity,
-                        items: ['Selecione', 'Sedentário', 'Leve', 'Moderada', 'Intensa'],
+                        items: [
+                          'Selecione',
+                          'Sedentário',
+                          'Leve',
+                          'Moderada',
+                          'Intensa'
+                        ],
                         onChanged: (value) =>
                             setState(() => selectedActivity = value!),
                         width: 80,
@@ -219,13 +225,14 @@ class _GETPageState extends State<GETPage> {
                       ),
                       const SizedBox(height: 20),
                       if (result > 0)
-                        Text(
-                          'GET: ${result.toStringAsFixed(2)} kcal/dia',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                        CustomInput(
+                          label: 'Resultado:',
+                          controller: TextEditingController(
+                            text: '${result.toStringAsFixed(2)} kcal/dia',
                           ),
+                          enabled: false,
+                          width: 80,
+                          keyboardType: TextInputType.none,
                         ),
                       const SizedBox(height: 20),
                       Row(

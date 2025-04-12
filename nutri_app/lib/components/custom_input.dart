@@ -100,7 +100,7 @@ class CustomInput extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Poppins',
-                      color: enabled ? Colors.black : Colors.grey,
+                      color: Colors.black,
                     ),
                     decoration: InputDecoration(
                       hintText: hintText,
