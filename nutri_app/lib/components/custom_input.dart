@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Necessário para TextInputFormatter
 
 class CustomInput extends StatelessWidget {
   final String label;
@@ -11,6 +12,8 @@ class CustomInput extends StatelessWidget {
   final String? errorMessage;
   final Function(String)? onChanged;
   final bool obrigatorio;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? hintText;
 
   const CustomInput({
     super.key,
@@ -24,6 +27,8 @@ class CustomInput extends StatelessWidget {
     this.errorMessage,
     this.onChanged,
     this.obrigatorio = false,
+    this.inputFormatters,
+    this.hintText,
   });
 
   @override
@@ -90,13 +95,20 @@ class CustomInput extends StatelessWidget {
                     obscureText: obscureText,
                     enabled: enabled,
                     onChanged: onChanged,
+                    inputFormatters: inputFormatters,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Poppins',
                       color: enabled ? Colors.black : Colors.grey,
                     ),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
+                      hintText: hintText,
+                      hintStyle: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        color: Colors.grey,
+                      ),
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10),

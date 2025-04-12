@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
@@ -23,33 +24,59 @@ class _GETPageState extends State<GETPage> {
   bool isLoading = false;
   bool formError = false;
 
+  // Filtros:
+  final ageFilter = FilteringTextInputFormatter.allow(RegExp(r'^\d{0,3}$'));
+  final decimalFilter = TextInputFormatter.withFunction((oldValue, newValue) {
+    final newText = newValue.text.replaceAll(',', '.');
+    if (newText.isEmpty) return newValue.copyWith(text: '');
+    final regex = RegExp(r'^\d{0,3}(\.\d{0,3})?$');
+    if (!regex.hasMatch(newText)) return oldValue;
+    return newValue.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
+    );
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    weightController
+        .addListener(_replaceCommaWithDot); // Mantido para peso (se aplicável)
+  }
+
+  @override
+  void dispose() {
+    weightController.removeListener(_replaceCommaWithDot);
+    ageController.dispose();
+    weightController.dispose();
+    heightController.dispose();
+    super.dispose();
+  }
+
+  void _replaceCommaWithDot() {
+    final textWeight = weightController.text;
+    if (textWeight.contains(',')) {
+      weightController.text = textWeight.replaceAll(',', '.');
+      weightController.selection = TextSelection.fromPosition(
+        TextPosition(offset: weightController.text.length),
+      );
+    }
+  }
+
   void calculateGET() {
     final double weight = double.tryParse(weightController.text) ?? 0.0;
-    final double height = double.tryParse(heightController.text) ?? 0.0;
+    final int heightCm = int.tryParse(heightController.text) ?? 0;
+    final double heightM = heightCm / 100; // Converte para metros
     final int age = int.tryParse(ageController.text) ?? 0;
 
-    bool hasError = false;
+    // Validações
+    bool hasError = weight <= 0 ||
+        heightCm <= 0 ||
+        age <= 0 ||
+        selectedGender == 'Selecione' ||
+        selectedActivity == 'Selecione';
 
-    // Validação dos campos
-    if (weight <= 0) {
-      hasError = true;
-    }
-    if (height <= 0) {
-      hasError = true;
-    }
-    if (age <= 0) {
-      hasError = true;
-    }
-    if (selectedGender == 'Selecione') {
-      hasError = true;
-    }
-    if (selectedActivity == 'Selecione') {
-      hasError = true;
-    }
-
-    setState(() {
-      formError = hasError;
-    });
+    setState(() => formError = hasError);
 
     if (hasError) {
       ToastUtil.showToast(
@@ -60,29 +87,39 @@ class _GETPageState extends State<GETPage> {
       return;
     }
 
+    setState(() => isLoading = true);
+
+    // Cálculo da TMB (DRI 2002)
+    double tmb;
+    if (selectedGender == 'Masculino') {
+      tmb = 293 - (3.8 * age) + (456.4 * heightM) + (10.12 * weight);
+    } else {
+      tmb = 247 - (2.47 * age) + (401.5 * heightM) + (8.6 * weight);
+    }
+
+    // Fator de Atividade (FAO/OMS 1985)
+    double factor = switch (selectedActivity) {
+      'Leve' => 1.55,
+      'Moderada' => (selectedGender == 'Masculino') ? 1.80 : 1.65,
+      'Intensa' => (selectedGender == 'Masculino') ? 2.10 : 1.80,
+      _ => 1.2, // Sedentário
+    };
+
     setState(() {
-      isLoading = true;
+      result = tmb * factor;
+      isLoading = false;
     });
+  }
 
-    Future.delayed(const Duration(milliseconds: 500), () {
-      double tmb;
-      if (selectedGender == 'Masculino') {
-        tmb = 88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age);
-      } else {
-        tmb = 447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age);
-      }
-
-      double factor = switch (selectedActivity) {
-        'Leve' => 1.375,
-        'Moderada' => 1.55,
-        'Intensa' => 1.725,
-        _ => 1.2,
-      };
-
-      setState(() {
-        result = tmb * factor;
-        isLoading = false;
-      });
+  void clearFields() {
+    setState(() {
+      selectedGender = 'Selecione';
+      selectedActivity = 'Selecione';
+      ageController.clear();
+      weightController.clear();
+      heightController.clear();
+      result = 0.0;
+      formError = false;
     });
   }
 
@@ -108,11 +145,8 @@ class _GETPageState extends State<GETPage> {
                         label: 'Sexo:',
                         value: selectedGender,
                         items: ['Selecione', 'Masculino', 'Feminino'],
-                        onChanged: (value) {
-                          setState(() {
-                            selectedGender = value!;
-                          });
-                        },
+                        onChanged: (value) =>
+                            setState(() => selectedGender = value!),
                         width: 80,
                         obrigatorio: true,
                         error: formError && selectedGender == 'Selecione',
@@ -133,12 +167,14 @@ class _GETPageState extends State<GETPage> {
                                 (int.tryParse(ageController.text) ?? 0) <= 0
                             ? 'Campo obrigatório'
                             : null,
+                        inputFormatters: [ageFilter],
                       ),
                       const SizedBox(height: 15),
                       CustomInput(
                         label: 'Peso (kg):',
                         controller: weightController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
                         width: 80,
                         obrigatorio: true,
                         error: formError &&
@@ -148,32 +184,30 @@ class _GETPageState extends State<GETPage> {
                                     0
                             ? 'Campo obrigatório'
                             : null,
+                        inputFormatters: [decimalFilter],
                       ),
                       const SizedBox(height: 15),
                       CustomInput(
                         label: 'Estatura (cm):',
                         controller: heightController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.number, // Inteiro
                         width: 80,
                         obrigatorio: true,
                         error: formError &&
-                            (double.tryParse(heightController.text) ?? 0) <= 0,
+                            (int.tryParse(heightController.text) ?? 0) <= 0,
                         errorMessage: formError &&
-                                (double.tryParse(heightController.text) ?? 0) <=
-                                    0
+                                (int.tryParse(heightController.text) ?? 0) <= 0
                             ? 'Campo obrigatório'
                             : null,
+                        inputFormatters: [ageFilter],
                       ),
                       const SizedBox(height: 15),
                       CustomDropdown(
                         label: 'Atividade Física:',
                         value: selectedActivity,
                         items: ['Selecione', 'Leve', 'Moderada', 'Intensa'],
-                        onChanged: (value) {
-                          setState(() {
-                            selectedActivity = value!;
-                          });
-                        },
+                        onChanged: (value) =>
+                            setState(() => selectedActivity = value!),
                         width: 80,
                         obrigatorio: true,
                         error: formError && selectedActivity == 'Selecione',
@@ -203,13 +237,24 @@ class _GETPageState extends State<GETPage> {
                             textColor: Colors.black,
                             boxShadowColor: Colors.black,
                           ),
-                          CustomButton(
-                            text: 'Calcular',
-                            onPressed: calculateGET,
+                          Row(
+                            children: [
+                              CustomButton(
+                                text: 'Limpar',
+                                onPressed: clearFields,
+                                color: Colors.white,
+                                textColor: Colors.black,
+                                boxShadowColor: Colors.black,
+                              ),
+                              const SizedBox(width: 10),
+                              CustomButton(
+                                text: 'Calcular',
+                                onPressed: calculateGET,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
