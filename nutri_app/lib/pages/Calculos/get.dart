@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
+import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/toast_util.dart';
 
 class GETPage extends StatefulWidget {
   const GETPage({super.key});
@@ -10,23 +14,57 @@ class GETPage extends StatefulWidget {
 }
 
 class _GETPageState extends State<GETPage> {
-  String? selectedGender;
-  String? selectedActivity;
+  String selectedGender = 'Selecione';
+  String selectedActivity = 'Selecione';
   final TextEditingController ageController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   double result = 0.0;
+  bool isLoading = false;
+  bool formError = false;
 
   void calculateGET() {
     final double weight = double.tryParse(weightController.text) ?? 0.0;
     final double height = double.tryParse(heightController.text) ?? 0.0;
     final int age = int.tryParse(ageController.text) ?? 0;
 
-    if (weight > 0 &&
-        height > 0 &&
-        age > 0 &&
-        selectedGender != null &&
-        selectedActivity != null) {
+    bool hasError = false;
+
+    // Validação dos campos
+    if (weight <= 0) {
+      hasError = true;
+    }
+    if (height <= 0) {
+      hasError = true;
+    }
+    if (age <= 0) {
+      hasError = true;
+    }
+    if (selectedGender == 'Selecione') {
+      hasError = true;
+    }
+    if (selectedActivity == 'Selecione') {
+      hasError = true;
+    }
+
+    setState(() {
+      formError = hasError;
+    });
+
+    if (hasError) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Preencha todos os campos obrigatórios',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
       double tmb;
       if (selectedGender == 'Masculino') {
         tmb = 88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age);
@@ -43,147 +81,154 @@ class _GETPageState extends State<GETPage> {
 
       setState(() {
         result = tmb * factor;
+        isLoading = false;
       });
-    }
-  }
-
-  Widget _buildTextField(String label, TextEditingController controller) {
-    return Row(
-      children: [
-        Text(label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(width: 20),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSelectionRow(String label, List<String> options,
-      String? selectedValue, Function(String) onSelect) {
-    return Row(
-      children: [
-        Text(label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Row(
-            children: options.map((option) {
-              bool isSelected = selectedValue == option;
-              return Row(
-                children: [
-                  InkWell(
-                    onTap: () => setState(() => onSelect(option)),
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: isSelected ? Colors.blue : Colors.grey,
-                            width: 2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: isSelected
-                          ? const Icon(Icons.check,
-                              size: 18, color: Colors.blue)
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(option),
-                  const SizedBox(width: 10),
-                ],
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(title: 'GET'),
-      body: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 15,
-                spreadRadius: 1,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSelectionRow('Sexo:', ['Masculino', 'Feminino'],
-                  selectedGender, (value) => selectedGender = value),
-              const SizedBox(height: 20),
-              _buildTextField('Idade:', ageController),
-              const SizedBox(height: 20),
-              _buildTextField('Peso (kg):', weightController),
-              const SizedBox(height: 20),
-              _buildTextField('Estatura (cm):', heightController),
-              const SizedBox(height: 20),
-              _buildSelectionRow(
-                  'Atividade Física:',
-                  ['Leve', 'Moderada', 'Intensa'],
-                  selectedActivity,
-                  (value) => selectedActivity = value),
-              const SizedBox(height: 20),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Voltar',
-                        style: TextStyle(color: Colors.red),
+    double screenWidth = MediaQuery.of(context).size.width;
+    double cardWidth =
+        screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
+
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: const CustomAppBar(title: 'GET - Gasto Energético Total'),
+          body: SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: CustomCard(
+                  width: cardWidth,
+                  child: Column(
+                    children: [
+                      CustomDropdown(
+                        label: 'Sexo:',
+                        value: selectedGender,
+                        items: ['Selecione', 'Masculino', 'Feminino'],
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGender = value!;
+                          });
+                        },
+                        width: 80,
+                        obrigatorio: true,
+                        error: formError && selectedGender == 'Selecione',
+                        errorMessage: formError && selectedGender == 'Selecione'
+                            ? 'Campo obrigatório'
+                            : null,
                       ),
-                    ),
+                      const SizedBox(height: 15),
+                      CustomInput(
+                        label: 'Idade:',
+                        controller: ageController,
+                        keyboardType: TextInputType.number,
+                        width: 80,
+                        obrigatorio: true,
+                        error: formError &&
+                            (int.tryParse(ageController.text) ?? 0) <= 0,
+                        errorMessage: formError &&
+                                (int.tryParse(ageController.text) ?? 0) <= 0
+                            ? 'Campo obrigatório'
+                            : null,
+                      ),
+                      const SizedBox(height: 15),
+                      CustomInput(
+                        label: 'Peso (kg):',
+                        controller: weightController,
+                        keyboardType: TextInputType.number,
+                        width: 80,
+                        obrigatorio: true,
+                        error: formError &&
+                            (double.tryParse(weightController.text) ?? 0) <= 0,
+                        errorMessage: formError &&
+                                (double.tryParse(weightController.text) ?? 0) <=
+                                    0
+                            ? 'Campo obrigatório'
+                            : null,
+                      ),
+                      const SizedBox(height: 15),
+                      CustomInput(
+                        label: 'Estatura (cm):',
+                        controller: heightController,
+                        keyboardType: TextInputType.number,
+                        width: 80,
+                        obrigatorio: true,
+                        error: formError &&
+                            (double.tryParse(heightController.text) ?? 0) <= 0,
+                        errorMessage: formError &&
+                                (double.tryParse(heightController.text) ?? 0) <=
+                                    0
+                            ? 'Campo obrigatório'
+                            : null,
+                      ),
+                      const SizedBox(height: 15),
+                      CustomDropdown(
+                        label: 'Atividade Física:',
+                        value: selectedActivity,
+                        items: ['Selecione', 'Leve', 'Moderada', 'Intensa'],
+                        onChanged: (value) {
+                          setState(() {
+                            selectedActivity = value!;
+                          });
+                        },
+                        width: 80,
+                        obrigatorio: true,
+                        error: formError && selectedActivity == 'Selecione',
+                        errorMessage:
+                            formError && selectedActivity == 'Selecione'
+                                ? 'Campo obrigatório'
+                                : null,
+                      ),
+                      const SizedBox(height: 20),
+                      if (result > 0)
+                        Text(
+                          'GET: ${result.toStringAsFixed(2)} kcal/dia',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomButton(
+                            text: 'Voltar',
+                            onPressed: () => Navigator.pop(context),
+                            color: Colors.white,
+                            textColor: Colors.black,
+                            boxShadowColor: Colors.black,
+                          ),
+                          CustomButton(
+                            text: 'Calcular',
+                            onPressed: calculateGET,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
-                  CustomButton(
-                    text: 'Calcular',
-                    onPressed: calculateGET,
-                  ),
-                ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        if (isLoading)
+          ModalBarrier(
+            dismissible: false,
+            color: Colors.black.withOpacity(0.5),
+          ),
+        if (isLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+      ],
     );
   }
 }
