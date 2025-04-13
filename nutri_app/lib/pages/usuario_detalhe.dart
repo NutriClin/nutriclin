@@ -297,8 +297,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
-    final cardWidth = screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
-    final inputWidth = cardWidth * 0.9;
+    final cardWidth = screenWidth * 0.95;
 
     return Stack(
       children: [
@@ -307,9 +306,9 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
             title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário',
           ),
           body: SingleChildScrollView(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
                 child: CustomCard(
                   width: cardWidth,
                   child: Padding(

@@ -124,146 +124,107 @@ class _IMCPageState extends State<IMCPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtém o tamanho da tela
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-    final screenHeight = mediaQuery.size.height;
-
-    // Define tamanhos baseados na tela
-    final cardWidth = screenWidth * 0.9; // Ocupa 90% da largura
-    final inputWidth = cardWidth * 0.8; // 80% da largura do card
-    final paddingVertical = screenHeight * 0.02; // 2% da altura
-    final spacingHeight = screenHeight * 0.02; // 2% da altura entre widgets
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.95;
 
     return Stack(
       children: [
         Scaffold(
           appBar: const CustomAppBar(title: 'IMC - Índice de Massa Corporal'),
           body: SingleChildScrollView(
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: paddingVertical),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
                 child: CustomCard(
                   width: cardWidth,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Ajusta o padding interno do card baseado no tamanho
-                      final innerPadding = constraints.maxWidth * 0.05;
-
-                      return Padding(
-                        padding: EdgeInsets.all(innerPadding),
-                        child: Column(
-                          children: [
-                            CustomInput(
-                              label: 'Peso (kg):',
-                              controller: weightController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              obrigatorio: true,
-                              error: formError &&
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        CustomInput(
+                          label: 'Peso (kg):',
+                          controller: weightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          obrigatorio: true,
+                          error: formError &&
+                              (double.tryParse(weightController.text) ?? 0) <=
+                                  0,
+                          errorMessage: formError &&
                                   (double.tryParse(weightController.text) ??
                                           0) <=
-                                      0,
-                              errorMessage: formError &&
-                                      (double.tryParse(weightController.text) ??
-                                              0) <=
-                                          0
-                                  ? 'Campo obrigatório'
-                                  : null,
-                              inputFormatters: [decimalFilter],
-                            ),
-                            SizedBox(height: spacingHeight),
-                            CustomInput(
-                              label: 'Estatura (cm):',
-                              controller: heightController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              obrigatorio: true,
-                              error: formError &&
+                                      0
+                              ? 'Campo obrigatório'
+                              : null,
+                          inputFormatters: [decimalFilter],
+                        ),
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Estatura (cm):',
+                          controller: heightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          obrigatorio: true,
+                          error: formError &&
+                              (double.tryParse(heightController.text) ?? 0) <=
+                                  0,
+                          errorMessage: formError &&
                                   (double.tryParse(heightController.text) ??
                                           0) <=
-                                      0,
-                              errorMessage: formError &&
-                                      (double.tryParse(heightController.text) ??
-                                              0) <=
-                                          0
-                                  ? 'Campo obrigatório'
-                                  : null,
-                              inputFormatters: [decimalFilter],
+                                      0
+                              ? 'Campo obrigatório'
+                              : null,
+                          inputFormatters: [decimalFilter],
+                        ),
+                        const SizedBox(height: 15),
+                        if (result > 0) ...[
+                          CustomInput(
+                            label: 'IMC:',
+                            controller: TextEditingController(
+                              text: result.toStringAsFixed(2),
                             ),
-                            SizedBox(height: spacingHeight * 1.5),
-                            if (result > 0) ...[
-                              CustomInput(
-                                label: 'IMC:',
-                                controller: TextEditingController(
-                                  text: result.toStringAsFixed(2),
+                            enabled: false,
+                          ),
+                          const SizedBox(height: 15),
+                          CustomInput(
+                            label: 'Classificação:',
+                            controller: TextEditingController(
+                              text: classification,
+                            ),
+                            enabled: false,
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomButton(
+                              text: 'Voltar',
+                              onPressed: () => Navigator.pop(context),
+                              color: Colors.white,
+                              textColor: Colors.black,
+                              boxShadowColor: Colors.black,
+                            ),
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Limpar',
+                                  onPressed: clearFields,
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
                                 ),
-                                enabled: false,
-                                keyboardType: TextInputType.none,
-                              ),
-                              SizedBox(height: spacingHeight),
-                              CustomInput(
-                                label: 'Classificação:',
-                                controller: TextEditingController(
-                                  text: classification,
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Calcular',
+                                  onPressed: calculateIMC,
                                 ),
-                                enabled: false,
-                                keyboardType: TextInputType.none,
-                              ),
-                              SizedBox(height: spacingHeight * 1.5),
-                            ],
-                            // Botões com tamanho responsivo
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minWidth: inputWidth,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    flex: 1,
-                                    child: CustomButton(
-                                      text: 'Voltar',
-                                      onPressed: () => Navigator.pop(context),
-                                      color: Colors.white,
-                                      textColor: Colors.black,
-                                      boxShadowColor: Colors.black,
-                                    ),
-                                  ),
-                                  Flexible(
-                                    flex: 2,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Flexible(
-                                          child: CustomButton(
-                                            text: 'Limpar',
-                                            onPressed: clearFields,
-                                            color: Colors.white,
-                                            textColor: Colors.black,
-                                            boxShadowColor: Colors.black,
-                                          ),
-                                        ),
-                                        SizedBox(width: spacingHeight),
-                                        Flexible(
-                                          child: CustomButton(
-                                            text: 'Calcular',
-                                            onPressed: calculateIMC,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              ],
                             ),
                           ],
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
                 ),
               ),

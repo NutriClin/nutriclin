@@ -40,8 +40,7 @@ class _GETPageState extends State<GETPage> {
   @override
   void initState() {
     super.initState();
-    weightController
-        .addListener(_replaceCommaWithDot); // Mantido para peso (se aplicável)
+    weightController.addListener(_replaceCommaWithDot);
   }
 
   @override
@@ -66,7 +65,7 @@ class _GETPageState extends State<GETPage> {
   void calculateGET() {
     final double weight = double.tryParse(weightController.text) ?? 0.0;
     final int heightCm = int.tryParse(heightController.text) ?? 0;
-    final double heightM = heightCm / 100; // Converte para metros
+    final double heightM = heightCm / 100;
     final int age = int.tryParse(ageController.text) ?? 0;
 
     // Validações
@@ -103,7 +102,7 @@ class _GETPageState extends State<GETPage> {
       'Leve' => 1.55,
       'Moderada' => (selectedGender == 'Masculino') ? 1.80 : 1.65,
       'Intensa' => (selectedGender == 'Masculino') ? 2.10 : 1.80,
-      _ => 1.2, // Sedentário
+      _ => 1.2,
     };
 
     setState(() {
@@ -126,138 +125,144 @@ class _GETPageState extends State<GETPage> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth =
-        screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.95;
 
     return Stack(
       children: [
         Scaffold(
           appBar: const CustomAppBar(title: 'GET - Gasto Energético Total'),
           body: SingleChildScrollView(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
                 child: CustomCard(
                   width: cardWidth,
-                  child: Column(
-                    children: [
-                      CustomDropdown(
-                        label: 'Sexo:',
-                        value: selectedGender,
-                        items: ['Selecione', 'Masculino', 'Feminino'],
-                        onChanged: (value) =>
-                            setState(() => selectedGender = value!),
-                        obrigatorio: true,
-                        error: formError && selectedGender == 'Selecione',
-                        errorMessage: formError && selectedGender == 'Selecione'
-                            ? 'Campo obrigatório'
-                            : null,
-                      ),
-                      const SizedBox(height: 15),
-                      CustomInput(
-                        label: 'Idade:',
-                        controller: ageController,
-                        keyboardType: TextInputType.number,
-                        obrigatorio: true,
-                        error: formError &&
-                            (int.tryParse(ageController.text) ?? 0) <= 0,
-                        errorMessage: formError &&
-                                (int.tryParse(ageController.text) ?? 0) <= 0
-                            ? 'Campo obrigatório'
-                            : null,
-                        inputFormatters: [ageFilter],
-                      ),
-                      const SizedBox(height: 15),
-                      CustomInput(
-                        label: 'Peso (kg):',
-                        controller: weightController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        obrigatorio: true,
-                        error: formError &&
-                            (double.tryParse(weightController.text) ?? 0) <= 0,
-                        errorMessage: formError &&
-                                (double.tryParse(weightController.text) ?? 0) <=
-                                    0
-                            ? 'Campo obrigatório'
-                            : null,
-                        inputFormatters: [decimalFilter],
-                      ),
-                      const SizedBox(height: 15),
-                      CustomInput(
-                        label: 'Estatura (cm):',
-                        controller: heightController,
-                        keyboardType: TextInputType.number,
-                        obrigatorio: true,
-                        error: formError &&
-                            (int.tryParse(heightController.text) ?? 0) <= 0,
-                        errorMessage: formError &&
-                                (int.tryParse(heightController.text) ?? 0) <= 0
-                            ? 'Campo obrigatório'
-                            : null,
-                        inputFormatters: [ageFilter],
-                      ),
-                      const SizedBox(height: 15),
-                      CustomDropdown(
-                        label: 'Atividade Física:',
-                        value: selectedActivity,
-                        items: [
-                          'Selecione',
-                          'Sedentário',
-                          'Leve',
-                          'Moderada',
-                          'Intensa'
-                        ],
-                        onChanged: (value) =>
-                            setState(() => selectedActivity = value!),
-                        obrigatorio: true,
-                        error: formError && selectedActivity == 'Selecione',
-                        errorMessage:
-                            formError && selectedActivity == 'Selecione'
-                                ? 'Campo obrigatório'
-                                : null,
-                      ),
-                      const SizedBox(height: 20),
-                      if (result > 0)
-                        CustomInput(
-                          label: 'Resultado:',
-                          controller: TextEditingController(
-                            text: '${result.toStringAsFixed(2)} kcal/dia',
-                          ),
-                          enabled: false,
-                          keyboardType: TextInputType.none,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        CustomDropdown(
+                          label: 'Sexo:',
+                          value: selectedGender,
+                          items: ['Selecione', 'Masculino', 'Feminino'],
+                          onChanged: (value) =>
+                              setState(() => selectedGender = value!),
+                          obrigatorio: true,
+                          error: formError && selectedGender == 'Selecione',
+                          errorMessage:
+                              formError && selectedGender == 'Selecione'
+                                  ? 'Campo obrigatório'
+                                  : null,
                         ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CustomButton(
-                            text: 'Voltar',
-                            onPressed: () => Navigator.pop(context),
-                            color: Colors.white,
-                            textColor: Colors.black,
-                            boxShadowColor: Colors.black,
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Idade:',
+                          controller: ageController,
+                          keyboardType: TextInputType.number,
+                          obrigatorio: true,
+                          error: formError &&
+                              (int.tryParse(ageController.text) ?? 0) <= 0,
+                          errorMessage: formError &&
+                                  (int.tryParse(ageController.text) ?? 0) <= 0
+                              ? 'Campo obrigatório'
+                              : null,
+                          inputFormatters: [ageFilter],
+                        ),
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Peso (kg):',
+                          controller: weightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          obrigatorio: true,
+                          error: formError &&
+                              (double.tryParse(weightController.text) ?? 0) <=
+                                  0,
+                          errorMessage: formError &&
+                                  (double.tryParse(weightController.text) ??
+                                          0) <=
+                                      0
+                              ? 'Campo obrigatório'
+                              : null,
+                          inputFormatters: [decimalFilter],
+                        ),
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Estatura (cm):',
+                          controller: heightController,
+                          keyboardType: TextInputType.number,
+                          obrigatorio: true,
+                          error: formError &&
+                              (int.tryParse(heightController.text) ?? 0) <= 0,
+                          errorMessage: formError &&
+                                  (int.tryParse(heightController.text) ?? 0) <=
+                                      0
+                              ? 'Campo obrigatório'
+                              : null,
+                          inputFormatters: [ageFilter],
+                        ),
+                        const SizedBox(height: 15),
+                        CustomDropdown(
+                          label: 'Atividade Física:',
+                          value: selectedActivity,
+                          items: [
+                            'Selecione',
+                            'Sedentário',
+                            'Leve',
+                            'Moderada',
+                            'Intensa'
+                          ],
+                          onChanged: (value) =>
+                              setState(() => selectedActivity = value!),
+                          obrigatorio: true,
+                          error: formError && selectedActivity == 'Selecione',
+                          errorMessage:
+                              formError && selectedActivity == 'Selecione'
+                                  ? 'Campo obrigatório'
+                                  : null,
+                        ),
+                        const SizedBox(height: 20),
+                        if (result > 0)
+                          CustomInput(
+                            label: 'Resultado:',
+                            controller: TextEditingController(
+                              text: '${result.toStringAsFixed(2)} kcal/dia',
+                            ),
+                            enabled: false,
+                            keyboardType: TextInputType.none,
                           ),
-                          Row(
-                            children: [
-                              CustomButton(
-                                text: 'Limpar',
-                                onPressed: clearFields,
-                                color: Colors.white,
-                                textColor: Colors.black,
-                                boxShadowColor: Colors.black,
-                              ),
-                              const SizedBox(width: 10),
-                              CustomButton(
-                                text: 'Calcular',
-                                onPressed: calculateGET,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomButton(
+                              text: 'Voltar',
+                              onPressed: () => Navigator.pop(context),
+                              color: Colors.white,
+                              textColor: Colors.black,
+                              boxShadowColor: Colors.black,
+                            ),
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Limpar',
+                                  onPressed: clearFields,
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Calcular',
+                                  onPressed: calculateGET,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
