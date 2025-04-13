@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomInputPassword extends StatefulWidget {
   final String label;
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final bool obscureText;
-  final double width;
+  final double labelWidth;
+  final bool enabled;
+  final bool error;
+  final String? errorMessage;
+  final Function(String)? onChanged;
+  final bool obrigatorio;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? hintText;
+  final double? height;
 
   const CustomInputPassword({
     super.key,
     required this.label,
-    required this.width,
+    this.labelWidth = 120,
     this.controller,
     this.keyboardType = TextInputType.text,
-    this.obscureText = true, // Começar com a senha oculta por padrão
+    this.obscureText = true,
+    this.enabled = true,
+    this.error = false,
+    this.errorMessage,
+    this.onChanged,
+    this.obrigatorio = false,
+    this.inputFormatters,
+    this.hintText,
+    this.height,
   });
 
   @override
@@ -31,73 +48,138 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: widget.width,
-            child: Text(
-              widget.label,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Container(
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 2.5,
-                    offset: const Offset(0, 1),
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final inputHeight = widget.height ?? (screenWidth < 600 ? 36.0 : 42.0);
+        final fontSize = screenWidth < 600 ? 14.0 : 16.0;
+        final labelSpacing = screenWidth < 600 ? 10.0 : 15.0;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Label com largura fixa
+                  SizedBox(
+                    width: widget.labelWidth,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: widget.label,
+                            style: TextStyle(
+                              color: widget.error ? Colors.red : Colors.black,
+                              fontSize: fontSize,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          if (widget.obrigatorio)
+                            const TextSpan(
+                              text: '*',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: labelSpacing),
+                  // Campo de texto que ocupa o restante da row
+                  Expanded(
+                    child: Container(
+                      height: inputHeight,
+                      decoration: BoxDecoration(
+                        color: widget.enabled
+                            ? Colors.white
+                            : const Color(0xFFEEE9EF),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: widget.error ? Colors.red : Colors.transparent,
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: widget.error
+                                ? Colors.red.withOpacity(0.2)
+                                : Colors.black.withOpacity(0.15),
+                            blurRadius: 2.5,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: widget.controller,
+                        keyboardType: widget.keyboardType,
+                        textAlignVertical: TextAlignVertical.center,
+                        obscureText: widget.obscureText && !_isPasswordVisible,
+                        enabled: widget.enabled,
+                        onChanged: widget.onChanged,
+                        inputFormatters: widget.inputFormatters,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Poppins',
+                          color: Colors.black,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: widget.hintText,
+                          hintStyle: TextStyle(
+                            fontSize: fontSize,
+                            fontFamily: 'Poppins',
+                            color: Colors.grey,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: screenWidth < 600 ? 10 : 15,
+                            vertical: screenWidth < 600 ? 12 : 16,
+                          ),
+                          suffixIcon: widget.obscureText
+                              ? IconButton(
+                                  icon: Icon(
+                                    _isPasswordVisible
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isPasswordVisible = !_isPasswordVisible;
+                                    });
+                                  },
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: TextField(
-                controller: widget.controller,
-                keyboardType: widget.keyboardType,
-                obscureText: !_isPasswordVisible, // Invertido para o toggle
-                textAlignVertical: TextAlignVertical.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                  suffixIcon: widget.obscureText
-                      ? IconButton(
-                          // Substitui GestureDetector por IconButton
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible =
-                                  !_isPasswordVisible; // Alterna o estado
-                            });
-                          },
-                        )
-                      : null,
+            ),
+            if (widget.error && widget.errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  widget.errorMessage!,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }

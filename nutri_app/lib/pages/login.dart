@@ -7,7 +7,7 @@ import 'package:nutri_app/components/custom_input_password.dart';
 import 'package:nutri_app/pages/home.dart';
 import 'package:nutri_app/services/auth_service.dart';
 import 'package:nutri_app/services/preferences_service.dart';
-import 'package:toastification/toastification.dart';
+import 'package:nutri_app/components/toast_util.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,162 +18,197 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController();
-  bool isLoading = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
+  bool _isLoading = false;
+  bool _emailError = false;
+  bool _senhaError = false;
+  String _emailErrorMessage = '';
+  String _senhaErrorMessage = '';
 
-  void _login() async {
+  Future<void> _login() async {
     FocusScope.of(context).unfocus();
 
-    String email = emailController.text.trim();
-    String senha = senhaController.text.trim();
+    final email = _emailController.text.trim();
+    final senha = _senhaController.text.trim();
 
-    if (email.isEmpty || senha.isEmpty) {
-      _mostrarMensagem("Por favor, preencha todos os campos!");
+    if (!_validarCampos(email, senha)) {
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    print('Iniciando tentativa de login');
-    Map<String, dynamic>? usuario = await _authService.login(email, senha);
-    print('Resultado do login: $usuario');
+    try {
+      final usuario = await _authService.login(email, senha);
 
-    if (usuario != null) {
-      // Salva o tipo de usuário nas preferências
-      await PreferencesService.saveUserType(usuario['tipo_usuario']);
+      if (usuario != null) {
+        await PreferencesService.saveUserType(usuario['tipo_usuario']);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(tipoUsuario: usuario['tipo_usuario']),
-        ),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                HomePage(tipoUsuario: usuario['tipo_usuario']),
+          ),
+        );
+      } else {
+        ToastUtil.showToast(
+          context: context,
+          message: "Email ou senha inválidos",
+          isError: true,
+        );
+
+        _emailError = true;
+        _senhaError = true;
+      }
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: "Erro ao realizar login: ${e.toString()}",
+        isError: true,
       );
-    } else {
-      _mostrarMensagem("Email ou senha inválidos.");
+    } finally {
+      setState(() => _isLoading = false);
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
-  void _mostrarMensagem(String mensagem) {
-    toastification.show(
-      context: context,
-      type: ToastificationType.error,
-      style: ToastificationStyle.flat,
-      description: Text(mensagem),
-      alignment: Alignment.topCenter,
-      autoCloseDuration: const Duration(seconds: 5),
-      animationBuilder: (context, animation, alignment, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-      icon: Icon(Icons.error),
-      primaryColor: Colors.red,
-      backgroundColor: Colors.red[50],
-      foregroundColor: Colors.black,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x07000000),
-          blurRadius: 16,
-          offset: Offset(0, 16),
-          spreadRadius: 0,
-        )
-      ],
-      showProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      dragToClose: true,
-    );
+  bool _validarCampos(String email, String senha) {
+    bool valido = true;
+
+    if (email.isEmpty) {
+      _emailError = true;
+      _emailErrorMessage = 'Email é obrigatório';
+      valido = false;
+    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      _emailError = true;
+      _emailErrorMessage = 'Email inválido';
+      valido = false;
+    } else {
+      _emailError = false;
+      _emailErrorMessage = '';
+    }
+
+    if (senha.isEmpty) {
+      _senhaError = true;
+      _senhaErrorMessage = 'Senha é obrigatória';
+      valido = false;
+    } else {
+      _senhaError = false;
+      _senhaErrorMessage = '';
+    }
+
+    setState(() {});
+
+    return valido;
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth =
-        screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
+    final isSmallScreen = screenWidth < 600;
 
-    return Stack(
-      children: [
-        Scaffold(
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
+    // Cálculos responsivos
+    final logoSize = isSmallScreen ? screenWidth * 0.5 : screenWidth * 0.3;
+    final cardWidth = isSmallScreen ? screenWidth * 0.9 : screenWidth * 0.4;
+    final cardPadding = isSmallScreen ? 20.0 : 30.0;
+    final verticalSpacing = isSmallScreen ? 20.0 : 30.0;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFEAEAEA),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: SizedBox(
+              height: screenHeight,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 16.0 : 32.0,
+                    vertical: 16.0,
                   ),
-                  child: IntrinsicHeight(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          // Logo
-                          SizedBox(
-                            width: 300,
-                            height: 300,
-                            child: SvgPicture.asset(
-                              'assets/imagens/campologo.svg',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Card de Login
-                          CustomCard(
-                            width: cardWidth,
-                            child: Column(
-                              children: [
-                                CustomInput(
-                                  label: 'Email:',
-                                  controller: emailController,
-                                ),
-                                const SizedBox(height: 15),
-                                CustomInputPassword(
-                                  label: 'Senha:',
-                                  width: 50,
-                                  controller: senhaController,
-                                  obscureText: true,
-                                ),
-                                const SizedBox(height: 15),
-                                CustomButton(
-                                  text: isLoading ? "Entrando..." : "Entrar",
-                                  onPressed: isLoading ? () {} : _login,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                        ],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Logo responsiva
+                      SizedBox(
+                        width: logoSize,
+                        height: logoSize,
+                        child: SvgPicture.asset(
+                          'assets/imagens/campologo.svg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ),
+                      SizedBox(height: verticalSpacing),
+
+                      // Card de Login responsivo
+                      CustomCard(
+                        width: cardWidth,
+                        child: Padding(
+                          padding: EdgeInsets.all(cardPadding),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomInput(
+                                label: 'Email:',
+                                controller: _emailController,
+                                error: _emailError,
+                                errorMessage: _emailErrorMessage,
+                                onChanged: (value) {
+                                  if (_emailError) {
+                                    _validarCampos(
+                                      _emailController.text.trim(),
+                                      _senhaController.text.trim(),
+                                    );
+                                  }
+                                },
+                              ),
+                              SizedBox(height: verticalSpacing * 0.75),
+                              CustomInputPassword(
+                                label: 'Senha:',
+                                controller: _senhaController,
+                                error: _senhaError,
+                                errorMessage: _senhaErrorMessage,
+                                onChanged: (value) {
+                                  if (_senhaError) {
+                                    _validarCampos(
+                                      _emailController.text.trim(),
+                                      _senhaController.text.trim(),
+                                    );
+                                  }
+                                },
+                              ),
+                              SizedBox(height: verticalSpacing),
+                              CustomButton(
+                                text: "Entrar",
+                                onPressed: _login,
+                                isLoading: _isLoading,
+                                enabled: !_isLoading,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-        if (isLoading) ...[
-          ModalBarrier(
-            dismissible: false,
-            color: Colors.black.withOpacity(0.5),
-          ),
-          const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             ),
           ),
+          if (_isLoading)
+            ModalBarrier(
+              dismissible: false,
+              color: Colors.black.withOpacity(0.5),
+            ),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007AFF)),
+              ),
+            ),
         ],
-      ],
+      ),
     );
   }
 }
