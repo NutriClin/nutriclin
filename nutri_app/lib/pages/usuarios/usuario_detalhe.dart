@@ -350,27 +350,57 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               setState(() => _tipoUsuario = valor!),
                         ),
                         const SizedBox(height: 15),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Ativo:',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final mediaQuery = MediaQuery.of(context);
+                            final screenWidth = mediaQuery.size.width;
+                            final labelSpacing = screenWidth < 600
+                                ? 10.0
+                                : 15.0; // Mesmo cálculo do CustomInput
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // Label com largura fixa igual ao CustomInput
+                                      SizedBox(
+                                        width: 120,
+                                        child: Text(
+                                          'Ativo:',
+                                          style: TextStyle(
+                                            fontSize:
+                                                screenWidth < 600 ? 14.0 : 16.0,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          width:
+                                              labelSpacing), // Mesmo espaçamento do CustomInput
+                                      // Switch que ocupa o restante da row
+                                      Expanded(
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Switch(
+                                            value: _isAtivo,
+                                            onChanged: _toggleAtivoStatus,
+                                            activeColor:
+                                                const Color(0xFF007AFF),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 15),
-                              Switch(
-                                value: _isAtivo,
-                                onChanged: _toggleAtivoStatus,
-                                activeColor: const Color(0xFF007AFF),
-                              ),
-                            ],
-                          ),
+                              ],
+                            );
+                          },
                         ),
                         if (_isEditMode) const SizedBox(height: 15),
                         if (_isEditMode)

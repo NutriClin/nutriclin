@@ -4,6 +4,7 @@ import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/custom_list_usuario.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/usuarios/usuario_detalhe.dart';
 
 class UsuarioPage extends StatefulWidget {
@@ -17,6 +18,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> usuarios = [];
   List<Map<String, dynamic>> usuariosFiltrados = [];
+  bool isLoading = false; // Adicionado estado para o loader
 
   @override
   void initState() {
@@ -34,29 +36,41 @@ class _UsuarioPageState extends State<UsuarioPage> {
 
   /// Busca todos os usuários no Firestore
   Future<void> _buscarUsuarios() async {
-    FirebaseFirestore.instance
-        .collection('usuarios')
-        .snapshots()
-        .listen((snapshot) {
-      List<Map<String, dynamic>> listaUsuarios = snapshot.docs.map((doc) {
-        Timestamp timestamp = doc['data'];
-        DateTime data = timestamp.toDate();
+    setState(() => isLoading = true); // Ativa o loader
 
-        return {
-          'id': doc.id,
-          'nome': doc['nome'],
-          'email': doc['email'],
-          'tipo_usuario': doc['tipo_usuario'],
-          'ativo': doc['ativo'] ?? true,
-          'data': data,
-        };
-      }).toList();
+    try {
+      FirebaseFirestore.instance
+          .collection('usuarios')
+          .snapshots()
+          .listen((snapshot) {
+        List<Map<String, dynamic>> listaUsuarios = snapshot.docs.map((doc) {
+          Timestamp timestamp = doc['data'];
+          DateTime data = timestamp.toDate();
 
-      setState(() {
-        usuarios = listaUsuarios;
-        usuariosFiltrados = List.from(usuarios);
+          return {
+            'id': doc.id,
+            'nome': doc['nome'],
+            'email': doc['email'],
+            'tipo_usuario': doc['tipo_usuario'],
+            'ativo': doc['ativo'] ?? true,
+            'data': data,
+          };
+        }).toList();
+
+        setState(() {
+          usuarios = listaUsuarios;
+          usuariosFiltrados = List.from(usuarios);
+          isLoading = false;
+        });
       });
-    });
+    } catch (e) {
+      setState(() => isLoading = false); 
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao carregar usuários: ${e.toString()}',
+        isError: true,
+      );
+    }
   }
 
   /// Filtra os usuários pelo nome
@@ -71,52 +85,71 @@ class _UsuarioPageState extends State<UsuarioPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(title: 'Usuários'),
-      drawer: const CustomDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            CustomInputSearch(controller: _searchController),
-            const SizedBox(height: 10),
-            Expanded(
-              child: usuariosFiltrados.isEmpty
-                  ? const Center(child: Text("Nenhum usuário encontrado."))
-                  : ListView.builder(
-                      itemCount: usuariosFiltrados.length,
-                      itemBuilder: (context, index) {
-                        var usuario = usuariosFiltrados[index];
-                        return CustomListUsuario(report: usuario);
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UsuarioDetalhe(idUsuario: ""),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: const CustomAppBar(title: 'Usuários'),
+          drawer: const CustomDrawer(),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                CustomInputSearch(controller: _searchController),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: isLoading
+                      ? const SizedBox() // Espaço vazio enquanto carrega
+                      : usuariosFiltrados.isEmpty
+                          ? const Center(
+                              child: Text("Nenhum usuário encontrado."))
+                          : ListView.builder(
+                              itemCount: usuariosFiltrados.length,
+                              itemBuilder: (context, index) {
+                                var usuario = usuariosFiltrados[index];
+                                return CustomListUsuario(report: usuario);
+                              },
+                            ),
                 ),
-              );
-            },
-            backgroundColor: const Color(0xFF007AFF),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40),
+              ],
             ),
-            child: const Icon(Icons.add, color: Colors.white),
           ),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UsuarioDetalhe(idUsuario: ""),
+                    ),
+                  );
+                },
+                backgroundColor: const Color(0xFF007AFF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
+            ),
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        if (isLoading)
+          ModalBarrier(
+            dismissible: false,
+            color: Colors.black.withOpacity(0.5),
+          ),
+        if (isLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+      ],
     );
   }
 }

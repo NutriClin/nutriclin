@@ -23,6 +23,8 @@ class _IMCPageState extends State<IMCPage> {
   bool formError = false;
 
   // Filtros
+  final heightFilter = FilteringTextInputFormatter.allow(RegExp(r'^\d{0,3}$'));
+
   final decimalFilter = TextInputFormatter.withFunction((oldValue, newValue) {
     final newText = newValue.text.replaceAll(',', '.');
     if (newText.isEmpty) return newValue.copyWith(text: '');
@@ -160,7 +162,7 @@ class _IMCPageState extends State<IMCPage> {
                               : null,
                           inputFormatters: [decimalFilter],
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 20),
                         CustomInput(
                           label: 'Estatura (cm):',
                           controller: heightController,
@@ -176,9 +178,9 @@ class _IMCPageState extends State<IMCPage> {
                                       0
                               ? 'Campo obrigatório'
                               : null,
-                          inputFormatters: [decimalFilter],
+                          inputFormatters: [heightFilter],
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 20),
                         if (result > 0) ...[
                           CustomInput(
                             label: 'IMC:',
@@ -187,7 +189,7 @@ class _IMCPageState extends State<IMCPage> {
                             ),
                             enabled: false,
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 20),
                           CustomInput(
                             label: 'Classificação:',
                             controller: TextEditingController(
@@ -195,7 +197,6 @@ class _IMCPageState extends State<IMCPage> {
                             ),
                             enabled: false,
                           ),
-                          const SizedBox(height: 15),
                         ],
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

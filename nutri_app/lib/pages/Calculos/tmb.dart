@@ -26,6 +26,7 @@ class _TMBPageState extends State<TMBPage> {
 
   // Filtros
   final ageFilter = FilteringTextInputFormatter.allow(RegExp(r'^\d{0,3}$'));
+  final heightFilter = FilteringTextInputFormatter.allow(RegExp(r'^\d{0,3}$'));
   final decimalFilter = TextInputFormatter.withFunction((oldValue, newValue) {
     final newText = newValue.text.replaceAll(',', '.');
     if (newText.isEmpty) return newValue.copyWith(text: '');
@@ -192,7 +193,7 @@ class _TMBPageState extends State<TMBPage> {
                                       0
                               ? 'Campo obrigatório'
                               : null,
-                          inputFormatters: [decimalFilter],
+                          inputFormatters: [heightFilter],
                         ),
                         const SizedBox(height: 20),
                         if (result > 0)
