@@ -179,7 +179,7 @@ class _TMBPageState extends State<TMBPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Estatura (cm):',
+                          label: 'Altura (cm):',
                           controller: heightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),

@@ -151,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               CustomInput(
-                                label: 'Email:',
+                                label: 'Email',
                                 controller: _emailController,
                                 error: _emailError,
                                 errorMessage: _emailErrorMessage,
@@ -166,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               SizedBox(height: verticalSpacing * 0.75),
                               CustomInputPassword(
-                                label: 'Senha:',
+                                label: 'Senha',
                                 controller: _senhaController,
                                 error: _senhaError,
                                 errorMessage: _senhaErrorMessage,

@@ -5,6 +5,7 @@ import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/controllers/usuario_controller.dart';
 import 'package:nutri_app/components/toast_util.dart';
 
@@ -350,57 +351,11 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               setState(() => _tipoUsuario = valor!),
                         ),
                         const SizedBox(height: 15),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final mediaQuery = MediaQuery.of(context);
-                            final screenWidth = mediaQuery.size.width;
-                            final labelSpacing = screenWidth < 600
-                                ? 10.0
-                                : 15.0; // Mesmo cálculo do CustomInput
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      // Label com largura fixa igual ao CustomInput
-                                      SizedBox(
-                                        width: 120,
-                                        child: Text(
-                                          'Ativo:',
-                                          style: TextStyle(
-                                            fontSize:
-                                                screenWidth < 600 ? 14.0 : 16.0,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                          width:
-                                              labelSpacing), // Mesmo espaçamento do CustomInput
-                                      // Switch que ocupa o restante da row
-                                      Expanded(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Switch(
-                                            value: _isAtivo,
-                                            onChanged: _toggleAtivoStatus,
-                                            activeColor:
-                                                const Color(0xFF007AFF),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+                        CustomSwitch(
+                          label: 'Ativo:',
+                          value: _isAtivo,
+                          onChanged: _toggleAtivoStatus,
+                          enabled: true, // ou a lógica que você precisar
                         ),
                         if (_isEditMode) const SizedBox(height: 15),
                         if (_isEditMode)

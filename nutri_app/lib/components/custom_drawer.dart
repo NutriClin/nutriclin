@@ -29,7 +29,7 @@ class CustomDrawer extends StatelessWidget {
                   child: Center(
                     child: SvgPicture.asset(
                       'assets/imagens/campologo.svg',
-                      height: 100,
+                      height: 60,
                       semanticsLabel: 'Logo Campo',
                     ),
                   ),

@@ -191,7 +191,7 @@ class _GETPageState extends State<GETPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Estatura (cm):',
+                          label: 'Altura (cm):',
                           controller: heightController,
                           keyboardType: TextInputType.number,
                           obrigatorio: true,

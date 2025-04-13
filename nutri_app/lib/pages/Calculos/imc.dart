@@ -164,7 +164,7 @@ class _IMCPageState extends State<IMCPage> {
                         ),
                         const SizedBox(height: 15), // Alterado de 20 para 15
                         CustomInput(
-                          label: 'Estatura (cm):',
+                          label: 'Altura (cm):',
                           controller: heightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
