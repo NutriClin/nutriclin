@@ -146,7 +146,7 @@ class _IMCPageState extends State<IMCPage> {
                     child: Column(
                       children: [
                         CustomInput(
-                          label: 'Peso (kg):',
+                          label: 'Peso (kg)',
                           controller: weightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -164,7 +164,7 @@ class _IMCPageState extends State<IMCPage> {
                         ),
                         const SizedBox(height: 15), // Alterado de 20 para 15
                         CustomInput(
-                          label: 'Altura (cm):',
+                          label: 'Altura (cm)',
                           controller: heightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -191,7 +191,7 @@ class _IMCPageState extends State<IMCPage> {
                           ),
                           const SizedBox(height: 15), // Alterado de 20 para 15
                           CustomInput(
-                            label: 'Classificação:',
+                            label: 'Classificação',
                             controller: TextEditingController(
                               text: classification,
                             ),

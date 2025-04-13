@@ -45,10 +45,8 @@ class CustomInput extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label acima do input
             Padding(
-              padding: const EdgeInsets.only(
-                  bottom: 8.0), // Espaço entre label e input
+              padding: const EdgeInsets.only(bottom: 8.0),
               child: Text.rich(
                 TextSpan(
                   children: [
@@ -74,7 +72,6 @@ class CustomInput extends StatelessWidget {
                 ),
               ),
             ),
-            // Campo de texto
             Container(
               height: inputHeight,
               decoration: BoxDecoration(

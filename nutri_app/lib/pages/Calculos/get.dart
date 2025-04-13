@@ -145,7 +145,7 @@ class _GETPageState extends State<GETPage> {
                     child: Column(
                       children: [
                         CustomDropdown(
-                          label: 'Sexo:',
+                          label: 'Sexo',
                           value: selectedGender,
                           items: ['Selecione', 'Masculino', 'Feminino'],
                           onChanged: (value) =>
@@ -159,7 +159,7 @@ class _GETPageState extends State<GETPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Idade:',
+                          label: 'Idade',
                           controller: ageController,
                           keyboardType: TextInputType.number,
                           obrigatorio: true,
@@ -173,7 +173,7 @@ class _GETPageState extends State<GETPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Peso (kg):',
+                          label: 'Peso (kg)',
                           controller: weightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -191,7 +191,7 @@ class _GETPageState extends State<GETPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Altura (cm):',
+                          label: 'Altura (cm)',
                           controller: heightController,
                           keyboardType: TextInputType.number,
                           obrigatorio: true,
@@ -206,9 +206,9 @@ class _GETPageState extends State<GETPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomDropdown(
-                          label: 'Atividade Física:',
+                          label: 'Atividade física',
                           value: selectedActivity,
-                          items: [
+                          items: const [
                             'Selecione',
                             'Sedentário',
                             'Leve',
@@ -227,7 +227,7 @@ class _GETPageState extends State<GETPage> {
                         const SizedBox(height: 20),
                         if (result > 0)
                           CustomInput(
-                            label: 'Resultado:',
+                            label: 'Resultado',
                             controller: TextEditingController(
                               text: '${result.toStringAsFixed(2)} kcal/dia',
                             ),

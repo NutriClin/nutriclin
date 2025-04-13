@@ -247,7 +247,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                     const SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment
-                          .spaceBetween, // Isso vai distribuir o espaço entre os widgets
+                          .spaceBetween,
                       children: [
                         CustomButton(
                           text: 'Cancelar',
@@ -319,7 +319,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                     child: Column(
                       children: [
                         CustomInput(
-                          label: 'Nome:',
+                          label: 'Nome',
                           controller: nomeController,
                           enabled: _isAtivo,
                           error: _nomeError,
@@ -331,7 +331,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Email:',
+                          label: 'Email',
                           controller: emailController,
                           enabled: _isAtivo,
                           error: _emailError,
@@ -343,19 +343,19 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                         ),
                         const SizedBox(height: 15),
                         CustomDropdown(
-                          label: 'Cargo:',
+                          label: 'Cargo',
                           value: _tipoUsuario,
-                          items: ['Aluno', 'Professor', 'Coordenador'],
+                          items: const ['Aluno', 'Professor', 'Coordenador'],
                           enabled: _isAtivo,
                           onChanged: (valor) =>
                               setState(() => _tipoUsuario = valor!),
                         ),
                         const SizedBox(height: 15),
                         CustomSwitch(
-                          label: 'Ativo:',
+                          label: 'Ativo',
                           value: _isAtivo,
                           onChanged: _toggleAtivoStatus,
-                          enabled: true, // ou a lógica que você precisar
+                          enabled: true,
                         ),
                         if (_isEditMode) const SizedBox(height: 15),
                         if (_isEditMode)

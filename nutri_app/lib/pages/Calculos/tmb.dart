@@ -133,7 +133,7 @@ class _TMBPageState extends State<TMBPage> {
                     child: Column(
                       children: [
                         CustomDropdown(
-                          label: 'Sexo:',
+                          label: 'Sexo',
                           value: selectedGender,
                           items: ['Selecione', 'Masculino', 'Feminino'],
                           onChanged: (value) =>
@@ -147,7 +147,7 @@ class _TMBPageState extends State<TMBPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Idade:',
+                          label: 'Idade',
                           controller: ageController,
                           keyboardType: TextInputType.number,
                           obrigatorio: true,
@@ -161,7 +161,7 @@ class _TMBPageState extends State<TMBPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Peso (kg):',
+                          label: 'Peso (kg)',
                           controller: weightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -179,7 +179,7 @@ class _TMBPageState extends State<TMBPage> {
                         ),
                         const SizedBox(height: 15),
                         CustomInput(
-                          label: 'Altura (cm):',
+                          label: 'Altura (cm)',
                           controller: heightController,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
@@ -198,7 +198,7 @@ class _TMBPageState extends State<TMBPage> {
                         const SizedBox(height: 20),
                         if (result > 0)
                           CustomInput(
-                            label: 'Resultado:',
+                            label: 'Resultado',
                             controller: TextEditingController(
                               text: '${result.toStringAsFixed(2)} kcal/dia',
                             ),

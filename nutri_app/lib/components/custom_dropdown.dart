@@ -38,7 +38,6 @@ class CustomDropdown extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label acima do dropdown
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text.rich(
@@ -66,7 +65,6 @@ class CustomDropdown extends StatelessWidget {
                 ),
               ),
             ),
-            // Dropdown que ocupa toda a linha
             Container(
               height: inputHeight,
               decoration: BoxDecoration(

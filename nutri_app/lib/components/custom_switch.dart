@@ -31,7 +31,6 @@ class CustomSwitch extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label acima do switch
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text.rich(
@@ -59,11 +58,10 @@ class CustomSwitch extends StatelessWidget {
                 ),
               ),
             ),
-            // Container do switch
             Container(
               height: inputHeight,
               child: Padding(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 0,
                 ),
                 child: Align(

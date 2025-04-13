@@ -58,7 +58,6 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label acima do input
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text.rich(
@@ -86,7 +85,6 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
                 ),
               ),
             ),
-            // Campo de texto
             Container(
               height: inputHeight,
               decoration: BoxDecoration(
