@@ -4,6 +4,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   const CustomAppBar({super.key, required this.title});
 
+  void _navigateToHome(BuildContext context) {
+    Navigator.of(context).popUntil((route) {
+      return route.isFirst;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -26,7 +32,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.house_rounded, color: Color(0xFF007AFF)),
-          onPressed: () {},
+          onPressed: () => _navigateToHome(context),
         ),
       ],
       flexibleSpace: Container(

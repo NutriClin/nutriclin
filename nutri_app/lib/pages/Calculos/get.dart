@@ -160,7 +160,6 @@ class _GETPageState extends State<GETPage> {
                         label: 'Idade:',
                         controller: ageController,
                         keyboardType: TextInputType.number,
-                        width: 80,
                         obrigatorio: true,
                         error: formError &&
                             (int.tryParse(ageController.text) ?? 0) <= 0,
@@ -176,7 +175,6 @@ class _GETPageState extends State<GETPage> {
                         controller: weightController,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
-                        width: 80,
                         obrigatorio: true,
                         error: formError &&
                             (double.tryParse(weightController.text) ?? 0) <= 0,
@@ -191,8 +189,7 @@ class _GETPageState extends State<GETPage> {
                       CustomInput(
                         label: 'Estatura (cm):',
                         controller: heightController,
-                        keyboardType: TextInputType.number, // Inteiro
-                        width: 80,
+                        keyboardType: TextInputType.number,
                         obrigatorio: true,
                         error: formError &&
                             (int.tryParse(heightController.text) ?? 0) <= 0,
@@ -231,7 +228,6 @@ class _GETPageState extends State<GETPage> {
                             text: '${result.toStringAsFixed(2)} kcal/dia',
                           ),
                           enabled: false,
-                          width: 80,
                           keyboardType: TextInputType.none,
                         ),
                       const SizedBox(height: 20),

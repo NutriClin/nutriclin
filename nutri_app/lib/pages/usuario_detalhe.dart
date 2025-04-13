@@ -334,7 +334,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                               children: [
                                 CustomInput(
                                   label: 'Nome:',
-                                  width: 60,
                                   controller: nomeController,
                                   enabled: _isAtivo,
                                   error: _nomeError,
@@ -349,7 +348,6 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                                 const SizedBox(height: 15),
                                 CustomInput(
                                   label: 'Email:',
-                                  width: 60,
                                   controller: emailController,
                                   enabled: _isAtivo,
                                   error: _emailError,

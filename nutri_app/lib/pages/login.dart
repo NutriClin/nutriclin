@@ -131,7 +131,6 @@ class _LoginPageState extends State<LoginPage> {
                               children: [
                                 CustomInput(
                                   label: 'Email:',
-                                  width: 50,
                                   controller: emailController,
                                 ),
                                 const SizedBox(height: 15),
