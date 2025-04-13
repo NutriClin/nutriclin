@@ -5,12 +5,14 @@ class CustomBox extends StatelessWidget {
   final String text;
   final String imagePath;
   final VoidCallback onTap;
+  final double labelFontSize;
 
   const CustomBox({
     super.key,
     required this.text,
     required this.imagePath,
     required this.onTap,
+    this.labelFontSize = 14,
   });
 
   @override
@@ -57,8 +59,8 @@ class CustomBox extends StatelessWidget {
                   Text(
                     text,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: labelFontSize,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Poppins',
                     ),

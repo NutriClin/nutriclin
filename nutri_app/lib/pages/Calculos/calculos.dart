@@ -29,9 +29,11 @@ class CalculosPage extends StatelessWidget {
   List<Widget> _buildCards(BuildContext context) {
     List<Widget> cards = [];
 
+    double labelFontSize = 12;
     cards.addAll([
       CustomBox(
         text: 'Taxa metabólica basal',
+        labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/tmb-text.svg',
         onTap: () => Navigator.push(
           context,
@@ -41,6 +43,7 @@ class CalculosPage extends StatelessWidget {
       const SizedBox(width: 20),
       CustomBox(
         text: 'Gasto energético total',
+        labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/get-text.svg',
         onTap: () => Navigator.push(
           context,
@@ -50,6 +53,7 @@ class CalculosPage extends StatelessWidget {
       const SizedBox(width: 20),
       CustomBox(
         text: 'Índice de massa corporal',
+        labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/imc-text.svg',
         onTap: () => Navigator.push(
           context,
