@@ -213,7 +213,7 @@ class _IMCPageState extends State<IMCPage> {
                                   text: 'Limpar',
                                   onPressed: clearFields,
                                   color: Colors.white,
-                                  textColor: Colors.black,
+                                  textColor: Colors.red,
                                   boxShadowColor: Colors.black,
                                 ),
                                 const SizedBox(width: 10),

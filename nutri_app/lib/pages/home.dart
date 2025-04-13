@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/components/custom_drawer.dart';
-import 'package:nutri_app/pages/Calculos/calculos.dart';
-import 'usuarios.dart';
+import 'package:nutri_app/pages/calculos/calculos.dart';
+import 'usuarios/usuarios.dart';
 
 class HomePage extends StatelessWidget {
   final String tipoUsuario;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:nutri_app/pages/usuarios.dart';
+import 'package:nutri_app/pages/usuarios/usuarios.dart';
 import './firebase/firebase_options.dart';
 import 'pages/login.dart';
 import 'pages/home.dart';

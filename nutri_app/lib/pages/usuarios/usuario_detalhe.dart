@@ -245,16 +245,16 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                     ),
                     const SizedBox(height: 15),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceBetween, // Isso vai distribuir o espaço entre os widgets
                       children: [
                         CustomButton(
-                          text: 'Voltar',
+                          text: 'Cancelar',
                           onPressed: () => Navigator.pop(context),
                           color: Colors.white,
-                          textColor: Colors.black,
+                          textColor: Colors.red,
                           boxShadowColor: Colors.black,
                         ),
-                        const SizedBox(width: 10),
                         CustomButton(
                           text: 'Confirmar',
                           onPressed: () async {

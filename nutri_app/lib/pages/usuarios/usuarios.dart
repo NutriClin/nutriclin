@@ -4,7 +4,7 @@ import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/custom_list_usuario.dart';
-import 'package:nutri_app/pages/usuario_detalhe.dart';
+import 'package:nutri_app/pages/usuarios/usuario_detalhe.dart';
 
 class UsuarioPage extends StatefulWidget {
   const UsuarioPage({super.key});

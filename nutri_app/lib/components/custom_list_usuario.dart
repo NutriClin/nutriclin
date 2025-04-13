@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nutri_app/pages/usuario_detalhe.dart';
+import 'package:nutri_app/pages/usuarios/usuario_detalhe.dart';
 
 class CustomListUsuario extends StatelessWidget {
   final Map<String, dynamic> report;

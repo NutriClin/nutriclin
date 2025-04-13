@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:nutri_app/pages/Calculos/calculos.dart';
-import 'package:nutri_app/pages/usuarios.dart';
+import 'package:nutri_app/pages/calculos/calculos.dart';
+import 'package:nutri_app/pages/usuarios/usuarios.dart';
 import 'package:nutri_app/services/preferences_service.dart';
 
 class CustomDrawer extends StatelessWidget {

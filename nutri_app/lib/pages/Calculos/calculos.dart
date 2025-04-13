@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/components/custom_drawer.dart';
-import 'package:nutri_app/pages/Calculos/get.dart';
-import 'package:nutri_app/pages/Calculos/imc.dart';
-import 'package:nutri_app/pages/Calculos/tmb.dart';
+import 'package:nutri_app/pages/calculos/get.dart';
+import 'package:nutri_app/pages/calculos/imc.dart';
+import 'package:nutri_app/pages/calculos/tmb.dart';
 
 class CalculosPage extends StatelessWidget {
   const CalculosPage({super.key});
