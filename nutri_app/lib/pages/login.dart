@@ -6,6 +6,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_input_password.dart';
 import 'package:nutri_app/pages/home.dart';
 import 'package:nutri_app/services/auth_service.dart';
+import 'package:nutri_app/services/preferences_service.dart';
 import 'package:toastification/toastification.dart';
 
 class LoginPage extends StatefulWidget {
@@ -40,11 +41,10 @@ class _LoginPageState extends State<LoginPage> {
     Map<String, dynamic>? usuario = await _authService.login(email, senha);
     print('Resultado do login: $usuario');
 
-    setState(() {
-      isLoading = false;
-    });
-
     if (usuario != null) {
+      // Salva o tipo de usuário nas preferências
+      await PreferencesService.saveUserType(usuario['tipo_usuario']);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -54,6 +54,10 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       _mostrarMensagem("Email ou senha inválidos.");
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void _mostrarMensagem(String mensagem) {

@@ -5,7 +5,7 @@ class CustomDropdown extends StatelessWidget {
   final List<String> items;
   final String value;
   final ValueChanged<String?> onChanged;
-  final double width;
+  final double labelWidth; // Largura fixa para a label
   final bool enabled;
   final bool obrigatorio;
   final bool error;
@@ -17,7 +17,7 @@ class CustomDropdown extends StatelessWidget {
     required this.items,
     required this.value,
     required this.onChanged,
-    required this.width,
+    this.labelWidth = 120, // Largura padrão para a label
     this.enabled = true,
     this.obrigatorio = false,
     this.error = false,
@@ -26,6 +26,11 @@ class CustomDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final fontSize = screenWidth < 600 ? 14.0 : 16.0;
+    final labelSpacing = screenWidth < 600 ? 10.0 : 15.0;
+    final inputHeight = screenWidth < 600 ? 36.0 : 42.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,8 +38,9 @@ class CustomDropdown extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Label com largura fixa
               SizedBox(
-                width: width,
+                width: labelWidth,
                 child: Text.rich(
                   TextSpan(
                     children: [
@@ -43,7 +49,7 @@ class CustomDropdown extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: error ? Colors.red : Colors.black,
-                          fontSize: 14,
+                          fontSize: fontSize,
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -60,11 +66,14 @@ class CustomDropdown extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: labelSpacing),
+              // Dropdown que ocupa o restante da row
               Expanded(
                 child: Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  height: inputHeight,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth < 600 ? 10 : 15,
+                  ),
                   decoration: BoxDecoration(
                     color: enabled ? Colors.white : const Color(0xFFEEE9EF),
                     borderRadius: BorderRadius.circular(8),
@@ -91,7 +100,7 @@ class CustomDropdown extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: enabled ? Colors.black : Colors.grey,
-                        fontSize: 14,
+                        fontSize: fontSize,
                         fontFamily: 'Poppins',
                       ),
                       enableFeedback: enabled,
@@ -99,7 +108,10 @@ class CustomDropdown extends StatelessWidget {
                       items: items
                           .map((item) => DropdownMenuItem(
                                 value: item,
-                                child: Text(item),
+                                child: Text(
+                                  item,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ))
                           .toList(),
                     ),
@@ -114,9 +126,9 @@ class CustomDropdown extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4.0),
             child: Text(
               errorMessage!,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.red,
-                fontSize: 12,
+                fontSize: screenWidth < 600 ? 12 : 14,
                 fontFamily: 'Poppins',
               ),
             ),

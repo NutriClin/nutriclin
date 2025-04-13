@@ -5,7 +5,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/controllers/usuario_controller.dart';
-import 'package:toastification/toastification.dart';
+import 'package:nutri_app/components/toast_util.dart';
 
 class UsuarioDetalhe extends StatefulWidget {
   final String? idUsuario;
@@ -24,42 +24,10 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   late bool _isEditMode;
   late bool _isAtivo = true;
   bool isLoading = false;
-
-  void _mostrarToast(String mensagem, {bool isError = true}) {
-    toastification.show(
-      context: context,
-      type: isError ? ToastificationType.error : ToastificationType.success,
-      style: ToastificationStyle.flat,
-      description: Text(mensagem),
-      alignment: Alignment.topCenter,
-      autoCloseDuration: const Duration(seconds: 5),
-      animationBuilder: (context, animation, alignment, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-      icon: Icon(isError ? Icons.error : Icons.check_circle),
-      primaryColor: isError ? Colors.red : Colors.green,
-      backgroundColor: isError ? Colors.red[50] : Colors.green[50],
-      foregroundColor: Colors.black,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x07000000),
-          blurRadius: 16,
-          offset: Offset(0, 16),
-          spreadRadius: 0,
-        )
-      ],
-      showProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      dragToClose: true,
-    );
-  }
+  bool _nomeError = false;
+  bool _emailError = false;
+  String _nomeErrorMessage = '';
+  String _emailErrorMessage = '';
 
   @override
   void initState() {
@@ -71,9 +39,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
   }
 
   Future<void> _buscarUsuario(String id) async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
       var dados = await _usuarioController.buscarUsuario(id);
@@ -87,21 +53,22 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
           _isAtivo = dados['ativo'] ?? true;
         });
       } else {
-        _mostrarToast('Falha ao carregar dados do usuário');
+        ToastUtil.showToast(
+          context: context,
+          message: 'Falha ao carregar dados do usuário',
+          isError: true,
+        );
       }
     } catch (e) {
-      _mostrarToast('Erro ao buscar usuário: ${e.toString()}');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao buscar usuário: ${e.toString()}',
+        isError: true,
+      );
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
-
-  bool _nomeError = false;
-  bool _emailError = false;
-  String _nomeErrorMessage = '';
-  String _emailErrorMessage = '';
 
   bool _validarCampos() {
     bool valido = true;
@@ -149,13 +116,15 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
 
   Future<void> _salvarUsuario() async {
     if (!_validarCampos()) {
-      _mostrarToast('Por favor, verifique o formulário!');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
       String resultado = await _usuarioController.salvarUsuario(
@@ -167,24 +136,32 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       );
 
       if (resultado.contains('sucesso')) {
-        _mostrarToast(resultado, isError: false);
+        ToastUtil.showToast(
+          context: context,
+          message: resultado,
+          isError: false,
+        );
         Navigator.pop(context);
       } else {
-        _mostrarToast(resultado);
+        ToastUtil.showToast(
+          context: context,
+          message: resultado,
+          isError: true,
+        );
       }
     } catch (e) {
-      _mostrarToast('Erro ao salvar usuário: ${e.toString()}');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao salvar usuário: ${e.toString()}',
+        isError: true,
+      );
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
   Future<void> _toggleAtivoStatus(bool newValue) async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
       String resultado = await _usuarioController.ativarDesativarUsuario(
@@ -197,24 +174,34 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
           _isAtivo = newValue;
           _ativo = newValue;
         });
-        _mostrarToast(resultado, isError: false);
+        ToastUtil.showToast(
+          context: context,
+          message: resultado,
+          isError: false,
+        );
       } else {
-        _mostrarToast(resultado);
+        ToastUtil.showToast(
+          context: context,
+          message: resultado,
+          isError: true,
+        );
         setState(() {
           _isAtivo = !newValue;
           _ativo = !newValue;
         });
       }
     } catch (e) {
-      _mostrarToast('Erro ao alterar status do usuário: ${e.toString()}');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao alterar status do usuário: ${e.toString()}',
+        isError: true,
+      );
       setState(() {
         _isAtivo = !newValue;
         _ativo = !newValue;
       });
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
@@ -223,12 +210,14 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 40),
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.1,
+          ),
           backgroundColor: Colors.transparent,
           child: Stack(
             children: [
               CustomCard(
-                width: MediaQuery.of(context).size.width * 1,
+                width: MediaQuery.of(context).size.width * 0.9,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -259,38 +248,36 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                       children: [
                         CustomButton(
                           text: 'Voltar',
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop(context),
                           color: Colors.white,
                           textColor: Colors.black,
                           boxShadowColor: Colors.black,
                         ),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 10),
                         CustomButton(
                           text: 'Confirmar',
                           onPressed: () async {
                             Navigator.pop(context);
-                            setState(() {
-                              isLoading = true;
-                            });
+                            setState(() => isLoading = true);
 
                             try {
                               String resultado = await _usuarioController
                                   .enviarRedefinicaoSenha(widget.idUsuario!);
 
-                              if (resultado.contains('sucesso')) {
-                                _mostrarToast(resultado, isError: false);
-                              } else {
-                                _mostrarToast(resultado);
-                              }
+                              ToastUtil.showToast(
+                                context: context,
+                                message: resultado,
+                                isError: !resultado.contains('sucesso'),
+                              );
                             } catch (e) {
-                              _mostrarToast(
-                                  'Erro ao redefinir senha: ${e.toString()}');
+                              ToastUtil.showToast(
+                                context: context,
+                                message:
+                                    'Erro ao redefinir senha: ${e.toString()}',
+                                isError: true,
+                              );
                             } finally {
-                              setState(() {
-                                isLoading = false;
-                              });
+                              setState(() => isLoading = false);
                             }
                           },
                         ),
@@ -308,142 +295,121 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth =
-        screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final cardWidth = screenWidth < 600 ? screenWidth * 0.9 : screenWidth * 0.4;
+    final inputWidth = cardWidth * 0.9;
 
     return Stack(
       children: [
         Scaffold(
           appBar: CustomAppBar(
-              title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário'),
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          CustomCard(
-                            width: cardWidth,
-                            child: Column(
-                              children: [
-                                CustomInput(
-                                  label: 'Nome:',
-                                  controller: nomeController,
-                                  enabled: _isAtivo,
-                                  error: _nomeError,
-                                  errorMessage: _nomeErrorMessage,
-                                  obrigatorio: true,
-                                  onChanged: (value) {
-                                    if (_nomeError) {
-                                      _validarCampos();
-                                    }
-                                  },
+            title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário',
+          ),
+          body: SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: CustomCard(
+                  width: cardWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        CustomInput(
+                          label: 'Nome:',
+                          controller: nomeController,
+                          enabled: _isAtivo,
+                          error: _nomeError,
+                          errorMessage: _nomeErrorMessage,
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_nomeError) _validarCampos();
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Email:',
+                          controller: emailController,
+                          enabled: _isAtivo,
+                          error: _emailError,
+                          errorMessage: _emailErrorMessage,
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_emailError) _validarCampos();
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        CustomDropdown(
+                          label: 'Cargo:',
+                          value: _tipoUsuario,
+                          items: ['Aluno', 'Professor', 'Coordenador'],
+                          enabled: _isAtivo,
+                          onChanged: (valor) =>
+                              setState(() => _tipoUsuario = valor!),
+                        ),
+                        const SizedBox(height: 15),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            children: [
+                              const Text(
+                                'Ativo:',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
                                 ),
-                                const SizedBox(height: 15),
-                                CustomInput(
-                                  label: 'Email:',
-                                  controller: emailController,
-                                  enabled: _isAtivo,
-                                  error: _emailError,
-                                  errorMessage: _emailErrorMessage,
-                                  obrigatorio: true,
-                                  onChanged: (value) {
-                                    if (_emailError) {
-                                      _validarCampos();
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 15),
-                                CustomDropdown(
-                                  label: 'Cargo:',
-                                  value: _tipoUsuario,
-                                  items: ['Aluno', 'Professor', 'Coordenador'],
-                                  enabled: _isAtivo,
-                                  onChanged: (valor) {
-                                    setState(() {
-                                      _tipoUsuario = valor!;
-                                    });
-                                  },
-                                  width: 60,
-                                ),
-                                const SizedBox(height: 15),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0),
-                                  child: Row(
-                                    children: [
-                                      const Text(
-                                        'Ativo:',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 15),
-                                      Switch(
-                                        value: _isAtivo,
-                                        onChanged: (value) {
-                                          _toggleAtivoStatus(value);
-                                        },
-                                        activeColor: const Color(0xFF007AFF),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (_isEditMode) const SizedBox(height: 15),
-                                if (_isEditMode)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0),
-                                    child: CustomButton(
-                                      text: 'Redefinir Senha',
-                                      onPressed: _mostrarAlterarSenhaModal,
-                                      color: Colors.white,
-                                      textColor: Colors.red,
-                                      boxShadowColor: Colors.black,
-                                    ),
-                                  ),
-                                const SizedBox(height: 20),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      CustomButton(
-                                        text: 'Voltar',
-                                        onPressed: () => Navigator.pop(context),
-                                        color: Colors.white,
-                                        textColor: Colors.black,
-                                        boxShadowColor: Colors.black,
-                                      ),
-                                      CustomButton(
-                                        text: 'Salvar',
-                                        onPressed: _salvarUsuario,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                              ],
+                              ),
+                              const SizedBox(width: 15),
+                              Switch(
+                                value: _isAtivo,
+                                onChanged: _toggleAtivoStatus,
+                                activeColor: const Color(0xFF007AFF),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_isEditMode) const SizedBox(height: 15),
+                        if (_isEditMode)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: CustomButton(
+                              text: 'Redefinir Senha',
+                              onPressed: _mostrarAlterarSenhaModal,
+                              color: Colors.white,
+                              textColor: Colors.red,
+                              boxShadowColor: Colors.black,
                             ),
                           ),
-                        ],
-                      ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CustomButton(
+                                text: 'Voltar',
+                                onPressed: () => Navigator.pop(context),
+                                color: Colors.white,
+                                textColor: Colors.black,
+                                boxShadowColor: Colors.black,
+                              ),
+                              CustomButton(
+                                text: 'Salvar',
+                                onPressed: _salvarUsuario,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
         if (isLoading)

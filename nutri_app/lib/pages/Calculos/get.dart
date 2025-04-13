@@ -148,7 +148,6 @@ class _GETPageState extends State<GETPage> {
                         items: ['Selecione', 'Masculino', 'Feminino'],
                         onChanged: (value) =>
                             setState(() => selectedGender = value!),
-                        width: 80,
                         obrigatorio: true,
                         error: formError && selectedGender == 'Selecione',
                         errorMessage: formError && selectedGender == 'Selecione'
@@ -212,7 +211,6 @@ class _GETPageState extends State<GETPage> {
                         ],
                         onChanged: (value) =>
                             setState(() => selectedActivity = value!),
-                        width: 80,
                         obrigatorio: true,
                         error: formError && selectedActivity == 'Selecione',
                         errorMessage:
