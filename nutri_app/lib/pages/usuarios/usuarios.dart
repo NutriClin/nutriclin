@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:nutri_app/components/custom_appbar.dart';
-import 'package:nutri_app/components/custom_drawer.dart';
+import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/custom_list_usuario.dart';
 import 'package:nutri_app/components/toast_util.dart';
@@ -34,9 +33,8 @@ class _UsuarioPageState extends State<UsuarioPage> {
     super.dispose();
   }
 
-  /// Busca todos os usuários no Firestore
   Future<void> _buscarUsuarios() async {
-    setState(() => isLoading = true); // Ativa o loader
+    setState(() => isLoading = true);
 
     try {
       FirebaseFirestore.instance
@@ -64,7 +62,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
         });
       });
     } catch (e) {
-      setState(() => isLoading = false); 
+      setState(() => isLoading = false);
       ToastUtil.showToast(
         context: context,
         message: 'Erro ao carregar usuários: ${e.toString()}',
@@ -73,7 +71,6 @@ class _UsuarioPageState extends State<UsuarioPage> {
     }
   }
 
-  /// Filtra os usuários pelo nome
   void _filtrarUsuarios() {
     String query = _searchController.text.toLowerCase();
     setState(() {
@@ -87,9 +84,8 @@ class _UsuarioPageState extends State<UsuarioPage> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Scaffold(
-          appBar: const CustomAppBar(title: 'Usuários'),
-          drawer: const CustomDrawer(),
+        BasePage(
+          title: 'Usuários',
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Column(
@@ -99,7 +95,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
                 const SizedBox(height: 10),
                 Expanded(
                   child: isLoading
-                      ? const SizedBox() // Espaço vazio enquanto carrega
+                      ? const SizedBox()
                       : usuariosFiltrados.isEmpty
                           ? const Center(
                               child: Text("Nenhum usuário encontrado."))
@@ -135,8 +131,6 @@ class _UsuarioPageState extends State<UsuarioPage> {
               ),
             ),
           ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
         ),
         if (isLoading)
           ModalBarrier(

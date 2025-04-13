@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nutri_app/components/custom_appbar.dart';
+import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
-import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
@@ -246,8 +245,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
                     ),
                     const SizedBox(height: 15),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment
-                          .spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         CustomButton(
                           text: 'Cancelar',
@@ -303,11 +301,8 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
 
     return Stack(
       children: [
-        Scaffold(
-          appBar: CustomAppBar(
-            title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário',
-          ),
-          drawer: const CustomDrawer(),
+        BasePage(
+          title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário',
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(10),

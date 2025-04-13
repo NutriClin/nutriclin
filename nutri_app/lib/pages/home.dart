@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nutri_app/components/custom_appbar.dart';
+import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
-import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/pages/calculos/calculos.dart';
 import 'usuarios/usuarios.dart';
 
@@ -12,9 +11,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(title: 'Home'),
-      drawer: const CustomDrawer(),
+    return BasePage(
+      title: 'Home',
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
