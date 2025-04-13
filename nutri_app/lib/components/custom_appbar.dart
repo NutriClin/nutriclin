@@ -3,10 +3,12 @@ import 'package:nutri_app/services/preferences_service.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final ScaffoldState? scaffoldState;
 
   const CustomAppBar({
     super.key,
     required this.title,
+    this.scaffoldState,
   });
 
   @override
@@ -25,6 +27,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return FutureBuilder<String?>(
       future: _getUserType(),
       builder: (context, snapshot) {
+        final tipoUsuario = snapshot.data;
+
         return AppBar(
           title: Text(
             title,
@@ -38,14 +42,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           centerTitle: true,
           backgroundColor: const Color(0xFFEAEAEA),
           elevation: 0,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu_sharp, color: Color(0xFF007AFF)),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            ),
-          ),
+          leading: tipoUsuario != null
+              ? Builder(
+                  builder: (context) => IconButton(
+                    icon:
+                        const Icon(Icons.menu_sharp, color: Color(0xFF007AFF)),
+                    onPressed: () {
+                      // Usa o scaffoldState se fornecido, ou o padrão do contexto
+                      (scaffoldState ?? Scaffold.of(context)).openDrawer();
+                    },
+                  ),
+                )
+              : null,
           actions: [
             IconButton(
               icon: const Icon(Icons.house_rounded, color: Color(0xFF007AFF)),

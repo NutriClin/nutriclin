@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
+import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/custom_list_usuario.dart';
 import 'package:nutri_app/pages/usuario_detalhe.dart';
@@ -72,6 +73,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Usuários'),
+      drawer: const CustomDrawer(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: Column(

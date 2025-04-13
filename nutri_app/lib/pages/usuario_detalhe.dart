@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
@@ -305,6 +306,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
           appBar: CustomAppBar(
             title: _isEditMode ? 'Editar Usuário' : 'Cadastro de Usuário',
           ),
+          drawer: const CustomDrawer(),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(10),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_box.dart';
+import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/pages/Calculos/get.dart';
 import 'package:nutri_app/pages/Calculos/imc.dart';
 import 'package:nutri_app/pages/Calculos/tmb.dart';
@@ -12,6 +13,7 @@ class CalculosPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Cálculos'),
+      drawer: const CustomDrawer(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

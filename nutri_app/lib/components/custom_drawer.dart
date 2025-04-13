@@ -15,40 +15,10 @@ class CustomDrawer extends StatelessWidget {
       future: _getUserType(),
       builder: (context, snapshot) {
         final tipoUsuario = snapshot.data;
-
         return Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Color(0xFF007AFF),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Text(
-                      'Menu',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tipo: ${tipoUsuario ?? 'Não definido'}',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               ..._buildMenuItems(context, tipoUsuario),
             ],
           ),

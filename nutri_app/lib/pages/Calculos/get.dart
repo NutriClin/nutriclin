@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
 import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_drawer.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
@@ -132,6 +133,7 @@ class _GETPageState extends State<GETPage> {
       children: [
         Scaffold(
           appBar: const CustomAppBar(title: 'GET - Gasto Energético Total'),
+          drawer: const CustomDrawer(),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(10),
