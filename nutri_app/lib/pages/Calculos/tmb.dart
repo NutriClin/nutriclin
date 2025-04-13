@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nutri_app/components/custom_appbar.dart';
+import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/toast_util.dart';
 
 class TMBPage extends StatefulWidget {
   const TMBPage({super.key});
@@ -10,284 +15,241 @@ class TMBPage extends StatefulWidget {
 }
 
 class _TMBPageState extends State<TMBPage> {
-  String? selectedGender;
+  String selectedGender = 'Selecione';
   final TextEditingController ageController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
-  String result = '';
+  double result = 0.0;
+  bool isLoading = false;
+  bool formError = false;
+
+  // Filtros
+  final ageFilter = FilteringTextInputFormatter.allow(RegExp(r'^\d{0,3}$'));
+  final decimalFilter = TextInputFormatter.withFunction((oldValue, newValue) {
+    final newText = newValue.text.replaceAll(',', '.');
+    if (newText.isEmpty) return newValue.copyWith(text: '');
+    final regex = RegExp(r'^\d{0,3}(\.\d{0,3})?$');
+    if (!regex.hasMatch(newText)) return oldValue;
+    return newValue.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
+    );
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    weightController.addListener(_replaceCommaWithDot);
+  }
+
+  @override
+  void dispose() {
+    weightController.removeListener(_replaceCommaWithDot);
+    ageController.dispose();
+    weightController.dispose();
+    heightController.dispose();
+    super.dispose();
+  }
+
+  void _replaceCommaWithDot() {
+    final textWeight = weightController.text;
+    if (textWeight.contains(',')) {
+      weightController.text = textWeight.replaceAll(',', '.');
+      weightController.selection = TextSelection.fromPosition(
+        TextPosition(offset: weightController.text.length),
+      );
+    }
+  }
 
   void calculateTMB() {
-    setState(() {
-      int age = int.tryParse(ageController.text) ?? 0;
-      double weight = double.tryParse(weightController.text) ?? 0;
-      double height = double.tryParse(heightController.text) ?? 0;
+    final double weight = double.tryParse(weightController.text) ?? 0.0;
+    final double height = double.tryParse(heightController.text) ?? 0.0;
+    final int age = int.tryParse(ageController.text) ?? 0;
 
-      if (selectedGender != null && age > 0 && weight > 0 && height > 0) {
-        if (selectedGender == 'masculino') {
-          double tmb = 66 + (13.7 * weight) + (5 * height) - (6.8 * age);
-          result = '${tmb.toStringAsFixed(2)} kcal';
-        } else {
-          double tmb = 655 + (9.6 * weight) + (1.8 * height) - (4.7 * age);
-          result = '${tmb.toStringAsFixed(2)} kcal';
-        }
+    // Validações
+    bool hasError =
+        weight <= 0 || height <= 0 || age <= 0 || selectedGender == 'Selecione';
+
+    setState(() => formError = hasError);
+
+    if (hasError) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Preencha todos os campos obrigatórios',
+        isError: true,
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    // Cálculo da TMB
+    Future.delayed(const Duration(milliseconds: 500), () {
+      double tmb;
+      if (selectedGender == 'Masculino') {
+        tmb = 66 + (13.7 * weight) + (5 * height) - (6.8 * age);
       } else {
-        result = 'Preencha todos os campos';
+        tmb = 655 + (9.6 * weight) + (1.8 * height) - (4.7 * age);
       }
+
+      setState(() {
+        result = tmb;
+        isLoading = false;
+      });
+    });
+  }
+
+  void clearFields() {
+    setState(() {
+      selectedGender = 'Selecione';
+      ageController.clear();
+      weightController.clear();
+      heightController.clear();
+      result = 0.0;
+      formError = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Cálculo TMB',
-      ),
-      body: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 15,
-                spreadRadius: 1,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Text(
-                    'Sexo:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 20),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            selectedGender = 'feminino';
-                          });
-                        },
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: selectedGender == 'feminino' 
-                                  ? Colors.blue 
-                                  : Colors.grey,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: selectedGender == 'feminino'
-                              ? const Icon(
-                                  Icons.check,
-                                  size: 18,
-                                  color: Colors.blue,
-                                )
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.95;
+
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: const CustomAppBar(title: 'TMB - Taxa Metabólica Basal'),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: CustomCard(
+                  width: cardWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        CustomDropdown(
+                          label: 'Sexo:',
+                          value: selectedGender,
+                          items: ['Selecione', 'Masculino', 'Feminino'],
+                          onChanged: (value) =>
+                              setState(() => selectedGender = value!),
+                          obrigatorio: true,
+                          error: formError && selectedGender == 'Selecione',
+                          errorMessage:
+                              formError && selectedGender == 'Selecione'
+                                  ? 'Campo obrigatório'
+                                  : null,
+                        ),
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Idade:',
+                          controller: ageController,
+                          keyboardType: TextInputType.number,
+                          obrigatorio: true,
+                          error: formError &&
+                              (int.tryParse(ageController.text) ?? 0) <= 0,
+                          errorMessage: formError &&
+                                  (int.tryParse(ageController.text) ?? 0) <= 0
+                              ? 'Campo obrigatório'
                               : null,
+                          inputFormatters: [ageFilter],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text('feminino'),
-                      const SizedBox(width: 20),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            selectedGender = 'masculino';
-                          });
-                        },
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: selectedGender == 'masculino' 
-                                  ? Colors.blue 
-                                  : Colors.grey,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: selectedGender == 'masculino'
-                              ? const Icon(
-                                  Icons.check,
-                                  size: 18,
-                                  color: Colors.blue,
-                                )
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Peso (kg):',
+                          controller: weightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          obrigatorio: true,
+                          error: formError &&
+                              (double.tryParse(weightController.text) ?? 0) <=
+                                  0,
+                          errorMessage: formError &&
+                                  (double.tryParse(weightController.text) ??
+                                          0) <=
+                                      0
+                              ? 'Campo obrigatório'
                               : null,
+                          inputFormatters: [decimalFilter],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text('masculino'),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              
-              Row(
-                children: [
-                  const Text(
-                    'Idade:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        controller: ageController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '',
+                        const SizedBox(height: 15),
+                        CustomInput(
+                          label: 'Estatura (cm):',
+                          controller: heightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          obrigatorio: true,
+                          error: formError &&
+                              (double.tryParse(heightController.text) ?? 0) <=
+                                  0,
+                          errorMessage: formError &&
+                                  (double.tryParse(heightController.text) ??
+                                          0) <=
+                                      0
+                              ? 'Campo obrigatório'
+                              : null,
+                          inputFormatters: [decimalFilter],
                         ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              
-              Row(
-                children: [
-                  const Text(
-                    'Peso corporal(kg):',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        controller: weightController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              
-              Row(
-                children: [
-                  const Text(
-                    'Estatura(cm):',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        controller: heightController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              
-              Row(
-                children: [
-                  const Text(
-                    'Resultado:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300, 
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        result.isEmpty ? '' : result,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: result.isEmpty ? Colors.grey.shade600 : Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 2),
+                        const SizedBox(height: 20),
+                        if (result > 0)
+                          CustomInput(
+                            label: 'Resultado:',
+                            controller: TextEditingController(
+                              text: '${result.toStringAsFixed(2)} kcal/dia',
+                            ),
+                            enabled: false,
+                          ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomButton(
+                              text: 'Voltar',
+                              onPressed: () => Navigator.pop(context),
+                              color: Colors.white,
+                              textColor: Colors.black,
+                              boxShadowColor: Colors.black,
+                            ),
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Limpar',
+                                  onPressed: clearFields,
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Calcular',
+                                  onPressed: calculateTMB,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context), 
-                      child: const Text(
-                        'Voltar',
-                        style: TextStyle(color: Colors.red), 
-                      ),
-                    ),
                   ),
-                  
-                  CustomButton(
-                    text: 'Calcular',
-                    onPressed: calculateTMB,
-                  ),
-                ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        if (isLoading)
+          ModalBarrier(
+            dismissible: false,
+            color: Colors.black.withOpacity(0.5),
+          ),
+        if (isLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+      ],
     );
   }
 }
