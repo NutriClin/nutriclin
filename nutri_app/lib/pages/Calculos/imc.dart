@@ -162,7 +162,7 @@ class _IMCPageState extends State<IMCPage> {
                               : null,
                           inputFormatters: [decimalFilter],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15), // Alterado de 20 para 15
                         CustomInput(
                           label: 'Estatura (cm):',
                           controller: heightController,
@@ -189,7 +189,7 @@ class _IMCPageState extends State<IMCPage> {
                             ),
                             enabled: false,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 15), // Alterado de 20 para 15
                           CustomInput(
                             label: 'Classificação:',
                             controller: TextEditingController(
@@ -197,34 +197,40 @@ class _IMCPageState extends State<IMCPage> {
                             ),
                             enabled: false,
                           ),
+                          const SizedBox(height: 20),
                         ],
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.black,
-                              boxShadowColor: Colors.black,
-                            ),
-                            Row(
-                              children: [
-                                CustomButton(
-                                  text: 'Limpar',
-                                  onPressed: clearFields,
-                                  color: Colors.white,
-                                  textColor: Colors.red,
-                                  boxShadowColor: Colors.black,
-                                ),
-                                const SizedBox(width: 10),
-                                CustomButton(
-                                  text: 'Calcular',
-                                  onPressed: calculateIMC,
-                                ),
-                              ],
-                            ),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal:
+                                  16.0), // Adicionado padding horizontal
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CustomButton(
+                                text: 'Voltar',
+                                onPressed: () => Navigator.pop(context),
+                                color: Colors.white,
+                                textColor: Colors.black,
+                                boxShadowColor: Colors.black,
+                              ),
+                              Row(
+                                children: [
+                                  CustomButton(
+                                    text: 'Limpar',
+                                    onPressed: clearFields,
+                                    color: Colors.white,
+                                    textColor: Colors.red,
+                                    boxShadowColor: Colors.black,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  CustomButton(
+                                    text: 'Calcular',
+                                    onPressed: calculateIMC,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

@@ -7,7 +7,7 @@ class ToastUtil {
     required BuildContext context,
     required String message,
     bool isError = true,
-    int durationSeconds = 5,
+    int durationSeconds = 3,
   }) {
     toastification.show(
       context: context,
