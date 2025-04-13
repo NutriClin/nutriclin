@@ -162,7 +162,7 @@ class _IMCPageState extends State<IMCPage> {
                               : null,
                           inputFormatters: [decimalFilter],
                         ),
-                        const SizedBox(height: 15), // Alterado de 20 para 15
+                        const SizedBox(height: 15),
                         CustomInput(
                           label: 'Altura (cm)',
                           controller: heightController,
@@ -183,13 +183,13 @@ class _IMCPageState extends State<IMCPage> {
                         const SizedBox(height: 20),
                         if (result > 0) ...[
                           CustomInput(
-                            label: 'IMC:',
+                            label: 'Resultado',
                             controller: TextEditingController(
                               text: result.toStringAsFixed(2),
                             ),
                             enabled: false,
                           ),
-                          const SizedBox(height: 15), // Alterado de 20 para 15
+                          const SizedBox(height: 15),
                           CustomInput(
                             label: 'Classificação',
                             controller: TextEditingController(
@@ -197,40 +197,35 @@ class _IMCPageState extends State<IMCPage> {
                             ),
                             enabled: false,
                           ),
-                          const SizedBox(height: 20),
                         ],
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal:
-                                  16.0), // Adicionado padding horizontal
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CustomButton(
-                                text: 'Voltar',
-                                onPressed: () => Navigator.pop(context),
-                                color: Colors.white,
-                                textColor: Colors.black,
-                                boxShadowColor: Colors.black,
-                              ),
-                              Row(
-                                children: [
-                                  CustomButton(
-                                    text: 'Limpar',
-                                    onPressed: clearFields,
-                                    color: Colors.white,
-                                    textColor: Colors.red,
-                                    boxShadowColor: Colors.black,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  CustomButton(
-                                    text: 'Calcular',
-                                    onPressed: calculateIMC,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomButton(
+                              text: 'Voltar',
+                              onPressed: () => Navigator.pop(context),
+                              color: Colors.white,
+                              textColor: Colors.black,
+                              boxShadowColor: Colors.black,
+                            ),
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Limpar',
+                                  onPressed: clearFields,
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Calcular',
+                                  onPressed: calculateIMC,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ],
                     ),

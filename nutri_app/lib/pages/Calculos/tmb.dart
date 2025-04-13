@@ -135,7 +135,7 @@ class _TMBPageState extends State<TMBPage> {
                         CustomDropdown(
                           label: 'Sexo',
                           value: selectedGender,
-                          items: ['Selecione', 'Masculino', 'Feminino'],
+                          items: const ['Selecione', 'Masculino', 'Feminino'],
                           onChanged: (value) =>
                               setState(() => selectedGender = value!),
                           obrigatorio: true,
