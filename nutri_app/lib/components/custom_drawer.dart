@@ -1,5 +1,7 @@
-// Widget para o Drawer personalizado
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nutri_app/pages/Calculos/calculos.dart';
+import 'package:nutri_app/pages/usuarios.dart';
 import 'package:nutri_app/services/preferences_service.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -16,35 +18,82 @@ class CustomDrawer extends StatelessWidget {
       builder: (context, snapshot) {
         final tipoUsuario = snapshot.data;
         return Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          child: Column(
             children: [
-              ..._buildMenuItems(context, tipoUsuario),
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, '/home');
+                },
+                child: DrawerHeader(
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'assets/imagens/campologo.svg',
+                      height: 100,
+                      semanticsLabel: 'Logo Campo',
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    ..._buildMenuItems(context, tipoUsuario),
+                  ],
+                ),
+              ),
+              _buildLogoutItem(context),
             ],
           ),
         );
       },
     );
   }
+
+  // Widget do logout separado
+  Widget _buildLogoutItem(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+      ),
+      child: ListTile(
+        leading: const Icon(Icons.exit_to_app, color: Colors.red),
+        title: const Text(
+          'Sair',
+          style: TextStyle(color: Colors.red),
+        ),
+        onTap: () {
+          PreferencesService.clearUserType();
+          Navigator.pushReplacementNamed(context, '/login');
+        },
+      ),
+    );
+  }
 }
 
-// Método para construir os itens do menu baseado no tipo de usuário
 List<Widget> _buildMenuItems(BuildContext context, String? tipoUsuario) {
   List<Widget> items = [];
 
-  // Itens comuns a todos os usuários
-  items.addAll([
+  items.add(const SizedBox(height: 15));
+
+  items.add(
     ListTile(
       leading: const Icon(Icons.calculate, color: Color(0xFF007AFF)),
       title: const Text('Cálculos'),
       onTap: () {
         Navigator.pop(context);
-        // Navegar para tela de cálculos
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CalculosPage(),
+          ),
+        );
       },
     ),
-  ]);
+  );
 
-  // Itens específicos por tipo de usuário
   if (tipoUsuario == 'Coordenador') {
     items.addAll([
       ListTile(
@@ -52,44 +101,26 @@ List<Widget> _buildMenuItems(BuildContext context, String? tipoUsuario) {
         title: const Text('Usuários'),
         onTap: () {
           Navigator.pop(context);
-          // Navegar para tela de usuários
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.assessment, color: Color(0xFF007AFF)),
-        title: const Text('Relatórios'),
-        onTap: () {
-          Navigator.pop(context);
-          // Navegar para tela de relatórios
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const UsuarioPage(),
+            ),
+          );
         },
       ),
     ]);
   } else if (tipoUsuario == 'Aluno') {
-    items.addAll([
+    items.add(
       ListTile(
         leading: const Icon(Icons.medical_services, color: Color(0xFF007AFF)),
         title: const Text('Atendimento'),
         onTap: () {
           Navigator.pop(context);
-          // Navegar para tela de atendimento
         },
       ),
-    ]);
+    );
   }
-
-  // Item de logout (comum a todos)
-  items.add(const Divider());
-  items.add(
-    ListTile(
-      leading: const Icon(Icons.exit_to_app, color: Colors.red),
-      title: const Text('Sair', style: TextStyle(color: Colors.red)),
-      onTap: () {
-        // Implementar logout
-        PreferencesService.clearUserType();
-        Navigator.pushReplacementNamed(context, '/login');
-      },
-    ),
-  );
 
   return items;
 }

@@ -61,25 +61,8 @@ class HomePage extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(width: 20),
-        CustomBox(
-          text: 'Relatórios',
-          imagePath: 'assets/imagens/relatorios.svg',
-          onTap: () {
-            print("Clicou no box Relatórios");
-          },
-        ),
       ]);
     } else if (tipoUsuario == 'Professor') {
-      // cards.addAll([
-      //   CustomBox(
-      //     text: 'Relatórios Específicos',
-      //     imagePath: 'assets/imagens/relatorios.svg',
-      //     onTap: () {
-      //       print("Clicou no box Relatórios Específicos");
-      //     },
-      //   ),
-      // ]);
     } else if (tipoUsuario == 'Aluno') {
       cards.addAll([
         CustomBox(
@@ -87,14 +70,6 @@ class HomePage extends StatelessWidget {
           imagePath: 'assets/imagens/stethoscope.svg',
           onTap: () {
             print("Clicou no box Atendimento");
-          },
-        ),
-        const SizedBox(width: 20),
-        CustomBox(
-          text: 'Relatórios',
-          imagePath: 'assets/imagens/relatorios.svg',
-          onTap: () {
-            print("Clicou no box relatorios");
           },
         ),
       ]);
