@@ -1,0 +1,8 @@
+[build]
+  base = "nutri_app"
+  publish = "build/web"
+  command = "flutter build web"
+
+[build.environment]
+  PUB_ENVIRONMENT = "flutter"
+  FLUTTER_VERSION = "3.29.2"
