@@ -43,6 +43,8 @@ dependencies:
   flutter_email_sender: ^7.0.0
   toastification: ^3.0.2
   shared_preferences: ^2.5.3
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +79,7 @@ flutter:
     - assets/imagens/get-text.svg
     - assets/imagens/imc-text.svg
     - assets/imagens/tmb-text.svg
+    - assets/imagens/hospital.svg
     - assets/fonts/
 
   fonts:

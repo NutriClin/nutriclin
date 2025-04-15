@@ -9,7 +9,7 @@ class CustomCard extends StatelessWidget {
     Key? key,
     required this.child,
     required this.width,
-    this.padding = const EdgeInsets.all(20),
+    this.padding = const EdgeInsets.all(5),
   }) : super(key: key);
 
   @override

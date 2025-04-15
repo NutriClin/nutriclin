@@ -6,6 +6,7 @@ class CustomBox extends StatelessWidget {
   final String imagePath;
   final VoidCallback onTap;
   final double labelFontSize;
+  final double cardWidth;
 
   const CustomBox({
     super.key,
@@ -13,12 +14,13 @@ class CustomBox extends StatelessWidget {
     required this.imagePath,
     required this.onTap,
     this.labelFontSize = 14,
+    this.cardWidth = 80,
   });
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth = (screenWidth - 80) / 3;
+    double cardWidth = (screenWidth - this.cardWidth) / 3;
 
     return Material(
       color: Colors.transparent,

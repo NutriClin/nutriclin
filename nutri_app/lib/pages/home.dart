@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/calculos/calculos.dart';
 import 'usuarios/usuarios.dart';
 
@@ -28,10 +29,12 @@ class HomePage extends StatelessWidget {
   // Método para retornar os cards com base no tipo de usuário
   List<Widget> _buildCards(BuildContext context) {
     List<Widget> cards = [];
+    double labelFontSize = 12;
 
     cards.add(
       CustomBox(
         text: 'Cálculos',
+        labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/calculadora.svg',
         onTap: () {
           print("Clicou no box Cálculos");
@@ -48,6 +51,7 @@ class HomePage extends StatelessWidget {
     if (tipoUsuario == 'Coordenador') {
       cards.addAll([
         CustomBox(
+          labelFontSize: labelFontSize,
           text: 'Usuários',
           imagePath: 'assets/imagens/user-group.svg',
           onTap: () {
@@ -64,10 +68,17 @@ class HomePage extends StatelessWidget {
     } else if (tipoUsuario == 'Aluno') {
       cards.addAll([
         CustomBox(
+          labelFontSize: labelFontSize,
+          cardWidth: 40,
           text: 'Atendimento',
           imagePath: 'assets/imagens/stethoscope.svg',
           onTap: () {
-            print("Clicou no box Atendimento");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AtendimentoPage(),
+              ),
+            );
           },
         ),
       ]);
