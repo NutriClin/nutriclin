@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
@@ -77,6 +79,7 @@ class _HospitalAtendimentoIdentificacaoPageState
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
+    double espacamentoCards = 10;
 
     return BasePage(
       title: 'Identificação',
@@ -90,7 +93,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                   currentStep: 1,
                   totalSteps: 9,
                 ),
-                const SizedBox(height: 15),
+                SizedBox(height: espacamentoCards),
                 CustomCard(
                   width: cardWidth,
                   child: Padding(
@@ -103,7 +106,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                           keyboardType: TextInputType.text,
                           obrigatorio: true,
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         CustomDropdown(
                           label: 'Sexo',
                           value: selectedGender,
@@ -112,7 +115,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                               setState(() => selectedGender = value!),
                           obrigatorio: true,
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         GestureDetector(
                           onTap: () => _selectDate(context),
                           child: AbsorbPointer(
@@ -125,37 +128,37 @@ class _HospitalAtendimentoIdentificacaoPageState
                             ),
                           ),
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Hospital',
                           controller: hospitalController,
                           keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Clínica',
                           controller: clinicController,
                           keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Quarto',
                           controller: roomController,
                           keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Leito',
                           controller: bedController,
                           keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 15),
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Registro',
                           controller: bedController,
                           keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

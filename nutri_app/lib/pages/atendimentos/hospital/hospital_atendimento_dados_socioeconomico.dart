@@ -48,6 +48,8 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
 
   @override
   Widget build(BuildContext context) {
+    double espacamentoCards = 10;
+
     return BasePage(
       title: 'Dados Socioeconômicos',
       body: SingleChildScrollView(
@@ -56,8 +58,8 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
           child: Center(
             child: Column(
               children: [
-                const CustomStepper(currentStep: 3, totalSteps: 9),
-                const SizedBox(height: 15),
+                const CustomStepper(currentStep: 2, totalSteps: 9),
+                SizedBox(height: espacamentoCards),
                 CustomCard(
                   width: MediaQuery.of(context).size.width * 0.95,
                   child: Padding(
@@ -65,39 +67,30 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Água encanada
                         CustomCheckbox(
                           label: 'Água encanada:',
                           value: aguaEncanada,
                           onChanged: (value) =>
                               setState(() => aguaEncanada = value),
                         ),
-
-                        // Esgoto encanado
                         CustomCheckbox(
                           label: 'Esgoto encanado:',
                           value: esgotoEncanado,
                           onChanged: (value) =>
                               setState(() => esgotoEncanado = value),
                         ),
-
-                        // Coleta de lixo
                         CustomCheckbox(
                           label: 'Coleta de lixo:',
                           value: coletaLixo,
                           onChanged: (value) =>
                               setState(() => coletaLixo = value),
                         ),
-
-                        // Luz elétrica
                         CustomCheckbox(
                           label: 'Luz elétrica:',
                           value: luzEletrica,
                           onChanged: (value) =>
                               setState(() => luzEletrica = value),
                         ),
-
-                        // Tipo de casa
                         CustomCheckbox(
                           label: 'Tipo de casa:',
                           value: tipoCasa == 'alvenaria'
@@ -115,58 +108,43 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
                                     : null;
                           }),
                         ),
-
-                        const SizedBox(height: 10),
-
-                        // Inputs
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Nº de pessoas na casa',
                           controller: pessoasController,
                           keyboardType: TextInputType.number,
                         ),
-
-                        const SizedBox(height: 10),
-
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Renda familiar',
                           controller: rendaFamiliarController,
                           keyboardType: TextInputType.number,
                         ),
-
-                        const SizedBox(height: 10),
-
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Renda per capita',
                           controller: rendaPerCapitaController,
                           keyboardType: TextInputType.number,
                         ),
-
-                        const SizedBox(height: 10),
-
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Escolaridade',
                           controller: escolaridadeController,
                           keyboardType: TextInputType.text,
                         ),
-
-                        const SizedBox(height: 10),
-
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Profissão/Ocupação',
                           controller: profissaoController,
                           keyboardType: TextInputType.text,
                         ),
-
-                        const SizedBox(height: 10),
-
+                        SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Produção doméstica de alimentos: Quais?',
                           controller: producaoAlimentosController,
                           keyboardType: TextInputType.text,
                         ),
-
-                        const SizedBox(height: 20),
-
+                        const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

@@ -35,7 +35,7 @@ class CustomCheckbox extends StatelessWidget {
     );
 
     return Padding(
-      padding: padding ?? const EdgeInsets.symmetric(vertical: 8),
+      padding: padding ?? const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
           Expanded(
