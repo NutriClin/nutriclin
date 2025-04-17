@@ -5,6 +5,8 @@ import 'package:nutri_app/components/custom_checkbox.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_antecedentes_pessoais.dart';
 
 class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {
   const HospitalAtendimentoDadosSocioeconomicoPage({super.key});
@@ -21,7 +23,7 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
   bool? esgotoEncanado;
   bool? coletaLixo;
   bool? luzEletrica;
-  String? tipoCasa;
+  String selectedHouseType = 'Selecione';
 
   // Controllers para campos de texto
   final pessoasController = TextEditingController();
@@ -43,7 +45,12 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
   }
 
   void proceedToNext() {
-    Navigator.pushNamed(context, '/proximaRota');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              const HospitalAtendimentoAntecedentesPessoaisPage()),
+    );
   }
 
   @override
@@ -91,22 +98,20 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
                           onChanged: (value) =>
                               setState(() => luzEletrica = value),
                         ),
-                        CustomCheckbox(
-                          label: 'Tipo de casa:',
-                          value: tipoCasa == 'alvenaria'
-                              ? true
-                              : tipoCasa == 'madeira'
-                                  ? false
-                                  : null,
-                          trueLabel: 'Alvenaria',
-                          falseLabel: 'Madeira',
-                          onChanged: (value) => setState(() {
-                            tipoCasa = value == true
-                                ? 'alvenaria'
-                                : value == false
-                                    ? 'madeira'
-                                    : null;
-                          }),
+                        SizedBox(height: espacamentoCards),
+                        CustomDropdown(
+                          label: 'Tipo de casa',
+                          value: selectedHouseType,
+                          items: const [
+                            'Selecione',
+                            'Alvenaria',
+                            'Madeira',
+                            'Mista',
+                            'Não possui',
+                            'Outro'
+                          ],
+                          onChanged: (value) =>
+                              setState(() => selectedHouseType = value!),
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
@@ -59,14 +57,6 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   void proceedToNext() {
-    // if (nameController.text.isEmpty || birthDateController.text.isEmpty) {
-    //   ToastUtil.showToast(
-    //     context: context,
-    //     message: 'Preencha pelo menos nome e data de nascimento',
-    //     isError: true,
-    //   );
-    //   return;
-    // }
     Navigator.push(
       context,
       MaterialPageRoute(
