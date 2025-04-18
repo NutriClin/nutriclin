@@ -104,49 +104,52 @@ class _CustomInputPasswordState extends State<CustomInputPassword> {
                   ),
                 ],
               ),
-              child: TextField(
-                controller: widget.controller,
-                keyboardType: widget.keyboardType,
-                textAlignVertical: TextAlignVertical.center,
-                obscureText: widget.obscureText && !_isPasswordVisible,
-                enabled: widget.enabled,
-                onChanged: widget.onChanged,
-                inputFormatters: widget.inputFormatters,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                  color: Colors.black,
-                ),
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  hintStyle: TextStyle(
+              child: Center(
+                // Adicionado widget Center
+                child: TextField(
+                  controller: widget.controller,
+                  keyboardType: widget.keyboardType,
+                  textAlignVertical: TextAlignVertical.center,
+                  obscureText: widget.obscureText && !_isPasswordVisible,
+                  enabled: widget.enabled,
+                  onChanged: widget.onChanged,
+                  inputFormatters: widget.inputFormatters,
+                  style: TextStyle(
                     fontSize: fontSize,
+                    fontWeight: FontWeight.w500,
                     fontFamily: 'Poppins',
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: screenWidth < 600 ? 12 : 16,
-                    vertical: screenWidth < 600 ? 14 : 16,
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    hintStyle: TextStyle(
+                      fontSize: fontSize,
+                      fontFamily: 'Poppins',
+                      color: Colors.grey,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: screenWidth < 600 ? 12 : 16,
+                      vertical: 0, // Padding vertical definido como 0
+                    ),
+                    suffixIcon: widget.obscureText
+                        ? IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          )
+                        : null,
                   ),
-                  suffixIcon: widget.obscureText
-                      ? IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                        )
-                      : null,
                 ),
               ),
             ),

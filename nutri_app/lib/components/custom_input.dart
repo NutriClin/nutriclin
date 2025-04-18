@@ -91,32 +91,34 @@ class CustomInput extends StatelessWidget {
                   ),
                 ],
               ),
-              child: TextField(
-                controller: controller,
-                keyboardType: keyboardType,
-                textAlignVertical: TextAlignVertical.center,
-                obscureText: obscureText,
-                enabled: enabled,
-                onChanged: onChanged,
-                inputFormatters: inputFormatters,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                  color: Colors.black,
-                ),
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: TextStyle(
+              child: Center(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  textAlignVertical: TextAlignVertical.center,
+                  obscureText: obscureText,
+                  enabled: enabled,
+                  onChanged: onChanged,
+                  inputFormatters: inputFormatters,
+                  style: TextStyle(
                     fontSize: fontSize,
+                    fontWeight: FontWeight.w500,
                     fontFamily: 'Poppins',
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: screenWidth < 600 ? 12 : 16,
-                    vertical: screenWidth < 600 ? 14 : 16,
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    hintStyle: TextStyle(
+                      fontSize: fontSize,
+                      fontFamily: 'Poppins',
+                      color: Colors.grey,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: screenWidth < 600 ? 12 : 16,
+                      vertical: 0,
+                    ),
                   ),
                 ),
               ),

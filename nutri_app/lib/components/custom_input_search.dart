@@ -61,25 +61,35 @@ class _CustomInputSearchState extends State<CustomInputSearch> {
                   ),
                 ],
               ),
-              child: TextField(
-                controller: widget.controller,
-                keyboardType: widget.keyboardType,
-                textAlignVertical: TextAlignVertical.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _showClearIcon
-                      ? GestureDetector(
-                          onTap: _clearSearch,
-                          child: const Icon(Icons.clear, color: Colors.grey),
-                        )
-                      : null,
+              child: Center(
+                // Adicionado widget Center
+                child: TextField(
+                  controller: widget.controller,
+                  keyboardType: widget.keyboardType,
+                  textAlignVertical: TextAlignVertical.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 0,
+                    ),
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Icon(Icons.search),
+                    ),
+                    suffixIcon: _showClearIcon
+                        ? GestureDetector(
+                            onTap: _clearSearch,
+                            child: const Icon(Icons.clear, color: Colors.grey),
+                          )
+                        : null,
+                  ),
                 ),
               ),
             ),
