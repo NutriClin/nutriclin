@@ -206,6 +206,7 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     }
   }
 
+
   void _mostrarAlterarSenhaModal() {
     showDialog(
       context: context,

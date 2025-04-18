@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
 
+import 'package:nutri_app/services/auth_service.dart';
+
 class UsuarioController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,67 +20,87 @@ class UsuarioController {
     return null;
   }
 
-String _gerarSenhaTemporaria() {
-  const String caracteres =
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*()-_=+';
-  Random random = Random();
-  return List.generate(12, (index) => caracteres[random.nextInt(caracteres.length)]).join();
-}
-
-Future<String> salvarUsuario({
-  required String? idUsuario,
-  required String nome,
-  required String email,
-  required String tipoUsuario,
-  required bool ativo,
-}) async {
-  try {
-    User? usuarioAtual = _auth.currentUser;
-    if (usuarioAtual == null) {
-      return 'Erro: Usuário não autenticado!';
-    }
-
-    DocumentSnapshot userDoc =
-        await _firestore.collection('usuarios').doc(usuarioAtual.uid).get();
-    String tipoAtual = userDoc['tipo_usuario'];
-
-    if (tipoAtual != 'Coordenador') {
-      return 'Erro: Apenas Coordenadores podem gerenciar usuários!';
-    }
-
-    if (idUsuario != null && idUsuario.isNotEmpty) {
-      await _firestore.collection('usuarios').doc(idUsuario).update({
-        'nome': nome,
-        'email': email,
-        'tipo_usuario': tipoUsuario,
-        'ativo': ativo,
-      });
-      return 'Usuário salvo com sucesso!';
-    } else {
-      String senhaTemporaria = _gerarSenhaTemporaria();
-
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: senhaTemporaria,
-      );
-
-      await _firestore.collection('usuarios').doc(userCredential.user!.uid).set({
-        'nome': nome,
-        'email': email,
-        'tipo_usuario': tipoUsuario,
-        'ativo': true,
-        'data': FieldValue.serverTimestamp(),
-      });
-
-      await _auth.sendPasswordResetEmail(email: email);
-
-      return 'Usuário cadastrado com sucesso! Um email foi enviado para ele definir a senha.';
-    }
-  } catch (e) {
-    return 'Erro: ao salvar usuário: $e';
+  String _gerarSenhaTemporaria() {
+    const String caracteres =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*()-_=+';
+    Random random = Random();
+    return List.generate(
+        12, (index) => caracteres[random.nextInt(caracteres.length)]).join();
   }
-}
 
+  Future<String> salvarUsuario({
+    required String? idUsuario,
+    required String nome,
+    required String email,
+    required String tipoUsuario,
+    required bool ativo,
+  }) async {
+    try {
+      User? usuarioAtual = _auth.currentUser;
+      if (usuarioAtual == null) {
+        return 'Erro: Usuário não autenticado!';
+      }
+
+      final credentialData = await AuthService().recuperarCredenciais();
+
+      if (credentialData == null) {
+        return 'Erro: Credenciais do coordenador não encontradas.';
+      }
+
+      final coordenadorEmail = credentialData['email']!;
+      final coordenadorSenha = credentialData['senha']!;
+
+      DocumentSnapshot userDoc =
+          await _firestore.collection('usuarios').doc(usuarioAtual.uid).get();
+      String tipoAtual = userDoc['tipo_usuario'];
+
+      if (tipoAtual != 'Coordenador') {
+        return 'Erro: Apenas Coordenadores podem gerenciar usuários!';
+      }
+
+      if (idUsuario != null && idUsuario.isNotEmpty) {
+        await _firestore.collection('usuarios').doc(idUsuario).update({
+          'nome': nome,
+          'email': email,
+          'tipo_usuario': tipoUsuario,
+          'ativo': ativo,
+        });
+        return 'Usuário salvo com sucesso!';
+      } else {
+        String senhaTemporaria = _gerarSenhaTemporaria();
+
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: senhaTemporaria,
+        );
+
+        await _firestore
+            .collection('usuarios')
+            .doc(userCredential.user!.uid)
+            .set({
+          'nome': nome,
+          'email': email,
+          'tipo_usuario': tipoUsuario,
+          'ativo': true,
+          'data': FieldValue.serverTimestamp(),
+        });
+
+        await _auth.sendPasswordResetEmail(email: email);
+
+        final coordenadorCredential = EmailAuthProvider.credential(
+          email: coordenadorEmail,
+          password: coordenadorSenha,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(coordenadorCredential);
+
+        return 'Usuário cadastrado com sucesso! Um email foi enviado para ele definir a senha.';
+      }
+    } catch (e) {
+      return 'Erro: ao salvar usuário: $e';
+    }
+  }
 
   Future<String> atualizarSenha(String email, String novaSenha) async {
     try {
