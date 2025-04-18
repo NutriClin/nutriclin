@@ -31,7 +31,7 @@ class AtendimentoPage extends StatelessWidget {
       CustomBox(
         text: 'Clínica',
         labelFontSize: labelFontSize,
-        imagePath: 'assets/imagens/stethoscope.svg',
+        imagePath: 'assets/imagens/clinica.svg',
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const TMBPage()),
@@ -41,7 +41,7 @@ class AtendimentoPage extends StatelessWidget {
       CustomBox(
         text: 'Hospital',
         labelFontSize: labelFontSize,
-        imagePath: 'assets/imagens/hospital.svg',
+        imagePath: 'assets/imagens/doctor.svg',
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const HospitalAtendimentoIdentificacaoPage()),

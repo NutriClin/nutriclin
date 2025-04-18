@@ -1,7 +1,8 @@
-<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <!-- Fundo transparente -->
-  <rect width="100" height="100" fill="none"/>
-  <!-- Cruz representando hospital -->
-  <rect x="40" y="20" width="20" height="60" fill="#007AFF"/>
-  <rect x="20" y="40" width="60" height="20" fill="#007AFF"/>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- House outline -->
+  <path d="M32 12L12 24V52H52V24L32 12Z" stroke="#007AFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Larger + sign centered in square body -->
+  <path d="M32 30V46" stroke="#007AFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M22 38H42" stroke="#007AFF" stroke-width="4" stroke-linecap="round"/>
 </svg>

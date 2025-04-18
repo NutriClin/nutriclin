@@ -82,6 +82,9 @@ flutter:
     - assets/imagens/imc-text.svg
     - assets/imagens/tmb-text.svg
     - assets/imagens/hospital.svg
+    - assets/imagens/clinica.svg
+    - assets/imagens/plus.svg
+    - assets/imagens/doctor.svg
     - assets/fonts/
 
   fonts:
