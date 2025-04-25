@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 
 class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
@@ -33,33 +34,52 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   }
 
   Future<void> _carregarUsuarioLogado() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance
-          .collection('usuario')
-          .doc(user.uid)
-          .get();
-      if (doc.exists) {
-        setState(() {
-          _estagiarioNomeController.text = doc['nome'];
-        });
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists) {
+          setState(() {
+            _estagiarioNomeController.text = doc['nome'] ?? '';
+          });
+        }
       }
+    } catch (e) {
+      print('Erro ao carregar usuário logado: $e');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Falha ao carregar dados do usuário',
+        isError: true,
+      );
     }
   }
 
   Future<void> _carregarProfessores() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('usuario')
-        .where('tipo_usuario', isEqualTo: 'Professor')
-        .get();
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('tipo_usuario', whereIn: ['Professor', 'Coordenador']).get();
 
-    setState(() {
-      _professores =
-          snapshot.docs.map((doc) => doc['nome'].toString()).toList();
-      if (_professores.isNotEmpty) {
-        _professorSelecionado = _professores.first;
-      }
-    });
+      final professores = snapshot.docs.map((doc) {
+        return doc['nome'] as String;
+      }).toList();
+
+      setState(() {
+        _professores = ['Selecione', ...professores];
+        _professorSelecionado = 'Selecione';
+      });
+    } catch (e) {
+      print('Erro ao carregar professores: $e');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Falha ao carregar professores',
+        isError: true,
+      );
+    }
   }
 
   void _finalizar() {
@@ -106,16 +126,18 @@ class _HospitalAtendimentoCondutaNutricionalPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomInput(
-                    label: 'Diagnóstico Clínico',
+                    label: 'Aluno Responsável',
                     controller: _estagiarioNomeController,
                     keyboardType: TextInputType.text,
+                    enabled: false,
                   ),
                   SizedBox(height: espacamentoCards),
                   CustomDropdown(
-                    label: 'Professor Supervisor:',
+                    label: 'Professor Supervisor',
                     value: _professorSelecionado ?? 'Selecione',
                     items: _professores,
                     enabled: true,
+                    obrigatorio: true,
                     onChanged: (valor) {
                       setState(() {
                         _professorSelecionado = valor!;
