@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_consumo_alimentar.dart';
@@ -66,6 +67,22 @@ class _HospitalAtendimentoDadosAntropometricosPageState
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoConsumoAlimentarPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () {
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+      ),
     );
   }
 
@@ -202,10 +219,7 @@ class _HospitalAtendimentoDadosAntropometricosPageState
                           children: [
                             CustomButton(
                               text: 'Cancelar',
-                              onPressed: () {
-                                Navigator.popUntil(
-                                    context, (route) => route.isFirst);
-                              },
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
                               textColor: Colors.red,
                               boxShadowColor: Colors.black,

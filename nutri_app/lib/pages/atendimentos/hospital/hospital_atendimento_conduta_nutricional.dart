@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 
@@ -66,6 +67,22 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     // FirebaseFirestore.instance.collection('condutas').add({ ... });
   }
 
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () {
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double espacamentoCards = 10;
@@ -105,9 +122,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
                     children: [
                       CustomButton(
                         text: 'Cancelar',
-                        onPressed: () {
-                          Navigator.popUntil(context, (route) => route.isFirst);
-                        },
+                        onPressed: () => _showCancelConfirmationDialog(),
                         color: Colors.white,
                         textColor: Colors.red,
                         boxShadowColor: Colors.black,

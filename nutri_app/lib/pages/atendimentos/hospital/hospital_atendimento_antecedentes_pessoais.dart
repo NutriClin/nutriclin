@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
@@ -37,6 +38,22 @@ class _HospitalAtendimentoAntecedentesPessoaisPageState
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoAntecedentesFamiliaresPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () {
+          Navigator.popUntil(context, (route) => route.isFirst);
+        },
+      ),
     );
   }
 
@@ -122,15 +139,12 @@ class _HospitalAtendimentoAntecedentesPessoaisPageState
                           ],
                         ),
                         const SizedBox(height: 20),
-                          Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
                               text: 'Cancelar',
-                              onPressed: () {
-                                Navigator.popUntil(
-                                    context, (route) => route.isFirst);
-                              },
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
                               textColor: Colors.red,
                               boxShadowColor: Colors.black,
