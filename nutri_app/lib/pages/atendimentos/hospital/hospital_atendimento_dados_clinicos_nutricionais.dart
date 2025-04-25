@@ -157,8 +157,8 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           items: const ['Selecione', 'Alterada', 'Inadequada'],
                           onChanged: (value) => setState(() =>
                               value == 'Inadequada'
-                                  ? _alimentacaoInadequada = false
-                                  : _alimentacaoInadequada = true),
+                                  ? _alimentacaoInadequada = true
+                                  : _alimentacaoInadequada = false),
                         ),
                         if (_alimentacaoInadequada) ...[
                           SizedBox(height: espacamentoCards),
@@ -274,8 +274,8 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           ],
                           onChanged: (value) => setState(() =>
                               value == 'Desfavorável'
-                                  ? _condicaoFuncional = false
-                                  : _condicaoFuncional = true),
+                                  ? _condicaoFuncional = true
+                                  : _condicaoFuncional = false),
                         ),
                         if (_condicaoFuncional) ...[
                           SizedBox(height: espacamentoCards),
