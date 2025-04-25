@@ -122,19 +122,34 @@ class _HospitalAtendimentoAntecedentesPessoaisPageState
                           ],
                         ),
                         const SizedBox(height: 20),
-                        Row(
+                          Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () {
+                                Navigator.popUntil(
+                                    context, (route) => route.isFirst);
+                              },
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: _proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

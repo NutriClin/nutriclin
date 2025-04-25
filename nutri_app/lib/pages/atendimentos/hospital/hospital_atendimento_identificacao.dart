@@ -156,7 +156,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                               text: 'Cancelar',
                               onPressed: () => Navigator.pop(context),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
                             CustomButton(

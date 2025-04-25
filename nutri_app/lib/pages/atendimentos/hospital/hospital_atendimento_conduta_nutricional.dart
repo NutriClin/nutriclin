@@ -5,6 +5,7 @@ import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/custom_input.dart';
 
 class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
   const HospitalAtendimentoCondutaNutricionalPage({super.key});
@@ -16,7 +17,9 @@ class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
 
 class _HospitalAtendimentoCondutaNutricionalPageState
     extends State<HospitalAtendimentoCondutaNutricionalPage> {
-  String? _estagiarioNome;
+  final TextEditingController _estagiarioNomeController =
+      TextEditingController();
+
   String? _professorSelecionado;
   List<String> _professores = [];
 
@@ -36,7 +39,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
           .get();
       if (doc.exists) {
         setState(() {
-          _estagiarioNome = doc['nome'];
+          _estagiarioNomeController.text = doc['nome'];
         });
       }
     }
@@ -65,6 +68,8 @@ class _HospitalAtendimentoCondutaNutricionalPageState
 
   @override
   Widget build(BuildContext context) {
+    double espacamentoCards = 10;
+
     return BasePage(
       title: 'Conduta Nutricional',
       body: Padding(
@@ -77,28 +82,14 @@ class _HospitalAtendimentoCondutaNutricionalPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(
-                    child: Text(
-                      'Conduta Nutricional',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  CustomInput(
+                    label: 'Diagnóstico Clínico',
+                    controller: _estagiarioNomeController,
+                    keyboardType: TextInputType.text,
                   ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    readOnly: true,
-                    enabled: false,
-                    decoration: InputDecoration(
-                      labelText: 'Estagiário de Nutrição:',
-                      hintText: _estagiarioNome ?? 'Carregando...',
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: espacamentoCards),
                   CustomDropdown(
-                    label: 'Prof° Supervisor:',
+                    label: 'Professor Supervisor:',
                     value: _professorSelecionado ?? 'Selecione',
                     items: _professores,
                     enabled: true,
@@ -113,18 +104,32 @@ class _HospitalAtendimentoCondutaNutricionalPageState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        text: 'Voltar',
-                        onPressed: () => Navigator.pop(context),
+                        text: 'Cancelar',
+                        onPressed: () {
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        },
                         color: Colors.white,
-                        textColor: Colors.black,
+                        textColor: Colors.red,
                         boxShadowColor: Colors.black,
                       ),
-                      CustomButton(
-                        text: 'Finalizar',
-                        onPressed: _finalizar,
+                      Row(
+                        children: [
+                          CustomButton(
+                            text: 'Voltar',
+                            onPressed: () => Navigator.pop(context),
+                            color: Colors.white,
+                            textColor: Colors.black,
+                            boxShadowColor: Colors.black,
+                          ),
+                          const SizedBox(width: 10),
+                          CustomButton(
+                            text: 'Finalizar',
+                            onPressed: _finalizar,
+                          ),
+                        ],
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
