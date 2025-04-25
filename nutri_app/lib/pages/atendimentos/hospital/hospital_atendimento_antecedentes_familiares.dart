@@ -6,6 +6,7 @@ import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_clinicos_nutricionais.dart';
 
 class HospitalAtendimentoAntecedentesFamiliaresPage extends StatefulWidget {
@@ -51,7 +52,12 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
         confirmText: 'Sair',
         cancelText: 'Continuar',
         onConfirm: () {
-          Navigator.popUntil(context, (route) => route.isFirst);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const AtendimentoPage()),
+              (route) => false,
+            );
+          });
         },
       ),
     );

@@ -6,6 +6,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_socioeconomico.dart';
 
 class HospitalAtendimentoIdentificacaoPage extends StatefulWidget {
@@ -66,7 +67,7 @@ class _HospitalAtendimentoIdentificacaoPageState
     );
   }
 
-  void _showCancelConfirmationDialog() {
+  void _showCancelConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => CustomConfirmationDialog(
@@ -76,7 +77,12 @@ class _HospitalAtendimentoIdentificacaoPageState
         confirmText: 'Sair',
         cancelText: 'Continuar',
         onConfirm: () {
-          Navigator.popUntil(context, (route) => route.isFirst);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const AtendimentoPage()),
+              (route) => false,
+            );
+          });
         },
       ),
     );
@@ -171,7 +177,8 @@ class _HospitalAtendimentoIdentificacaoPageState
                           children: [
                             CustomButton(
                               text: 'Cancelar',
-                              onPressed: () => _showCancelConfirmationDialog(),
+                              onPressed: () =>
+                                  _showCancelConfirmationDialog(context),
                               color: Colors.white,
                               textColor: Colors.red,
                               boxShadowColor: Colors.black,
