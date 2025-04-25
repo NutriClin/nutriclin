@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_antecedentes_pessoais.dart';
 
@@ -20,11 +21,10 @@ class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {
 
 class _HospitalAtendimentoDadosSocioeconomicoPageState
     extends State<HospitalAtendimentoDadosSocioeconomicoPage> {
-  // Variáveis de estado simplificadas
-  bool? aguaEncanada;
-  bool? esgotoEncanado;
-  bool? coletaLixo;
-  bool? luzEletrica;
+  bool _aguaEncanada = false;
+  bool _esgotoEncanado = false;
+  bool _coletaLixo = false;
+  bool _luzEletrica = false;
   String selectedHouseType = 'Selecione';
 
   // Controllers para campos de texto
@@ -97,29 +97,36 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomCheckbox(
-                          label: 'Água encanada:',
-                          value: aguaEncanada,
+                        CustomSwitch(
+                          label: 'Água encanada',
+                          value: _aguaEncanada,
                           onChanged: (value) =>
-                              setState(() => aguaEncanada = value),
+                              setState(() => _aguaEncanada = value),
+                          enabled: true,
                         ),
-                        CustomCheckbox(
-                          label: 'Esgoto encanado:',
-                          value: esgotoEncanado,
+                        SizedBox(height: espacamentoCards),
+                        CustomSwitch(
+                          label: 'Esgoto encanado',
+                          value: _esgotoEncanado,
                           onChanged: (value) =>
-                              setState(() => esgotoEncanado = value),
+                              setState(() => _esgotoEncanado = value),
+                          enabled: true,
                         ),
-                        CustomCheckbox(
-                          label: 'Coleta de lixo:',
-                          value: coletaLixo,
+                        SizedBox(height: espacamentoCards),
+                        CustomSwitch(
+                          label: 'Coleta de lixo',
+                          value: _coletaLixo,
                           onChanged: (value) =>
-                              setState(() => coletaLixo = value),
+                              setState(() => _coletaLixo = value),
+                          enabled: true,
                         ),
-                        CustomCheckbox(
-                          label: 'Luz elétrica:',
-                          value: luzEletrica,
+                        SizedBox(height: espacamentoCards),
+                        CustomSwitch(
+                          label: 'Luz elétrica',
+                          value: _luzEletrica,
                           onChanged: (value) =>
-                              setState(() => luzEletrica = value),
+                              setState(() => _luzEletrica = value),
+                          enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
