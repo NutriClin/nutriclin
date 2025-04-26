@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_antecedentes_familiares.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoAntecedentesPessoaisPage extends StatefulWidget {
   const HospitalAtendimentoAntecedentesPessoaisPage({super.key});
@@ -25,18 +28,75 @@ class _HospitalAtendimentoAntecedentesPessoaisPageState
   bool _outros = false;
   final TextEditingController _outrosController = TextEditingController();
 
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     _outrosController.dispose();
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarAntecedentesPessoais();
+
+    setState(() {
+      _dislipidemias = dados['dislipidemias'] as bool;
+      _has = dados['has'] as bool;
+      _cancer = dados['cancer'] as bool;
+      _excessoPeso = dados['excessoPeso'] as bool;
+      _diabetes = dados['diabetes'] as bool;
+      _outros = dados['outros'] as bool;
+      _outrosController.text = dados['outrosDescricao'] as String;
+    });
+  }
+
+  Future<void> _salvarAntecedentesPessoais() async {
+    await _atendimentoService.salvarAntecedentesPessoais(
+      dislipidemias: _dislipidemias,
+      has: _has,
+      cancer: _cancer,
+      excessoPeso: _excessoPeso,
+      diabetes: _diabetes,
+      outros: _outros,
+      outrosDescricao: _outrosController.text,
+    );
+  }
+
   void _proceedToNext() {
+    _salvarAntecedentesPessoais();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoAntecedentesFamiliaresPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
+              (route) => false,
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -126,15 +186,27 @@ class _HospitalAtendimentoAntecedentesPessoaisPageState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: _proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

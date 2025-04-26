@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
+import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_antropometricos.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosClinicosNutricionaisPage extends StatefulWidget {
   const HospitalAtendimentoDadosClinicosNutricionaisPage({super.key});
@@ -20,8 +24,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   // Controllers para campos de texto
   final TextEditingController _diagnosticoController = TextEditingController();
   final TextEditingController _prescricaoController = TextEditingController();
-  final TextEditingController _acetaceboController =
-      TextEditingController(); // Novo controller
+  final TextEditingController _acetaceboController = TextEditingController();
   final TextEditingController _alimentacaoHabitualController =
       TextEditingController();
   final TextEditingController _especificarAlimentacaoController =
@@ -49,13 +52,30 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
       TextEditingController();
   final TextEditingController _exameFisicoController = TextEditingController();
 
+  String selectedAlimentacaoHabitual = 'Selecione';
+  String selectedCondicaoFuncional = 'Selecione';
+
   // Estados para os switches/checkboxes
+  bool _doencaAnterior = false;
+  bool _cirurgiaRecente = false;
   bool _febre = false;
   bool _alteracaoPeso = false;
+  bool _alimentacaoInadequada = false;
   bool _necessidadeDieta = false;
   bool _suplementacao = false;
+  bool _desconforto = false;
   bool _tabagismo = false;
   bool _etilismo = false;
+  bool _condicaoFuncional = false;
+
+  // Serviço para manipulação de dados
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
 
   @override
   void dispose() {
@@ -82,12 +102,135 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosClinicosNutricionais();
+
+    setState(() {
+      // Controllers de texto
+      _diagnosticoController.text = dados['diagnostico'] as String;
+      _prescricaoController.text = dados['prescricao'] as String;
+      _acetaceboController.text = dados['aceitacao'] as String;
+      _alimentacaoHabitualController.text =
+          dados['especificarAlimentacao'] as String;
+      _doencaAnteriorController.text = dados['doencaAnteriorDesc'] as String;
+      _cirurgiaController.text = dados['cirurgiaDesc'] as String;
+      _quantoPesoController.text = dados['quantoPeso'] as String;
+      _qualDietaController.text = dados['qualDieta'] as String;
+      _tipoSuplementacaoController.text = dados['tipoSuplementacao'] as String;
+      _especificarCondicaoController.text =
+          dados['especificarCondicao'] as String;
+      _medicamentosController.text = dados['medicamentos'] as String;
+      _examesLaboratoriaisController.text =
+          dados['examesLaboratoriais'] as String;
+      _exameFisicoController.text = dados['exameFisico'] as String;
+
+      // Dropdowns
+      selectedAlimentacaoHabitual =
+          dados['alimentacaoHabitual']?.toString() ?? 'Selecione';
+      selectedCondicaoFuncional =
+          dados['condicaoFuncional']?.toString() ?? 'Selecione';
+
+      _alimentacaoInadequada = selectedAlimentacaoHabitual == 'Inadequada';
+      _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
+
+      // Switches
+      _doencaAnterior = dados['doencaAnterior'] as bool;
+      _cirurgiaRecente = dados['cirurgiaRecente'] as bool;
+      _febre = dados['febre'] as bool;
+      _alteracaoPeso = dados['alteracaoPeso'] as bool;
+      _desconforto = dados['desconfortos'] as bool;
+      _necessidadeDieta = dados['necessidadeDieta'] as bool;
+      _suplementacao = dados['suplementacao'] as bool;
+      _tabagismo = dados['tabagismo'] as bool;
+      _etilismo = dados['etilismo'] as bool;
+      _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
+    });
+  }
+
+  Future<void> _salvarDadosClinicosNutricionais() async {
+    await _atendimentoService.salvarDadosClinicosNutricionais(
+      diagnostico: _diagnosticoController.text,
+      prescricao: _prescricaoController.text,
+      aceitacao: _acetaceboController.text,
+      alimentacaoHabitual: selectedAlimentacaoHabitual,
+      especificarAlimentacao: _alimentacaoHabitualController.text,
+      doencaAnterior: _doencaAnterior,
+      doencaAnteriorDesc: _doencaAnteriorController.text,
+      cirurgiaRecente: _cirurgiaRecente,
+      cirurgiaDesc: _cirurgiaController.text,
+      febre: _febre,
+      alteracaoPeso: _alteracaoPeso,
+      quantoPeso: _quantoPesoController.text,
+      desconfortos: _desconforto,
+      necessidadeDieta: _necessidadeDieta,
+      qualDieta: _qualDietaController.text,
+      suplementacao: _suplementacao,
+      tipoSuplementacao: _tipoSuplementacaoController.text,
+      tabagismo: _tabagismo,
+      etilismo: _etilismo,
+      condicaoFuncional: selectedCondicaoFuncional,
+      especificarCondicao: _especificarCondicaoController.text,
+      medicamentos: _medicamentosController.text,
+      examesLaboratoriais: _examesLaboratoriaisController.text,
+      exameFisico: _exameFisicoController.text,
+    );
+  }
+
+  void _onAlimentacaoHabitualChanged(String? value) {
+    if (value == null) return;
+
+    setState(() {
+      selectedAlimentacaoHabitual = value;
+      _alimentacaoInadequada = value == 'Inadequada';
+
+      if (!_alimentacaoInadequada) {
+        _alimentacaoHabitualController.clear();
+      }
+    });
+  }
+
+  void _onCondicaoFuncionalChanged(String? value) {
+    if (value == null) return;
+
+    setState(() {
+      selectedCondicaoFuncional = value;
+      _condicaoFuncional = value == 'Desfavorável';
+
+      if (!_condicaoFuncional) {
+        _especificarCondicaoController.clear();
+      }
+    });
+  }
+
   void _proceedToNext() {
+    _salvarDadosClinicosNutricionais();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoDadosAntropometricosPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
+              (route) => false,
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -125,57 +268,55 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           ),
                         ),
                         SizedBox(height: 20),
-
                         CustomInput(
                           label: 'Diagnóstico Clínico',
                           controller: _diagnosticoController,
                           keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomInput(
                           label: 'Prescrição Dietoterápica',
                           controller: _prescricaoController,
                           keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: espacamentoCards),
-
-                        // Novo campo Acetácebo
                         CustomInput(
-                          label: 'Acetácebo',
+                          label: 'Aceitação:',
                           controller: _acetaceboController,
                           keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: espacamentoCards),
-
-                        CustomInput(
+                        CustomDropdown(
                           label: 'Alimentação Habitual',
-                          controller: _alimentacaoHabitualController,
-                          keyboardType: TextInputType.text,
+                          value: selectedAlimentacaoHabitual,
+                          items: const ['Selecione', 'Alterada', 'Inadequada'],
+                          onChanged: _onAlimentacaoHabitualChanged,
                         ),
+                        if (_alimentacaoInadequada) ...[
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Especificar',
+                            controller: _alimentacaoHabitualController,
+                            keyboardType: TextInputType.text,
+                          ),
+                        ],
                         SizedBox(height: espacamentoCards),
-
-                        CustomInput(
-                          label: 'Especificar',
-                          controller: _especificarAlimentacaoController,
-                          keyboardType: TextInputType.text,
-                        ),
-                        SizedBox(height: espacamentoCards),
-
-                        CustomInput(
+                        CustomSwitch(
                           label: 'Doença Anterior',
-                          controller: _doencaAnteriorController,
-                          keyboardType: TextInputType.text,
+                          value: _doencaAnterior,
+                          onChanged: (value) =>
+                              setState(() => _doencaAnterior = value),
+                          enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
-
-                        CustomInput(
+                        CustomSwitch(
                           label: 'Cirurgia Recente',
-                          controller: _cirurgiaController,
-                          keyboardType: TextInputType.text,
+                          value: _cirurgiaRecente,
+                          onChanged: (value) =>
+                              setState(() => _cirurgiaRecente = value),
+                          enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomSwitch(
                           label: 'Febre',
                           value: _febre,
@@ -183,7 +324,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomSwitch(
                           label: 'Alterações de peso recentes',
                           value: _alteracaoPeso,
@@ -191,7 +331,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                               setState(() => _alteracaoPeso = value),
                           enabled: true,
                         ),
-
                         if (_alteracaoPeso) ...[
                           SizedBox(height: espacamentoCards),
                           CustomInput(
@@ -201,14 +340,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
-
-                        CustomInput(
+                        CustomSwitch(
                           label: 'Desconfortos Orais/Gastrointestinais',
-                          controller: _desconfortosController,
-                          keyboardType: TextInputType.text,
+                          value: _desconforto,
+                          onChanged: (value) =>
+                              setState(() => _desconforto = value),
+                          enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomSwitch(
                           label: 'Necessidade de dieta hospitalar',
                           value: _necessidadeDieta,
@@ -216,7 +355,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                               setState(() => _necessidadeDieta = value),
                           enabled: true,
                         ),
-
                         if (_necessidadeDieta) ...[
                           SizedBox(height: espacamentoCards),
                           CustomInput(
@@ -226,7 +364,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
-
                         CustomSwitch(
                           label: 'Suplementação Nutricional',
                           value: _suplementacao,
@@ -234,7 +371,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                               setState(() => _suplementacao = value),
                           enabled: true,
                         ),
-
                         if (_suplementacao) ...[
                           SizedBox(height: espacamentoCards),
                           CustomInput(
@@ -244,7 +380,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
-
                         CustomSwitch(
                           label: 'Tabagismo',
                           value: _tabagismo,
@@ -253,7 +388,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomSwitch(
                           label: 'Etilismo',
                           value: _etilismo,
@@ -262,20 +396,24 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
-
-                        CustomInput(
+                        CustomDropdown(
                           label: 'Condição funcional',
-                          controller: _condicaoFuncionalController,
-                          keyboardType: TextInputType.text,
+                          value: selectedCondicaoFuncional,
+                          items: const [
+                            'Selecione',
+                            'Favorável',
+                            'Desfavorável'
+                          ],
+                          onChanged: _onCondicaoFuncionalChanged,
                         ),
-                        SizedBox(height: espacamentoCards),
-
-                        CustomInput(
-                          label: 'Especificar',
-                          controller: _especificarCondicaoController,
-                          keyboardType: TextInputType.text,
-                        ),
-
+                        if (_condicaoFuncional) ...[
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Especificar',
+                            controller: _especificarCondicaoController,
+                            keyboardType: TextInputType.text,
+                          ),
+                        ],
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Medicamentos/vitaminas/minerais prescritos',
@@ -283,33 +421,43 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomInput(
                           label: 'Exames Laboratoriais',
                           controller: _examesLaboratoriaisController,
                           keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: espacamentoCards),
-
                         CustomInput(
                           label: 'Exame Físico',
                           controller: _exameFisicoController,
                           keyboardType: TextInputType.text,
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: _proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

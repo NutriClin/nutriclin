@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_socioeconomico.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoIdentificacaoPage extends StatefulWidget {
   const HospitalAtendimentoIdentificacaoPage({super.key});
@@ -26,6 +29,14 @@ class _HospitalAtendimentoIdentificacaoPageState
   final TextEditingController bedController = TextEditingController();
   final TextEditingController recordController = TextEditingController();
 
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -36,6 +47,20 @@ class _HospitalAtendimentoIdentificacaoPageState
     bedController.dispose();
     recordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosIdentificacao();
+    setState(() {
+      nameController.text = dados['name']!;
+      selectedGender = dados['gender']!;
+      birthDateController.text = dados['birthDate']!;
+      hospitalController.text = dados['hospital']!;
+      clinicController.text = dados['clinic']!;
+      roomController.text = dados['room']!;
+      bedController.text = dados['bed']!;
+      recordController.text = dados['record']!;
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -56,12 +81,48 @@ class _HospitalAtendimentoIdentificacaoPageState
     }
   }
 
+  Future<void> _salvarDadosIdentificacao() async {
+    await _atendimentoService.salvarDadosIdentificacao(
+      name: nameController.text,
+      gender: selectedGender,
+      birthDate: birthDateController.text,
+      hospital: hospitalController.text,
+      clinic: clinicController.text,
+      room: roomController.text,
+      bed: bedController.text,
+      record: recordController.text,
+    );
+  }
+
   void proceedToNext() {
+    _salvarDadosIdentificacao();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoDadosSocioeconomicoPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
+              (route) => false,
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -145,7 +206,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Registro',
-                          controller: bedController,
+                          controller: recordController,
                           keyboardType: TextInputType.text,
                         ),
                         const SizedBox(height: 15),
@@ -154,9 +215,10 @@ class _HospitalAtendimentoIdentificacaoPageState
                           children: [
                             CustomButton(
                               text: 'Cancelar',
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () =>
+                                  _showCancelConfirmationDialog(context),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
                             CustomButton(

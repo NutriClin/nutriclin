@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/components/toast_util.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
   const HospitalAtendimentoCondutaNutricionalPage({super.key});
@@ -16,9 +21,16 @@ class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
 
 class _HospitalAtendimentoCondutaNutricionalPageState
     extends State<HospitalAtendimentoCondutaNutricionalPage> {
-  String? _estagiarioNome;
+  final TextEditingController _estagiarioNomeController =
+      TextEditingController();
+
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
   String? _professorSelecionado;
   List<String> _professores = [];
+  bool isLoading = false;
+  bool _professorSelecionadoError = false;
+  String? _errorMessage = '';
 
   @override
   void initState() {
@@ -28,109 +40,247 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   }
 
   Future<void> _carregarUsuarioLogado() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance
-          .collection('usuario')
-          .doc(user.uid)
-          .get();
-      if (doc.exists) {
-        setState(() {
-          _estagiarioNome = doc['nome'];
-        });
+    setState(() => isLoading = true);
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists) {
+          setState(() {
+            _estagiarioNomeController.text = doc['nome'] ?? '';
+          });
+        }
       }
+    } catch (e) {
+      print('Erro ao carregar usuário logado: $e');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Falha ao carregar dados do usuário',
+        isError: true,
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   Future<void> _carregarProfessores() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('usuario')
-        .where('tipo_usuario', isEqualTo: 'Professor')
-        .get();
+    setState(() => isLoading = true);
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('tipo_usuario', whereIn: ['Professor', 'Coordenador']).get();
 
-    setState(() {
-      _professores =
-          snapshot.docs.map((doc) => doc['nome'].toString()).toList();
-      if (_professores.isNotEmpty) {
-        _professorSelecionado = _professores.first;
+      final professorSalvo =
+          await _atendimentoService.carregarProfessorSelecionado();
+      final professores =
+          snapshot.docs.map((doc) => doc['nome'] as String).toList();
+
+      if (mounted) {
+        setState(() {
+          _professores = ['Selecione', ...professores];
+          _professorSelecionado = professorSalvo ?? 'Selecione';
+        });
       }
-    });
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Falha ao carregar lista de professores',
+        isError: true,
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
-  void _finalizar() {
-    // Salvar conduta ou enviar dados
-    // Exemplo:
-    // FirebaseFirestore.instance.collection('condutas').add({ ... });
+  Future<void> _finalizar() async {
+    if (_professorSelecionado == null || _professorSelecionado == 'Selecione') {
+      setState(() => _professorSelecionadoError = true);
+      setState(() => _errorMessage = 'Selecione um professor supervisor');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Selecione um professor supervisor',
+        isError: true,
+      );
+      return;
+    }
+
+    _professorSelecionadoError = false;
+    _errorMessage = null;
+
+    setState(() => isLoading = true);
+    try {
+      // Salva o professor selecionado independente do sucesso
+      await _atendimentoService
+          .salvarProfessorSelecionado(_professorSelecionado!);
+
+      // 1. Salva conduta localmente
+      await _atendimentoService.salvarCondutaNutricional(
+        estagiario: _estagiarioNomeController.text,
+        professor: _professorSelecionado!,
+      );
+
+      // 2. Obtém todos os dados consolidados
+      final dadosCompletos = await _atendimentoService.obterDadosCompletos();
+
+      // 3. Salva no Firebase
+      await _atendimentoService.salvarAtendimentoNoFirebase(dadosCompletos);
+
+      // 4. Limpa dados locais (incluindo o professor selecionado)
+      await _atendimentoService.limparTodosDados();
+
+      // 5. Feedback e navegação
+      ToastUtil.showToast(
+        context: context,
+        message: 'Atendimento salvo com sucesso!',
+        isError: false,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => AtendimentoPage()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao finalizar atendimento!. Tente novamente mais tarde.',
+        isError: true,
+      );
+      print('Erro ao finalizar atendimento ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          setState(() => isLoading = true);
+          try {
+            await _atendimentoService.limparTodosDados();
+            if (mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => AtendimentoPage()),
+                (route) => false,
+              );
+            }
+          } catch (e) {
+            ToastUtil.showToast(
+              context: context,
+              message: 'Erro ao cancelar atendimento',
+              isError: true,
+            );
+          } finally {
+            if (mounted) {
+              setState(() => isLoading = false);
+            }
+          }
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BasePage(
-      title: 'Conduta Nutricional',
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Center(
-          child: CustomCard(
-            width: MediaQuery.of(context).size.width * 0.95,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Conduta Nutricional',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    readOnly: true,
-                    enabled: false,
-                    decoration: InputDecoration(
-                      labelText: 'Estagiário de Nutrição:',
-                      hintText: _estagiarioNome ?? 'Carregando...',
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  CustomDropdown(
-                    label: 'Prof° Supervisor:',
-                    value: _professorSelecionado ?? 'Selecione',
-                    items: _professores,
-                    enabled: true,
-                    onChanged: (valor) {
-                      setState(() {
-                        _professorSelecionado = valor!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    double espacamentoCards = 10;
+
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Conduta Nutricional',
+          body: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Center(
+              child: CustomCard(
+                width: MediaQuery.of(context).size.width * 0.95,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomButton(
-                        text: 'Voltar',
-                        onPressed: () => Navigator.pop(context),
-                        color: Colors.white,
-                        textColor: Colors.black,
-                        boxShadowColor: Colors.black,
+                      CustomInput(
+                        label: 'Aluno Responsável',
+                        controller: _estagiarioNomeController,
+                        keyboardType: TextInputType.text,
+                        enabled: false,
                       ),
-                      CustomButton(
-                        text: 'Finalizar',
-                        onPressed: _finalizar,
+                      SizedBox(height: espacamentoCards),
+                      CustomDropdown(
+                        label: 'Professor Supervisor',
+                        value: _professorSelecionado ?? 'Selecione',
+                        items: _professores,
+                        enabled: true,
+                        obrigatorio: true,
+                        error: _professorSelecionadoError,
+                        errorMessage: _errorMessage,
+                        onChanged: (valor) {
+                          setState(() {
+                            _professorSelecionado = valor!;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomButton(
+                            text: 'Cancelar',
+                            onPressed: () => _showCancelConfirmationDialog(),
+                            color: Colors.white,
+                            textColor: Colors.red,
+                            boxShadowColor: Colors.black,
+                          ),
+                          Row(
+                            children: [
+                              CustomButton(
+                                text: 'Voltar',
+                                onPressed: () => Navigator.pop(context),
+                                color: Colors.white,
+                                textColor: Colors.black,
+                                boxShadowColor: Colors.black,
+                              ),
+                              const SizedBox(width: 10),
+                              CustomButton(
+                                text: 'Finalizar',
+                                onPressed: _finalizar,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
-                  )
-                ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
+        if (isLoading)
+          ModalBarrier(
+            dismissible: false,
+            color: Colors.black.withOpacity(0.5),
+          ),
+        if (isLoading)
+          const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+      ],
     );
   }
 }

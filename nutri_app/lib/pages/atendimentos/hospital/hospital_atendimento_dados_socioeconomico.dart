@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
-import 'package:nutri_app/components/custom_checkbox.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_antecedentes_pessoais.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {
   const HospitalAtendimentoDadosSocioeconomicoPage({super.key});
@@ -18,11 +21,12 @@ class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {
 
 class _HospitalAtendimentoDadosSocioeconomicoPageState
     extends State<HospitalAtendimentoDadosSocioeconomicoPage> {
-  // Variáveis de estado simplificadas
-  bool? aguaEncanada;
-  bool? esgotoEncanado;
-  bool? coletaLixo;
-  bool? luzEletrica;
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  bool _aguaEncanada = false;
+  bool _esgotoEncanado = false;
+  bool _coletaLixo = false;
+  bool _luzEletrica = false;
   String selectedHouseType = 'Selecione';
 
   // Controllers para campos de texto
@@ -32,6 +36,12 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
   final escolaridadeController = TextEditingController();
   final profissaoController = TextEditingController();
   final producaoAlimentosController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
 
   @override
   void dispose() {
@@ -44,12 +54,69 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
     super.dispose();
   }
 
-  void proceedToNext() {
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosSocioeconomicos();
+
+    setState(() {
+      _aguaEncanada = dados['aguaEncanada'] as bool;
+      _esgotoEncanado = dados['esgotoEncanado'] as bool;
+      _coletaLixo = dados['coletaLixo'] as bool;
+      _luzEletrica = dados['luzEletrica'] as bool;
+      selectedHouseType = dados['tipoCasa'] as String;
+      pessoasController.text = dados['numPessoas'] as String;
+      rendaFamiliarController.text = dados['rendaFamiliar'] as String;
+      rendaPerCapitaController.text = dados['rendaPerCapita'] as String;
+      escolaridadeController.text = dados['escolaridade'] as String;
+      profissaoController.text = dados['profissao'] as String;
+      producaoAlimentosController.text = dados['producaoAlimentos'] as String;
+    });
+  }
+
+  Future<void> _salvarDadosSocioeconomicos() async {
+    await _atendimentoService.salvarDadosSocioeconomicos(
+      aguaEncanada: _aguaEncanada,
+      esgotoEncanado: _esgotoEncanado,
+      coletaLixo: _coletaLixo,
+      luzEletrica: _luzEletrica,
+      tipoCasa: selectedHouseType,
+      numPessoas: pessoasController.text,
+      rendaFamiliar: rendaFamiliarController.text,
+      rendaPerCapita: rendaPerCapitaController.text,
+      escolaridade: escolaridadeController.text,
+      profissao: profissaoController.text,
+      producaoAlimentos: producaoAlimentosController.text,
+    );
+  }
+
+  void _proceedToNext() {
+    _salvarDadosSocioeconomicos();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoAntecedentesPessoaisPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
+              (route) => false,
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -74,29 +141,36 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomCheckbox(
-                          label: 'Água encanada:',
-                          value: aguaEncanada,
+                        CustomSwitch(
+                          label: 'Água encanada',
+                          value: _aguaEncanada,
                           onChanged: (value) =>
-                              setState(() => aguaEncanada = value),
+                              setState(() => _aguaEncanada = value),
+                          enabled: true,
                         ),
-                        CustomCheckbox(
-                          label: 'Esgoto encanado:',
-                          value: esgotoEncanado,
+                        SizedBox(height: espacamentoCards),
+                        CustomSwitch(
+                          label: 'Esgoto encanado',
+                          value: _esgotoEncanado,
                           onChanged: (value) =>
-                              setState(() => esgotoEncanado = value),
+                              setState(() => _esgotoEncanado = value),
+                          enabled: true,
                         ),
-                        CustomCheckbox(
-                          label: 'Coleta de lixo:',
-                          value: coletaLixo,
+                        SizedBox(height: espacamentoCards),
+                        CustomSwitch(
+                          label: 'Coleta de lixo',
+                          value: _coletaLixo,
                           onChanged: (value) =>
-                              setState(() => coletaLixo = value),
+                              setState(() => _coletaLixo = value),
+                          enabled: true,
                         ),
-                        CustomCheckbox(
-                          label: 'Luz elétrica:',
-                          value: luzEletrica,
+                        SizedBox(height: espacamentoCards),
+                        CustomSwitch(
+                          label: 'Luz elétrica',
+                          value: _luzEletrica,
                           onChanged: (value) =>
-                              setState(() => luzEletrica = value),
+                              setState(() => _luzEletrica = value),
+                          enabled: true,
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
@@ -154,15 +228,27 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

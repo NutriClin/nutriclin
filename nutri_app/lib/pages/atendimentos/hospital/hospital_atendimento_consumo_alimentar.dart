@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_requerimentos_nutricionais.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoConsumoAlimentarPage extends StatefulWidget {
   const HospitalAtendimentoConsumoAlimentarPage({super.key});
@@ -19,6 +22,15 @@ class _HospitalAtendimentoConsumoAlimentarPageState
   final TextEditingController _habitualController = TextEditingController();
   final TextEditingController _atualController = TextEditingController();
 
+  // Services
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     _habitualController.dispose();
@@ -26,12 +38,51 @@ class _HospitalAtendimentoConsumoAlimentarPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarConsumoAlimentar();
+
+    setState(() {
+      _habitualController.text = dados['habitual']!;
+      _atualController.text = dados['atual']!;
+    });
+  }
+
+  Future<void> _salvarConsumoAlimentar() async {
+    await _atendimentoService.salvarConsumoAlimentar(
+      habitual: _habitualController.text,
+      atual: _atualController.text,
+    );
+  }
+
   void _proceedToNext() {
+    _salvarConsumoAlimentar();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoRequerimentosNutricionaisPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
+              (route) => false,
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -75,15 +126,27 @@ class _HospitalAtendimentoConsumoAlimentarPageState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: _proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

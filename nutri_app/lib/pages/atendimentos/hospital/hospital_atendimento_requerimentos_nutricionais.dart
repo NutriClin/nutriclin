@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_conduta_nutricional.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoRequerimentosNutricionaisPage extends StatefulWidget {
   const HospitalAtendimentoRequerimentosNutricionaisPage({super.key});
@@ -29,6 +32,15 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
   final TextEditingController _fibrasController = TextEditingController();
   final TextEditingController _outrosController = TextEditingController();
 
+  // Services
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     _kcalDiaController.dispose();
@@ -45,12 +57,82 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    try {
+      final dados =
+          await _atendimentoService.carregarRequerimentosNutricionais();
+      if (mounted) {
+        setState(() {
+          _kcalDiaController.text = dados['kcalDia'] ?? '';
+          _kcalKgController.text = dados['kcalKg'] ?? '';
+          _choController.text = dados['cho'] ?? '';
+          _lipController.text = dados['lip'] ?? '';
+          _ptnPorcentagemController.text = dados['ptnPorcentagem'] ?? '';
+          _ptnKgController.text = dados['ptnKg'] ?? '';
+          _ptnDiaController.text = dados['ptnDia'] ?? '';
+          _liquidoKgController.text = dados['liquidoKg'] ?? '';
+          _liquidoDiaController.text = dados['liquidoDia'] ?? '';
+          _fibrasController.text = dados['fibras'] ?? '';
+          _outrosController.text = dados['outros'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar requerimentos nutricionais: $e');
+    }
+  }
+
+  Future<void> _salvarDados() async {
+    try {
+      await _atendimentoService.salvarRequerimentosNutricionais(
+        kcalDia: _kcalDiaController.text,
+        kcalKg: _kcalKgController.text,
+        cho: _choController.text,
+        lip: _lipController.text,
+        ptnPorcentagem: _ptnPorcentagemController.text,
+        ptnKg: _ptnKgController.text,
+        ptnDia: _ptnDiaController.text,
+        liquidoKg: _liquidoKgController.text,
+        liquidoDia: _liquidoDiaController.text,
+        fibras: _fibrasController.text,
+        outros: _outrosController.text,
+      );
+    } catch (e) {
+      debugPrint('Erro ao salvar requerimentos nutricionais: $e');
+    }
+  }
+
   void _proceedToNext() {
+    _salvarDados();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoCondutaNutricionalPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (context) => AtendimentoPage()),
+                (route) => false,
+              );
+            });
+          }
+        },
+      ),
     );
   }
 
@@ -125,15 +207,27 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: _proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

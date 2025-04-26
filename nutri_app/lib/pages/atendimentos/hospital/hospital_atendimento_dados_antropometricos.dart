@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_consumo_alimentar.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosAntropometricosPage extends StatefulWidget {
   const HospitalAtendimentoDadosAntropometricosPage({super.key});
@@ -37,6 +40,15 @@ class _HospitalAtendimentoDadosAntropometricosPageState
   final TextEditingController _diagnosticoNutricionalController =
       TextEditingController();
 
+  // Serviço para manipulação de dados
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     // Dispose de todos os controllers
@@ -60,12 +72,81 @@ class _HospitalAtendimentoDadosAntropometricosPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosAntropometricos();
+
+    setState(() {
+      _pesoAtualController.text = dados['pesoAtual']!;
+      _pesoUsualController.text = dados['pesoUsual']!;
+      _estaturaController.text = dados['estatura']!;
+      _imcController.text = dados['imc']!;
+      _piController.text = dados['pi']!;
+      _cbController.text = dados['cb']!;
+      _pctController.text = dados['pct']!;
+      _pcbController.text = dados['pcb']!;
+      _pcseController.text = dados['pcse']!;
+      _pcsiController.text = dados['pcsi']!;
+      _cmbController.text = dados['cmb']!;
+      _caController.text = dados['ca']!;
+      _cpController.text = dados['cp']!;
+      _ajController.text = dados['aj']!;
+      _percentualGorduraController.text = dados['percentualGordura']!;
+      _perdaPesoController.text = dados['perdaPeso']!;
+      _diagnosticoNutricionalController.text = dados['diagnosticoNutricional']!;
+    });
+  }
+
+  Future<void> _salvarDadosAntropometricos() async {
+    await _atendimentoService.salvarDadosAntropometricos(
+      pesoAtual: _pesoAtualController.text,
+      pesoUsual: _pesoUsualController.text,
+      estatura: _estaturaController.text,
+      imc: _imcController.text,
+      pi: _piController.text,
+      cb: _cbController.text,
+      pct: _pctController.text,
+      pcb: _pcbController.text,
+      pcse: _pcseController.text,
+      pcsi: _pcsiController.text,
+      cmb: _cmbController.text,
+      ca: _caController.text,
+      cp: _cpController.text,
+      aj: _ajController.text,
+      percentualGordura: _percentualGorduraController.text,
+      perdaPeso: _perdaPesoController.text,
+      diagnosticoNutricional: _diagnosticoNutricionalController.text,
+    );
+  }
+
   void _proceedToNext() {
+    _salvarDadosAntropometricos();
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>
               const HospitalAtendimentoConsumoAlimentarPage()),
+    );
+  }
+
+  void _showCancelConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Cancelar Atendimento',
+        message:
+            'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        onConfirm: () async {
+          await _atendimentoService.limparTodosDados();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
+              (route) => false,
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -201,15 +282,27 @@ class _HospitalAtendimentoDadosAntropometricosPageState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
+                              text: 'Cancelar',
+                              onPressed: () => _showCancelConfirmationDialog(),
                               color: Colors.white,
-                              textColor: Colors.black,
+                              textColor: Colors.red,
                               boxShadowColor: Colors.black,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: _proceedToNext,
+                            Row(
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.black,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                const SizedBox(width: 10),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: _proceedToNext,
+                                ),
+                              ],
                             ),
                           ],
                         ),

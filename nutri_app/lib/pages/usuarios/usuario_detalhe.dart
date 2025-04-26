@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
@@ -206,91 +207,33 @@ class _UsuarioDetalheState extends State<UsuarioDetalhe> {
     }
   }
 
-
   void _mostrarAlterarSenhaModal() {
     showDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * 0.1,
-          ),
-          backgroundColor: Colors.transparent,
-          child: Stack(
-            children: [
-              CustomCard(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Redefinir senha',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins',
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    const Text(
-                      'Tem certeza que deseja redefinir a senha deste usuário?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CustomButton(
-                          text: 'Cancelar',
-                          onPressed: () => Navigator.pop(context),
-                          color: Colors.white,
-                          textColor: Colors.red,
-                          boxShadowColor: Colors.black,
-                        ),
-                        CustomButton(
-                          text: 'Confirmar',
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            setState(() => isLoading = true);
-
-                            try {
-                              String resultado = await _usuarioController
-                                  .enviarRedefinicaoSenha(widget.idUsuario!);
-
-                              ToastUtil.showToast(
-                                context: context,
-                                message: resultado,
-                                isError: !resultado.contains('sucesso'),
-                              );
-                            } catch (e) {
-                              ToastUtil.showToast(
-                                context: context,
-                                message:
-                                    'Erro ao redefinir senha: ${e.toString()}',
-                                isError: true,
-                              );
-                            } finally {
-                              setState(() => isLoading = false);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Redefinir senha',
+        message: 'Tem certeza que deseja redefinir a senha deste usuário?',
+        onConfirm: () async {
+          setState(() => isLoading = true);
+          try {
+            String resultado = await _usuarioController
+                .enviarRedefinicaoSenha(widget.idUsuario!);
+            ToastUtil.showToast(
+              context: context,
+              message: resultado,
+              isError: !resultado.contains('enviado'),
+            );
+          } catch (e) {
+            ToastUtil.showToast(
+              context: context,
+              message: 'Erro ao redefinir senha: ${e.toString()}',
+              isError: true,
+            );
+          } finally {
+            setState(() => isLoading = false);
+          }
+        },
+      ),
     );
   }
 
