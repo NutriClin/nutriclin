@@ -54,13 +54,22 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
 
   Future<void> _fetchInitialData() async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance
+      final atendimentoSnapshot = await FirebaseFirestore.instance
           .collection('atendimento')
           .orderBy('nome')
           .limit(_limit)
           .get();
 
-      _processQuerySnapshot(querySnapshot);
+      _processQuerySnapshot(
+          atendimentoSnapshot, 'atendimento'); // Passa 'atendimento'
+
+      final clinicaSnapshot = await FirebaseFirestore.instance
+          .collection('clinica')
+          .orderBy('nome')
+          .limit(_limit)
+          .get();
+
+      _processQuerySnapshot(clinicaSnapshot, 'clinica'); // Passa 'clinica'
     } catch (e) {
       _handleError(e);
     }
@@ -84,7 +93,15 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
       }
 
       final querySnapshot = await query.get();
-      _processQuerySnapshot(querySnapshot);
+      _processQuerySnapshot(querySnapshot, 'atendimento');
+
+      final clinicaSnapshot = await FirebaseFirestore.instance
+          .collection('clinica')
+          .orderBy('nome')
+          .limit(_limit)
+          .get();
+
+      _processQuerySnapshot(clinicaSnapshot, 'clinica');
     } catch (e) {
       _handleError(e);
     } finally {
@@ -94,7 +111,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     }
   }
 
-  void _processQuerySnapshot(QuerySnapshot querySnapshot) {
+  void _processQuerySnapshot(QuerySnapshot querySnapshot, String origem) {
     if (querySnapshot.docs.isEmpty) {
       setState(() {
         _isLastPage = true;
@@ -111,6 +128,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
         'nome': doc['nome'],
         'status_atendimento': doc['status_atendimento'],
         'data': data,
+        'origem': origem,
       };
     }).toList();
 
@@ -151,7 +169,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     return Stack(
       children: [
         BasePage(
-          title: 'Atendimentos',
+          title: 'Relatórios',
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Column(
@@ -231,7 +249,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
           return CustomListAtendimento(report: atendimento);
         } else {
           if (_isLastPage) {
-            return const SizedBox(height: 100); // Espaço extra no final
+            return const SizedBox(height: 100);
           } else {
             return _buildLoader();
           }
