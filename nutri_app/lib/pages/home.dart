@@ -3,6 +3,7 @@ import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/calculos/calculos.dart';
+import 'package:nutri_app/pages/relatorios/relatorios.dart';
 import 'usuarios/usuarios.dart';
 
 class HomePage extends StatelessWidget {
@@ -65,6 +66,22 @@ class HomePage extends StatelessWidget {
         ),
       ]);
     } else if (tipoUsuario == 'Professor') {
+      cards.addAll([
+        CustomBox(
+          labelFontSize: labelFontSize,
+          cardWidth: 40,
+          text: 'Relatórios',
+          imagePath: 'assets/imagens/relatorio.svg',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RelatoriosPage(),
+              ),
+            );
+          },
+        ),
+      ]);
     } else if (tipoUsuario == 'Aluno') {
       cards.addAll([
         CustomBox(

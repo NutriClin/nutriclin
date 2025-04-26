@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 
-class CustomListRelatorio extends StatelessWidget {
+class CustomListAtendimento extends StatelessWidget {
   final Map<String, dynamic> report;
 
-  const CustomListRelatorio({super.key, required this.report});
+  const CustomListAtendimento({super.key, required this.report});
 
   @override
   Widget build(BuildContext context) {
-    bool isPendente = report["status"] == "Pendente";
+    Color statusColor;
+    switch (report["status_atendimento"]) {
+      case 'aprovado':
+        statusColor = Colors.green;
+        break;
+      case 'reprovado':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.orange;
+    }
+
     return Column(
       children: [
         ListTile(
@@ -39,9 +50,9 @@ class CustomListRelatorio extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                report["status"],
+                report["status_atendimento"],
                 style: TextStyle(
-                  color: isPendente ? Colors.red : Colors.green,
+                  color: statusColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                   fontFamily: 'Poppins',
@@ -52,7 +63,8 @@ class CustomListRelatorio extends StatelessWidget {
               const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
             ],
           ),
-          onTap: () {},
+          onTap: () {
+          },
         ),
         const Divider(),
       ],

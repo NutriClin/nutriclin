@@ -74,7 +74,6 @@ flutter:
   assets:
     - assets/imagens/atendimentos.svg
     - assets/imagens/calculos.svg
-    - assets/imagens/relatorios.svg
     - assets/imagens/campologo.svg
     - assets/imagens/calculadora.svg
     - assets/imagens/stethoscope.svg
@@ -86,6 +85,7 @@ flutter:
     - assets/imagens/clinica.svg
     - assets/imagens/plus.svg
     - assets/imagens/doctor.svg
+    - assets/imagens/relatorio.svg
     - assets/fonts/
 
   fonts:
