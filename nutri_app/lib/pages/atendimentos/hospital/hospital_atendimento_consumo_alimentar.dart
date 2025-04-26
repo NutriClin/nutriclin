@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_requerimentos_nutricionais.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoConsumoAlimentarPage extends StatefulWidget {
   const HospitalAtendimentoConsumoAlimentarPage({super.key});
@@ -21,6 +22,15 @@ class _HospitalAtendimentoConsumoAlimentarPageState
   final TextEditingController _habitualController = TextEditingController();
   final TextEditingController _atualController = TextEditingController();
 
+  // Services
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     _habitualController.dispose();
@@ -28,7 +38,24 @@ class _HospitalAtendimentoConsumoAlimentarPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarConsumoAlimentar();
+
+    setState(() {
+      _habitualController.text = dados['habitual']!;
+      _atualController.text = dados['atual']!;
+    });
+  }
+
+  Future<void> _salvarConsumoAlimentar() async {
+    await _atendimentoService.salvarConsumoAlimentar(
+      habitual: _habitualController.text,
+      atual: _atualController.text,
+    );
+  }
+
   void _proceedToNext() {
+    _salvarConsumoAlimentar();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -46,7 +73,8 @@ class _HospitalAtendimentoConsumoAlimentarPageState
             'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
         confirmText: 'Sair',
         cancelText: 'Continuar',
-        onConfirm: () {
+        onConfirm: () async {
+          await _atendimentoService.limparConsumoAlimentar();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const AtendimentoPage()),

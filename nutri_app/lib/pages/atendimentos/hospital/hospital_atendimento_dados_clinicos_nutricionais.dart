@@ -9,6 +9,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_antropometricos.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosClinicosNutricionaisPage extends StatefulWidget {
   const HospitalAtendimentoDadosClinicosNutricionaisPage({super.key});
@@ -67,6 +68,15 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   bool _etilismo = false;
   bool _condicaoFuncional = false;
 
+  // Serviço para manipulação de dados
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     // Dispose de todos os controllers
@@ -92,7 +102,78 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosClinicosNutricionais();
+
+    setState(() {
+      // Controllers de texto
+      _diagnosticoController.text = dados['diagnostico'] as String;
+      _prescricaoController.text = dados['prescricao'] as String;
+      _acetaceboController.text = dados['aceitacao'] as String;
+      _alimentacaoHabitualController.text =
+          dados['especificarAlimentacao'] as String;
+      _doencaAnteriorController.text = dados['doencaAnteriorDesc'] as String;
+      _cirurgiaController.text = dados['cirurgiaDesc'] as String;
+      _quantoPesoController.text = dados['quantoPeso'] as String;
+      _qualDietaController.text = dados['qualDieta'] as String;
+      _tipoSuplementacaoController.text = dados['tipoSuplementacao'] as String;
+      _especificarCondicaoController.text =
+          dados['especificarCondicao'] as String;
+      _medicamentosController.text = dados['medicamentos'] as String;
+      _examesLaboratoriaisController.text =
+          dados['examesLaboratoriais'] as String;
+      _exameFisicoController.text = dados['exameFisico'] as String;
+
+      // Dropdowns
+      selectedAlimentacaoHabitual = dados['alimentacaoHabitual'] as String;
+      selectedCondicaoFuncional = dados['condicaoFuncional'] as String;
+
+      // Switches
+      _doencaAnterior = dados['doencaAnterior'] as bool;
+      _cirurgiaRecente = dados['cirurgiaRecente'] as bool;
+      _febre = dados['febre'] as bool;
+      _alteracaoPeso = dados['alteracaoPeso'] as bool;
+      _alimentacaoInadequada = selectedAlimentacaoHabitual == 'Inadequada';
+      _desconforto = dados['desconfortos'] as bool;
+      _necessidadeDieta = dados['necessidadeDieta'] as bool;
+      _suplementacao = dados['suplementacao'] as bool;
+      _tabagismo = dados['tabagismo'] as bool;
+      _etilismo = dados['etilismo'] as bool;
+      _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
+    });
+  }
+
+  Future<void> _salvarDadosClinicosNutricionais() async {
+    await _atendimentoService.salvarDadosClinicosNutricionais(
+      diagnostico: _diagnosticoController.text,
+      prescricao: _prescricaoController.text,
+      aceitacao: _acetaceboController.text,
+      alimentacaoHabitual: selectedAlimentacaoHabitual,
+      especificarAlimentacao: _alimentacaoHabitualController.text,
+      doencaAnterior: _doencaAnterior,
+      doencaAnteriorDesc: _doencaAnteriorController.text,
+      cirurgiaRecente: _cirurgiaRecente,
+      cirurgiaDesc: _cirurgiaController.text,
+      febre: _febre,
+      alteracaoPeso: _alteracaoPeso,
+      quantoPeso: _quantoPesoController.text,
+      desconfortos: _desconforto,
+      necessidadeDieta: _necessidadeDieta,
+      qualDieta: _qualDietaController.text,
+      suplementacao: _suplementacao,
+      tipoSuplementacao: _tipoSuplementacaoController.text,
+      tabagismo: _tabagismo,
+      etilismo: _etilismo,
+      condicaoFuncional: selectedCondicaoFuncional,
+      especificarCondicao: _especificarCondicaoController.text,
+      medicamentos: _medicamentosController.text,
+      examesLaboratoriais: _examesLaboratoriaisController.text,
+      exameFisico: _exameFisicoController.text,
+    );
+  }
+
   void _proceedToNext() {
+    _salvarDadosClinicosNutricionais();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -110,7 +191,8 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
             'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
         confirmText: 'Sair',
         cancelText: 'Continuar',
-        onConfirm: () {
+        onConfirm: () async {
+          await _atendimentoService.limparDadosClinicosNutricionais();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const AtendimentoPage()),

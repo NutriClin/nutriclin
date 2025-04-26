@@ -8,6 +8,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_socioeconomico.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoIdentificacaoPage extends StatefulWidget {
   const HospitalAtendimentoIdentificacaoPage({super.key});
@@ -28,6 +29,14 @@ class _HospitalAtendimentoIdentificacaoPageState
   final TextEditingController bedController = TextEditingController();
   final TextEditingController recordController = TextEditingController();
 
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -38,6 +47,20 @@ class _HospitalAtendimentoIdentificacaoPageState
     bedController.dispose();
     recordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosIdentificacao();
+    setState(() {
+      nameController.text = dados['name']!;
+      selectedGender = dados['gender']!;
+      birthDateController.text = dados['birthDate']!;
+      hospitalController.text = dados['hospital']!;
+      clinicController.text = dados['clinic']!;
+      roomController.text = dados['room']!;
+      bedController.text = dados['bed']!;
+      recordController.text = dados['record']!;
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -58,7 +81,21 @@ class _HospitalAtendimentoIdentificacaoPageState
     }
   }
 
+  Future<void> _salvarDadosIdentificacao() async {
+    await _atendimentoService.salvarDadosIdentificacao(
+      name: nameController.text,
+      gender: selectedGender,
+      birthDate: birthDateController.text,
+      hospital: hospitalController.text,
+      clinic: clinicController.text,
+      room: roomController.text,
+      bed: bedController.text,
+      record: recordController.text,
+    );
+  }
+
   void proceedToNext() {
+    _salvarDadosIdentificacao();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -76,7 +113,8 @@ class _HospitalAtendimentoIdentificacaoPageState
             'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
         confirmText: 'Sair',
         cancelText: 'Continuar',
-        onConfirm: () {
+        onConfirm: () async {
+          await _atendimentoService.limparDadosIdentificacao();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const AtendimentoPage()),
@@ -168,7 +206,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Registro',
-                          controller: bedController,
+                          controller: recordController,
                           keyboardType: TextInputType.text,
                         ),
                         const SizedBox(height: 15),

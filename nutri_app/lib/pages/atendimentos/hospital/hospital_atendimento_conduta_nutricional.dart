@@ -9,6 +9,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
   const HospitalAtendimentoCondutaNutricionalPage({super.key});
@@ -22,6 +23,8 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     extends State<HospitalAtendimentoCondutaNutricionalPage> {
   final TextEditingController _estagiarioNomeController =
       TextEditingController();
+
+  final AtendimentoService _atendimentoService = AtendimentoService();
 
   String? _professorSelecionado;
   List<String> _professores = [];
@@ -82,10 +85,53 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     }
   }
 
-  void _finalizar() {
-    // Salvar conduta ou enviar dados
-    // Exemplo:
-    // FirebaseFirestore.instance.collection('condutas').add({ ... });
+  Future<void> _finalizar() async {
+    if (_professorSelecionado == null || _professorSelecionado == 'Selecione') {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Selecione um professor supervisor',
+        isError: true,
+      );
+      return;
+    }
+
+    try {
+      // 1. Salva conduta localmente
+      await _atendimentoService.salvarCondutaNutricional(
+        estagiario: _estagiarioNomeController.text,
+        professor: _professorSelecionado!,
+      );
+
+      // 2. Obtém todos os dados consolidados
+      final dadosCompletos = await _atendimentoService.obterDadosCompletos();
+
+      // 3. Salva no Firebase
+      await _atendimentoService.salvarAtendimentoNoFirebase(dadosCompletos);
+
+      // 4. Limpa dados locais
+      await _atendimentoService.limparTodosDados();
+
+      // 5. Feedback e navegação
+      ToastUtil.showToast(
+        context: context,
+        message: 'Atendimento salvo com sucesso!',
+        isError: false,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const AtendimentoPage()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao finalizar atendimento!. Tente novamente mais tarde.',
+        isError: true,
+      );
+      print('Erro ao finalizar atendimento ${e.toString()}');
+    }
   }
 
   void _showCancelConfirmationDialog() {

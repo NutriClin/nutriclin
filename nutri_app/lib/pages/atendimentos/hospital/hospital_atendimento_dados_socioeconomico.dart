@@ -9,6 +9,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_antecedentes_pessoais.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {
   const HospitalAtendimentoDadosSocioeconomicoPage({super.key});
@@ -20,6 +21,8 @@ class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {
 
 class _HospitalAtendimentoDadosSocioeconomicoPageState
     extends State<HospitalAtendimentoDadosSocioeconomicoPage> {
+  final AtendimentoService _atendimentoService = AtendimentoService();
+
   bool _aguaEncanada = false;
   bool _esgotoEncanado = false;
   bool _coletaLixo = false;
@@ -35,6 +38,12 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
   final producaoAlimentosController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
+  @override
   void dispose() {
     pessoasController.dispose();
     rendaFamiliarController.dispose();
@@ -45,7 +54,42 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
     super.dispose();
   }
 
+  Future<void> _carregarDados() async {
+    final dados = await _atendimentoService.carregarDadosSocioeconomicos();
+
+    setState(() {
+      _aguaEncanada = dados['aguaEncanada'] as bool;
+      _esgotoEncanado = dados['esgotoEncanado'] as bool;
+      _coletaLixo = dados['coletaLixo'] as bool;
+      _luzEletrica = dados['luzEletrica'] as bool;
+      selectedHouseType = dados['tipoCasa'] as String;
+      pessoasController.text = dados['numPessoas'] as String;
+      rendaFamiliarController.text = dados['rendaFamiliar'] as String;
+      rendaPerCapitaController.text = dados['rendaPerCapita'] as String;
+      escolaridadeController.text = dados['escolaridade'] as String;
+      profissaoController.text = dados['profissao'] as String;
+      producaoAlimentosController.text = dados['producaoAlimentos'] as String;
+    });
+  }
+
+  Future<void> _salvarDadosSocioeconomicos() async {
+    await _atendimentoService.salvarDadosSocioeconomicos(
+      aguaEncanada: _aguaEncanada,
+      esgotoEncanado: _esgotoEncanado,
+      coletaLixo: _coletaLixo,
+      luzEletrica: _luzEletrica,
+      tipoCasa: selectedHouseType,
+      numPessoas: pessoasController.text,
+      rendaFamiliar: rendaFamiliarController.text,
+      rendaPerCapita: rendaPerCapitaController.text,
+      escolaridade: escolaridadeController.text,
+      profissao: profissaoController.text,
+      producaoAlimentos: producaoAlimentosController.text,
+    );
+  }
+
   void _proceedToNext() {
+    _salvarDadosSocioeconomicos();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -63,7 +107,8 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
             'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
         confirmText: 'Sair',
         cancelText: 'Continuar',
-        onConfirm: () {
+        onConfirm: () async {
+          await _atendimentoService.limparDadosSocioeconomicos();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const AtendimentoPage()),
