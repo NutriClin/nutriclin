@@ -15,66 +15,135 @@ class UsuarioPage extends StatefulWidget {
 
 class _UsuarioPageState extends State<UsuarioPage> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> usuarios = [];
-  List<Map<String, dynamic>> usuariosFiltrados = [];
-  bool isLoading = false; // Adicionado estado para o loader
+  final ScrollController _scrollController = ScrollController();
+
+  bool _isLastPage = false;
+  DocumentSnapshot? _lastDocument;
+  bool _error = false;
+  bool _initialLoading = true;
+  bool _loadingMore = false;
+  final int _limit = 100; // Número de itens por página
+
+  List<Map<String, dynamic>> _usuarios = [];
+  List<Map<String, dynamic>> _usuariosFiltrados = [];
 
   @override
   void initState() {
     super.initState();
-    _buscarUsuarios();
+    _fetchInitialData();
+    _scrollController.addListener(_scrollListener);
     _searchController.addListener(_filtrarUsuarios);
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _searchController.removeListener(_filtrarUsuarios);
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _buscarUsuarios() async {
-    setState(() => isLoading = true);
+  void _scrollListener() {
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_scrollController.position.outOfRange) {
+      if (!_loadingMore && !_isLastPage) {
+        _fetchMoreData();
+      }
+    }
+  }
+
+  Future<void> _fetchInitialData() async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .orderBy('nome')
+          .limit(_limit)
+          .get();
+
+      _processQuerySnapshot(querySnapshot);
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+  Future<void> _fetchMoreData() async {
+    if (_isLastPage || _loadingMore) return;
+
+    setState(() {
+      _loadingMore = true;
+    });
 
     try {
-      FirebaseFirestore.instance
+      Query query = FirebaseFirestore.instance
           .collection('usuarios')
-          .snapshots()
-          .listen((snapshot) {
-        List<Map<String, dynamic>> listaUsuarios = snapshot.docs.map((doc) {
-          Timestamp timestamp = doc['data'];
-          DateTime data = timestamp.toDate();
+          .orderBy('nome')
+          .limit(_limit);
 
-          return {
-            'id': doc.id,
-            'nome': doc['nome'],
-            'email': doc['email'],
-            'tipo_usuario': doc['tipo_usuario'],
-            'ativo': doc['ativo'] ?? true,
-            'data': data,
-          };
-        }).toList();
+      if (_lastDocument != null) {
+        query = query.startAfterDocument(_lastDocument!);
+      }
 
-        setState(() {
-          usuarios = listaUsuarios;
-          usuariosFiltrados = List.from(usuarios);
-          isLoading = false;
-        });
-      });
+      final querySnapshot = await query.get();
+      _processQuerySnapshot(querySnapshot);
     } catch (e) {
-      setState(() => isLoading = false);
-      ToastUtil.showToast(
-        context: context,
-        message: 'Erro ao carregar usuários: ${e.toString()}',
-        isError: true,
-      );
+      _handleError(e);
+    } finally {
+      setState(() {
+        _loadingMore = false;
+      });
     }
+  }
+
+  void _processQuerySnapshot(QuerySnapshot querySnapshot) {
+    if (querySnapshot.docs.isEmpty) {
+      setState(() {
+        _isLastPage = true;
+      });
+      return;
+    }
+
+    List<Map<String, dynamic>> newUsers = querySnapshot.docs.map((doc) {
+      Timestamp timestamp = doc['data'] ?? Timestamp.now();
+      DateTime data = timestamp.toDate();
+
+      return {
+        'id': doc.id,
+        'nome': doc['nome'],
+        'email': doc['email'],
+        'tipo_usuario': doc['tipo_usuario'],
+        'ativo': doc['ativo'] ?? true,
+        'data': data,
+      };
+    }).toList();
+
+    setState(() {
+      _initialLoading = false;
+      _lastDocument = querySnapshot.docs.last;
+      _usuarios.addAll(newUsers);
+      _usuariosFiltrados = List.from(_usuarios);
+      _isLastPage = newUsers.length < _limit;
+    });
+  }
+
+  void _handleError(dynamic e) {
+    print("error --> $e");
+    ToastUtil.showToast(
+      context: context,
+      message: 'Erro ao carregar usuários: ${e.toString()}',
+      isError: true,
+    );
+    setState(() {
+      _initialLoading = false;
+      _error = true;
+      _loadingMore = false;
+    });
   }
 
   void _filtrarUsuarios() {
     String query = _searchController.text.toLowerCase();
     setState(() {
-      usuariosFiltrados = usuarios.where((usuario) {
+      _usuariosFiltrados = _usuarios.where((usuario) {
         return usuario["nome"].toLowerCase().contains(query);
       }).toList();
     });
@@ -94,18 +163,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
                 CustomInputSearch(controller: _searchController),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: isLoading
-                      ? const SizedBox()
-                      : usuariosFiltrados.isEmpty
-                          ? const Center(
-                              child: Text("Nenhum usuário encontrado."))
-                          : ListView.builder(
-                              itemCount: usuariosFiltrados.length,
-                              itemBuilder: (context, index) {
-                                var usuario = usuariosFiltrados[index];
-                                return CustomListUsuario(report: usuario);
-                              },
-                            ),
+                  child: _buildUsersList(),
                 ),
               ],
             ),
@@ -132,18 +190,102 @@ class _UsuarioPageState extends State<UsuarioPage> {
             ),
           ),
         ),
-        if (isLoading)
+        if (_initialLoading)
           ModalBarrier(
             dismissible: false,
             color: Colors.black.withOpacity(0.5),
           ),
-        if (isLoading)
+        if (_initialLoading)
           const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildUsersList() {
+    if (_initialLoading) {
+      return const SizedBox();
+    }
+
+    if (_error && _usuarios.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Ocorreu um erro ao carregar os usuários.',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _initialLoading = true;
+                  _error = false;
+                  _usuarios.clear();
+                  _lastDocument = null;
+                  _isLastPage = false;
+                  _fetchInitialData();
+                });
+              },
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_usuariosFiltrados.isEmpty) {
+      return const Center(child: Text("Nenhum usuário encontrado."));
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: _usuariosFiltrados.length + 1,
+      itemBuilder: (context, index) {
+        if (index < _usuariosFiltrados.length) {
+          final usuario = _usuariosFiltrados[index];
+          return CustomListUsuario(report: usuario);
+        } else {
+          if (_isLastPage) {
+            return const SizedBox(height: 100); // Espaço vazio quando não há mais usuários
+          } else {
+            return _buildLoader();
+          }
+        }
+      },
+    );
+  }
+
+  Widget _buildLoader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: _error
+            ? Column(
+                children: [
+                  Text(
+                    'Erro ao carregar mais usuários',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: _fetchMoreData,
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              )
+            : const CircularProgressIndicator(),
+      ),
     );
   }
 }
