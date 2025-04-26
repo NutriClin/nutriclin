@@ -64,6 +64,23 @@ class CustomListAtendimento extends StatelessWidget {
             ],
           ),
           onTap: () {
+            if (report["origem"] == "atendimento") {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => UsuarioDetalhe(idUsuario: report["id"]),
+              //   ),
+              // );
+              print("clicou no atendimento");
+            } else {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => UsuarioDetalhe(idUsuario: report["id"]),
+              //   ),
+              // );
+              print("clicou na clinica");
+            }
           },
         ),
         const Divider(),
