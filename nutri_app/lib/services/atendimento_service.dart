@@ -728,11 +728,11 @@ class AtendimentoService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw Exception('Usuário não autenticado');
 
-    await FirebaseFirestore.instance.collection('atendimentos').add({
+    await FirebaseFirestore.instance.collection('atendimento').add({
       ...dados,
       'criadoPor': user.uid,
       'criadoEm': FieldValue.serverTimestamp(),
-      'status': 'finalizado',
+      'status': 'enviado',
     });
   }
 
