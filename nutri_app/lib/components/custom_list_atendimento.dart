@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_identificacao.dart';
 
 class CustomListAtendimento extends StatelessWidget {
   final Map<String, dynamic> report;
@@ -65,12 +66,13 @@ class CustomListAtendimento extends StatelessWidget {
           ),
           onTap: () {
             if (report["origem"] == "atendimento") {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => UsuarioDetalhe(idUsuario: report["id"]),
-              //   ),
-              // );
+              print(report["id"]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HospitalAtendimentoIdentificacaoPage(idAtendimento: report["id"]),
+                ),
+              );
               print("clicou no atendimento");
             } else {
               // Navigator.push(

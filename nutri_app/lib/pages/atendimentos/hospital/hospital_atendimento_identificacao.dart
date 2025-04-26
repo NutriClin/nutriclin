@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
@@ -11,7 +12,9 @@ import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoIdentificacaoPage extends StatefulWidget {
-  const HospitalAtendimentoIdentificacaoPage({super.key});
+  final String? idAtendimento;
+
+  const HospitalAtendimentoIdentificacaoPage({super.key, this.idAtendimento});
 
   @override
   _HospitalAtendimentoIdentificacaoPageState createState() =>
@@ -30,6 +33,8 @@ class _HospitalAtendimentoIdentificacaoPageState
   final TextEditingController recordController = TextEditingController();
 
   final AtendimentoService _atendimentoService = AtendimentoService();
+
+  bool carregando = true;
 
   @override
   void initState() {
@@ -50,6 +55,41 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   Future<void> _carregarDados() async {
+    if (widget.idAtendimento != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('atendimento')
+            .doc(widget.idAtendimento)
+            .get();
+
+        print("ID Atendimento: ${widget.idAtendimento}");
+        print("Document: ${doc.data()}");
+        if (doc.exists) {
+          final data = doc.data()!;
+          final birthDate = data['data_nascimento'] as Timestamp?;
+          final formattedDate = birthDate != null
+              ? "${birthDate.toDate().day.toString().padLeft(2, '0')}/${birthDate.toDate().month.toString().padLeft(2, '0')}/${birthDate.toDate().year}"
+              : '';
+
+          setState(() {
+            nameController.text = data['nome'] ?? '';
+            selectedGender = data['sexo'] ?? 'Selecione';
+            birthDateController.text = formattedDate;
+            hospitalController.text = data['hospital'] ?? '';
+            clinicController.text = data['clinica'] ?? '';
+            roomController.text = data['quarto'] ?? '';
+            bedController.text = data['leito'] ?? '';
+            recordController.text = data['registro'] ?? '';
+            carregando = false;
+          });
+          return;
+        }
+      } catch (e) {
+        print("Erro ao buscar atendimento: $e");
+      }
+    }
+
+    // Se não tiver id ou erro, carrega dados locais
     final dados = await _atendimentoService.carregarDadosIdentificacao();
     setState(() {
       nameController.text = dados['name']!;
@@ -60,6 +100,7 @@ class _HospitalAtendimentoIdentificacaoPageState
       roomController.text = dados['room']!;
       bedController.text = dados['bed']!;
       recordController.text = dados['record']!;
+      carregando = false;
     });
   }
 
@@ -131,6 +172,12 @@ class _HospitalAtendimentoIdentificacaoPageState
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
+
+    if (carregando) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return BasePage(
       title: 'Identificação',
