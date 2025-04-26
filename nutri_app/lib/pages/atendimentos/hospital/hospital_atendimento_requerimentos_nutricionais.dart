@@ -121,12 +121,12 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
         confirmText: 'Sair',
         cancelText: 'Continuar',
         onConfirm: () async {
-          await _atendimentoService.limparRequerimentosNutricionais();
+          await _atendimentoService.limparTodosDados();
           if (mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
-                    builder: (context) => const AtendimentoPage()),
+                    builder: (context) => AtendimentoPage()),
                 (route) => false,
               );
             });

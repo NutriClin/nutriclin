@@ -141,7 +141,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const AtendimentoPage()),
+          MaterialPageRoute(builder: (context) => AtendimentoPage()),
           (route) => false,
         );
       }
@@ -174,8 +174,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
             await _atendimentoService.limparTodosDados();
             if (mounted) {
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => const AtendimentoPage()),
+                MaterialPageRoute(builder: (context) => AtendimentoPage()),
                 (route) => false,
               );
             }

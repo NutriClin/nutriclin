@@ -36,14 +36,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF5F5F5)),
         useMaterial3: true,
       ),
-      initialRoute: '/atendimento',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginPage(),
         '/usuario': (context) => const UsuarioPage(),
         '/home': (context) => const HomePage(
               tipoUsuario: 'Aluno',
             ),
-        '/atendimento': (context) => const AtendimentoPage(),
+        '/atendimento': (context) => AtendimentoPage(),
       },
     );
   }

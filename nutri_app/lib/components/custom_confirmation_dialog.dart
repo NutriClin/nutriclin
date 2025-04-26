@@ -18,7 +18,7 @@ class CustomConfirmationDialog extends StatelessWidget {
     required this.message,
     this.confirmText = 'Confirmar',
     this.cancelText = 'Cancelar',
-    this.confirmColor = Colors.blue,
+    this.confirmColor = const Color(0xFF007AFF),
     this.cancelColor = Colors.red,
     required this.onConfirm,
     this.onCancel,
@@ -35,57 +35,59 @@ class CustomConfirmationDialog extends StatelessWidget {
         children: [
           CustomCard(
             width: MediaQuery.of(context).size.width * 0.9,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     title,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Poppins',
-                      color: Colors.black,
+                      color: Color(0xFF007AFF),
                     ),
-                    textAlign: TextAlign.left,
                   ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  message,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Poppins',
+                  const SizedBox(height: 20),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomButton(
-                      text: cancelText,
-                      onPressed: () {
-                        if (onCancel != null) {
-                          onCancel!();
-                        }
-                        Navigator.pop(context);
-                      },
-                      color: Colors.white,
-                      textColor: cancelColor,
-                      boxShadowColor: Colors.black,
-                    ),
-                    CustomButton(
-                      text: confirmText,
-                      onPressed: () {
-                        onConfirm();
-                        Navigator.pop(context);
-                      },
-                      color: confirmColor,
-                    ),
-                  ],
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomButton(
+                        text: cancelText,
+                        onPressed: () {
+                          if (onCancel != null) {
+                            onCancel!();
+                          }
+                          Navigator.pop(context);
+                        },
+                        color: Colors.white,
+                        textColor: cancelColor,
+                        boxShadowColor: Colors.black,
+                      ),
+                      CustomButton(
+                        text: confirmText,
+                        onPressed: () {
+                          onConfirm();
+                          Navigator.pop(context);
+                        },
+                        color: confirmColor,
+                        textColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

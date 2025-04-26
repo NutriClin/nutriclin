@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_identificacao.dart';
 import 'package:nutri_app/pages/calculos/tmb.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class AtendimentoPage extends StatelessWidget {
-  const AtendimentoPage({super.key});
+  AtendimentoPage({super.key});
+  final AtendimentoService _atendimentoService = AtendimentoService();
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +27,66 @@ class AtendimentoPage extends StatelessWidget {
     );
   }
 
+  Future<void> _verificarDadosExistente(
+    BuildContext context,
+    String prefKey,
+    Widget nextPage,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys();
+    final dadosExistentes = keys.where((key) => key.startsWith(prefKey));
+
+    if (dadosExistentes.isNotEmpty) {
+      _mostrarModalConfirmacao(context, prefKey, nextPage);
+    } else {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => nextPage));
+    }
+  }
+
+  void _mostrarModalConfirmacao(
+    BuildContext context,
+    String prefKey,
+    Widget nextPage,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: 'Atendimento existente',
+        message:
+            'Já existe um atendimento em andamento. Deseja continuar com os dados existentes?',
+        confirmText: 'Continuar',
+        cancelText: 'Criar novo',
+        onConfirm: () {
+          Navigator.of(context, rootNavigator: true).pop();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => nextPage),
+            );
+          });
+        },
+        onCancel: () async {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) =>
+                const Center(child: CircularProgressIndicator()),
+          );
+
+          await _atendimentoService.limparTodosDados();
+
+          Navigator.of(context, rootNavigator: true).pop();
+          Navigator.of(context, rootNavigator: true).pop();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => nextPage),
+            );
+          });
+        },
+      ),
+    );
+  }
+
   List<Widget> _buildCards(BuildContext context) {
     List<Widget> cards = [];
 
@@ -32,9 +96,10 @@ class AtendimentoPage extends StatelessWidget {
         text: 'Clínica',
         labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/clinica.svg',
-        onTap: () => Navigator.push(
+        onTap: () => _verificarDadosExistente(
           context,
-          MaterialPageRoute(builder: (context) => const TMBPage()),
+          'clinica_atendimento',
+          const TMBPage(),
         ),
       ),
       const SizedBox(width: 20),
@@ -42,9 +107,10 @@ class AtendimentoPage extends StatelessWidget {
         text: 'Hospital',
         labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/doctor.svg',
-        onTap: () => Navigator.push(
+        onTap: () => _verificarDadosExistente(
           context,
-          MaterialPageRoute(builder: (context) => const HospitalAtendimentoIdentificacaoPage()),
+          'hospital_atendimento',
+          const HospitalAtendimentoIdentificacaoPage(),
         ),
       ),
     ]);

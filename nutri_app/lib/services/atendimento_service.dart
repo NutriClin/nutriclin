@@ -666,7 +666,6 @@ class AtendimentoService {
   static const String _prefsKeyAtendimento = 'hospital_atendimento';
 
   Future<void> salvarIdentificacao() async {
-    final prefs = await SharedPreferences.getInstance();
   }
 
   Future<Map<String, dynamic>> obterDadosCompletos() async {

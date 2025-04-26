@@ -114,10 +114,10 @@ class _HospitalAtendimentoIdentificacaoPageState
         confirmText: 'Sair',
         cancelText: 'Continuar',
         onConfirm: () async {
-          await _atendimentoService.limparDadosIdentificacao();
+          await _atendimentoService.limparTodosDados();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const AtendimentoPage()),
+              MaterialPageRoute(builder: (context) => AtendimentoPage()),
               (route) => false,
             );
           });
