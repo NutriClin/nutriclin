@@ -125,15 +125,19 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
       _exameFisicoController.text = dados['exameFisico'] as String;
 
       // Dropdowns
-      selectedAlimentacaoHabitual = dados['alimentacaoHabitual'] as String;
-      selectedCondicaoFuncional = dados['condicaoFuncional'] as String;
+      selectedAlimentacaoHabitual =
+          dados['alimentacaoHabitual']?.toString() ?? 'Selecione';
+      selectedCondicaoFuncional =
+          dados['condicaoFuncional']?.toString() ?? 'Selecione';
+
+      _alimentacaoInadequada = selectedAlimentacaoHabitual == 'Inadequada';
+      _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
 
       // Switches
       _doencaAnterior = dados['doencaAnterior'] as bool;
       _cirurgiaRecente = dados['cirurgiaRecente'] as bool;
       _febre = dados['febre'] as bool;
       _alteracaoPeso = dados['alteracaoPeso'] as bool;
-      _alimentacaoInadequada = selectedAlimentacaoHabitual == 'Inadequada';
       _desconforto = dados['desconfortos'] as bool;
       _necessidadeDieta = dados['necessidadeDieta'] as bool;
       _suplementacao = dados['suplementacao'] as bool;
@@ -170,6 +174,32 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
       examesLaboratoriais: _examesLaboratoriaisController.text,
       exameFisico: _exameFisicoController.text,
     );
+  }
+
+  void _onAlimentacaoHabitualChanged(String? value) {
+    if (value == null) return;
+
+    setState(() {
+      selectedAlimentacaoHabitual = value;
+      _alimentacaoInadequada = value == 'Inadequada';
+
+      if (!_alimentacaoInadequada) {
+        _alimentacaoHabitualController.clear();
+      }
+    });
+  }
+
+  void _onCondicaoFuncionalChanged(String? value) {
+    if (value == null) return;
+
+    setState(() {
+      selectedCondicaoFuncional = value;
+      _condicaoFuncional = value == 'Desfavorável';
+
+      if (!_condicaoFuncional) {
+        _especificarCondicaoController.clear();
+      }
+    });
   }
 
   void _proceedToNext() {
@@ -260,10 +290,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           label: 'Alimentação Habitual',
                           value: selectedAlimentacaoHabitual,
                           items: const ['Selecione', 'Alterada', 'Inadequada'],
-                          onChanged: (value) => setState(() =>
-                              value == 'Inadequada'
-                                  ? _alimentacaoInadequada = true
-                                  : _alimentacaoInadequada = false),
+                          onChanged: _onAlimentacaoHabitualChanged,
                         ),
                         if (_alimentacaoInadequada) ...[
                           SizedBox(height: espacamentoCards),
@@ -377,10 +404,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             'Favorável',
                             'Desfavorável'
                           ],
-                          onChanged: (value) => setState(() =>
-                              value == 'Desfavorável'
-                                  ? _condicaoFuncional = true
-                                  : _condicaoFuncional = false),
+                          onChanged: _onCondicaoFuncionalChanged,
                         ),
                         if (_condicaoFuncional) ...[
                           SizedBox(height: espacamentoCards),
