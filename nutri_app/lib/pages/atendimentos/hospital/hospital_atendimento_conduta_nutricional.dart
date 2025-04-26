@@ -62,26 +62,20 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   }
 
   Future<void> _carregarProfessores() async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .where('tipo_usuario', whereIn: ['Professor', 'Coordenador']).get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .where('tipo_usuario', whereIn: ['Professor', 'Coordenador']).get();
 
-      final professores = snapshot.docs.map((doc) {
-        return doc['nome'] as String;
-      }).toList();
+    final professorSalvo =
+        await _atendimentoService.carregarProfessorSelecionado();
+    final professores =
+        snapshot.docs.map((doc) => doc['nome'] as String).toList();
 
+    if (mounted) {
       setState(() {
         _professores = ['Selecione', ...professores];
-        _professorSelecionado = 'Selecione';
+        _professorSelecionado = professorSalvo ?? 'Selecione';
       });
-    } catch (e) {
-      print('Erro ao carregar professores: $e');
-      ToastUtil.showToast(
-        context: context,
-        message: 'Falha ao carregar professores',
-        isError: true,
-      );
     }
   }
 
@@ -96,6 +90,10 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     }
 
     try {
+      // Salva o professor selecionado independente do sucesso
+      await _atendimentoService
+          .salvarProfessorSelecionado(_professorSelecionado!);
+
       // 1. Salva conduta localmente
       await _atendimentoService.salvarCondutaNutricional(
         estagiario: _estagiarioNomeController.text,
@@ -108,7 +106,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
       // 3. Salva no Firebase
       await _atendimentoService.salvarAtendimentoNoFirebase(dadosCompletos);
 
-      // 4. Limpa dados locais
+      // 4. Limpa dados locais (incluindo o professor selecionado)
       await _atendimentoService.limparTodosDados();
 
       // 5. Feedback e navegação

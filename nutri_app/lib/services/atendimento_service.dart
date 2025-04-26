@@ -736,4 +736,14 @@ class AtendimentoService {
       'status': 'finalizado',
     });
   }
+
+  Future<void> salvarProfessorSelecionado(String professor) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('professor_selecionado', professor);
+  }
+
+  Future<String?> carregarProfessorSelecionado() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('professor_selecionado');
+  }
 }
