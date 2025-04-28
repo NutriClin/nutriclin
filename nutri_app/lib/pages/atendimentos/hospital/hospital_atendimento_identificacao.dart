@@ -62,8 +62,6 @@ class _HospitalAtendimentoIdentificacaoPageState
             .doc(widget.idAtendimento)
             .get();
 
-        print("ID Atendimento: ${widget.idAtendimento}");
-        print("Document: ${doc.data()}");
         if (doc.exists) {
           final data = doc.data()!;
           final birthDate = data['data_nascimento'] as Timestamp?;
@@ -89,7 +87,6 @@ class _HospitalAtendimentoIdentificacaoPageState
       }
     }
 
-    // Se não tiver id ou erro, carrega dados locais
     final dados = await _atendimentoService.carregarDadosIdentificacao();
     setState(() {
       nameController.text = dados['name']!;
@@ -135,8 +132,8 @@ class _HospitalAtendimentoIdentificacaoPageState
     );
   }
 
-  void proceedToNext() {
-    _salvarDadosIdentificacao();
+  void _proceedToNext() async {
+    await _salvarDadosIdentificacao();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -270,7 +267,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                             ),
                             CustomButton(
                               text: 'Próximo',
-                              onPressed: proceedToNext,
+                              onPressed: _proceedToNext, 
                             ),
                           ],
                         ),

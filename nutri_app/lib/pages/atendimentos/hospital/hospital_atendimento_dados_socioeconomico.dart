@@ -88,8 +88,8 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
     );
   }
 
-  void _proceedToNext() {
-    _salvarDadosSocioeconomicos();
+  void _proceedToNext() async {
+    await _salvarDadosSocioeconomicos();
     Navigator.push(
       context,
       MaterialPageRoute(

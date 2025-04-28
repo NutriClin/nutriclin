@@ -123,10 +123,11 @@ class _HospitalAtendimentoCondutaNutricionalPageState
         professor: _professorSelecionado!,
       );
 
-      // 2. Obtém todos os dados consolidados
+      // 2. Obtém todos os dados consolidados localmente
       final dadosCompletos = await _atendimentoService.obterDadosCompletos();
 
-      // 3. Salva no Firebase
+      print('Dados completos: $dadosCompletos');
+      // 3. Salva os dados completos no Firebase
       await _atendimentoService.salvarAtendimentoNoFirebase(dadosCompletos);
 
       // 4. Limpa dados locais (incluindo o professor selecionado)
@@ -148,7 +149,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     } catch (e) {
       ToastUtil.showToast(
         context: context,
-        message: 'Erro ao finalizar atendimento!. Tente novamente mais tarde.',
+        message: 'Erro ao finalizar atendimento! Tente novamente mais tarde.',
         isError: true,
       );
       print('Erro ao finalizar atendimento ${e.toString()}');
@@ -158,6 +159,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
       }
     }
   }
+
 
   void _showCancelConfirmationDialog() {
     showDialog(

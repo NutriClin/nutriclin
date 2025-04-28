@@ -666,51 +666,23 @@ class AtendimentoService {
   static const String _prefsKeyAtendimento = 'hospital_atendimento';
 
   Future<void> salvarIdentificacao() async {
+    
   }
 
-  Future<Map<String, dynamic>> obterDadosCompletos() async {
-    // Recupera dados de cada etapa
-    final identificacao = await _carregarDadosEtapa('identificacao');
-    final socioeconomicos = await _carregarDadosEtapa('socioeconomicos');
-    final antecedentesPessoais =
-        await _carregarDadosEtapa('antecedentes_pessoais');
-    final antecedentesFamiliares =
-        await _carregarDadosEtapa('antecedentes_familiares');
-    final dadosClinicos = await _carregarDadosEtapa('dados_clinicos');
-    final antropometricos = await _carregarDadosEtapa('antropometricos');
-    final consumoAlimentar = await _carregarDadosEtapa('consumo_alimentar');
-    final requerimentos = await _carregarDadosEtapa('requerimentos');
-    final conduta = await _carregarDadosEtapa('conduta');
-
-    return {
-      'identificacao': identificacao,
-      'socioeconomicos': socioeconomicos,
-      'antecedentesPessoais': antecedentesPessoais,
-      'antecedentesFamiliares': antecedentesFamiliares,
-      'dadosClinicos': dadosClinicos,
-      'antropometricos': antropometricos,
-      'consumoAlimentar': consumoAlimentar,
-      'requerimentos': requerimentos,
-      'conduta': conduta,
-      'data': DateTime.now().toIso8601String(),
-    };
-  }
-
-  Future<Map<String, dynamic>> _carregarDadosEtapa(String etapa) async {
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys();
-    final etapaKeys =
-        keys.where((key) => key.startsWith('$_prefsKeyAtendimento.$etapa'));
-
-    final dados = <String, dynamic>{};
-    for (final key in etapaKeys) {
-      final value = prefs.get(key);
-      final field = key.replaceFirst('$_prefsKeyAtendimento.$etapa.', '');
-      dados[field] = value;
-    }
-
-    return dados;
-  }
+Future<Map<String, dynamic>> obterDadosCompletos() async {
+  return {
+    'identificacao': await carregarDadosIdentificacao(),
+    'socioeconomicos': await carregarDadosSocioeconomicos(),
+    'antecedentesPessoais': await carregarAntecedentesPessoais(),
+    'antecedentesFamiliares': await carregarAntecedentesFamiliares(),
+    'dadosClinicos': await carregarDadosClinicosNutricionais(),
+    'antropometricos': await carregarDadosAntropometricos(),
+    'consumoAlimentar': await carregarConsumoAlimentar(),
+    'requerimentos': await carregarRequerimentosNutricionais(),
+    'conduta': await carregarCondutaNutricional(),
+    'data': DateTime.now().toIso8601String(),
+  };
+}
 
   Future<void> limparTodosDados() async {
     final prefs = await SharedPreferences.getInstance();
