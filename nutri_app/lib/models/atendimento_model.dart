@@ -186,7 +186,9 @@ class AtendimentoModel {
     required this.nomeAluno,
     required this.nomeProfessor,
   });
-    factory AtendimentoModel.fromMap(Map<String, dynamic> map, String documentId) {
+
+  factory AtendimentoModel.fromMap(
+      Map<String, dynamic> map, String documentId) {
     return AtendimentoModel(
       id: documentId,
       nome: map['nome'] ?? '',
@@ -201,8 +203,8 @@ class AtendimentoModel {
       esgotoEncanado: map['esgoto_encanado'] ?? false,
       coletaLixo: map['coleta_lixo'] ?? false,
       luzEletrica: map['luz_eletrica'] ?? false,
-      casa: map['tipo_casa'] ?? '',
-      numeroPessoasMoramJunto: map['numero_pessoas_moram_junto'] ?? 0,
+      casa: map['casa'] ?? '',
+      numeroPessoasMoramJunto: (map['numero_pessoas_moram_junto'] ?? 0).toInt(),
       rendaFamiliar: (map['renda_familar'] ?? 0).toDouble(),
       rendaPerCapta: (map['renda_per_capta'] ?? 0).toDouble(),
       escolaridade: map['escolaridade'] ?? '',
@@ -214,7 +216,8 @@ class AtendimentoModel {
       possuiExcessoPeso: map['possui_excesso_peso'] ?? false,
       possuiDiabetes: map['possui_diabetes'] ?? false,
       possuiOutraDoenca: map['possui_outra_doenca'] ?? false,
-      familiarPossuiDislipidemias: map['familiar_possui_dislipidemias'] ?? false,
+      familiarPossuiDislipidemias:
+          map['familiar_possui_dislipidemias'] ?? false,
       familiarPossuiHAS: map['familiar_possui_has'] ?? false,
       familiarPossuiCancer: map['familiar_possui_cancer'] ?? false,
       familiarPossuiExcessoPeso: map['familiar_possui_excesso_peso'] ?? false,
@@ -236,15 +239,20 @@ class AtendimentoModel {
       prescricaoDietoterapica: map['prescricao_dietoterapica'] ?? '',
       aceitacao: map['aceitacao'] ?? '',
       alimentacaoHabitual: map['alimentacao_habitual'] ?? '',
-      possuiDoencaAnterior: map['possui_doenca_antererior'] ?? false,
+      possuiDoencaAnterior: map['possui_doenca_anterior'] ?? false,
       possuiCirurgiaRecente: map['possui_cirurgia_recente'] ?? false,
       possuiFebre: map['possui_febre'] ?? false,
       possuiAlteracaoPesoRecente: map['possui_alteracao_peso_recente'] ?? false,
-      quantidadePercaPesoRecente: (map['quantidade_perca_peso_recente'] ?? 0).toDouble(),
-      possuiDesconfortoOralGastrointestinal: map['possui_desconforto_oral_gastrointestinal'] ?? false,
-      possuiNecessidadeDietaHospitalar: map['possui_necessidade_dieta_hospitalar'] ?? false,
-      resumoNecessidadeDietaHospitalar: map['resumo_necessidade_dieta_hospitalar'] ?? '',
-      possuiSuplementacaoNutricional: map['possui_suplementacao_nutricional'] ?? false,
+      quantidadePercaPesoRecente:
+          (map['quantidade_perca_peso_recente'] ?? 0).toDouble(),
+      possuiDesconfortoOralGastrointestinal:
+          map['possui_desconforto_oral_gastrointestinal'] ?? false,
+      possuiNecessidadeDietaHospitalar:
+          map['possui_necessidade_dieta_hospitalar'] ?? false,
+      resumoNecessidadeDietaHospitalar:
+          map['resumo_necessidade_dieta_hospitalar'] ?? '',
+      possuiSuplementacaoNutricional:
+          map['possui_suplementacao_nutricional'] ?? false,
       resumoSuplementoNutricional: map['resumo_suplemento_nutricional'] ?? '',
       possuiTabagismo: map['possui_tabagismo'] ?? false,
       possuiEtilismo: map['possui_etilismo'] ?? false,
@@ -264,9 +272,11 @@ class AtendimentoModel {
       ca: (map['ca'] ?? 0).toDouble(),
       aj: (map['aj'] ?? 0).toDouble(),
       porcentagemGc: (map['porcentagem_gc'] ?? 0).toDouble(),
-      porcentagemPercaPesoPorTempo: (map['porcentagem_perca_peso_por_tempo'] ?? 0).toDouble(),
+      porcentagemPercaPesoPorTempo:
+          (map['porcentagem_perca_peso_por_tempo'] ?? 0).toDouble(),
       diagnosticoNutricional: map['diagnostico_nutricional'] ?? '',
-      resumoMedicamentosVitaminasMineraisPrescritos: map['resumo_medicamentos_vitaminas_minerais_prescritos'] ?? '',
+      resumoMedicamentosVitaminasMineraisPrescritos:
+          map['resumo_medicamentos_vitaminas_minerais_prescritos'] ?? '',
       resumoExamesLaboratoriais: map['resumo_exames_laboratoriais'] ?? '',
       resumoExameFisico: map['resumo_exame_fisico'] ?? '',
       observacaoSupervisor: map['observacao_supervisor'] ?? '',
@@ -278,7 +288,7 @@ class AtendimentoModel {
       atualizadoEm: (map['atualizado_em'] as Timestamp).toDate(),
       atualizadoPor: map['atualizado_por'] ?? '',
       nomeAluno: map['nome_aluno'] ?? '',
-      nomeProfessor: map['nome_profesor'] ?? '',
+      nomeProfessor: map['nome_professor'] ?? '',
     );
   }
 
@@ -286,7 +296,7 @@ class AtendimentoModel {
     return {
       'nome': nome,
       'sexo': sexo,
-      'data_nascimento': dataNascimento,
+      'data_nascimento': Timestamp.fromDate(dataNascimento),
       'hospital': hospital,
       'clinica': clinica,
       'quarto': quarto,
@@ -331,12 +341,13 @@ class AtendimentoModel {
       'prescricao_dietoterapica': prescricaoDietoterapica,
       'aceitacao': aceitacao,
       'alimentacao_habitual': alimentacaoHabitual,
-      'possui_doenca_antererior': possuiDoencaAnterior,
+      'possui_doenca_anterior': possuiDoencaAnterior,
       'possui_cirurgia_recente': possuiCirurgiaRecente,
       'possui_febre': possuiFebre,
       'possui_alteracao_peso_recente': possuiAlteracaoPesoRecente,
       'quantidade_perca_peso_recente': quantidadePercaPesoRecente,
-      'possui_desconforto_oral_gastrointestinal': possuiDesconfortoOralGastrointestinal,
+      'possui_desconforto_oral_gastrointestinal':
+          possuiDesconfortoOralGastrointestinal,
       'possui_necessidade_dieta_hospitalar': possuiNecessidadeDietaHospitalar,
       'resumo_necessidade_dieta_hospitalar': resumoNecessidadeDietaHospitalar,
       'possui_suplementacao_nutricional': possuiSuplementacaoNutricional,
@@ -361,16 +372,15 @@ class AtendimentoModel {
       'porcentagem_gc': porcentagemGc,
       'porcentagem_perca_peso_por_tempo': porcentagemPercaPesoPorTempo,
       'diagnostico_nutricional': diagnosticoNutricional,
-      'resumo_medicamentos_vitaminas_minerais_prescritos': resumoMedicamentosVitaminasMineraisPrescritos,
+      'resumo_medicamentos_vitaminas_minerais_prescritos':
+          resumoMedicamentosVitaminasMineraisPrescritos,
       'resumo_exames_laboratoriais': resumoExamesLaboratoriais,
       'resumo_exame_fisico': resumoExameFisico,
       'observacao_supervisor': observacaoSupervisor,
       'id_aluno': idAluno,
       'id_professor_supervisor': idProfessorSupervisor,
       'status_atendimento': statusAtendimento,
-      'criado_em': criadoEm,
       'criado_por': criadoPor,
-      'atualizado_em': atualizadoEm,
       'atualizado_por': atualizadoPor,
       'nome_aluno': nomeAluno,
       'nome_professor': nomeProfessor,
