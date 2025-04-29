@@ -634,10 +634,14 @@ class AtendimentoService {
   Future<void> salvarCondutaNutricional({
     required String estagiario,
     required String professor,
+    required String idEstagiario,
+    required String idProfessor,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$_prefsKeyConduta.estagiario', estagiario);
     await prefs.setString('$_prefsKeyConduta.professor', professor);
+    await prefs.setString('$_prefsKeyConduta.idEstagiario', idEstagiario);
+    await prefs.setString('$_prefsKeyConduta.idProfessor', idProfessor);
   }
 
   Future<Map<String, String>> carregarCondutaNutricional() async {
@@ -717,4 +721,6 @@ Future<Map<String, dynamic>> obterDadosCompletos() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('professor_selecionado');
   }
+
+  obterAtendimentoAtual() {}
 }

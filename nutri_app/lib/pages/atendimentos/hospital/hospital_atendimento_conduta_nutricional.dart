@@ -10,6 +10,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HospitalAtendimentoCondutaNutricionalPage extends StatefulWidget {
   const HospitalAtendimentoCondutaNutricionalPage({super.key});
@@ -35,12 +36,99 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   @override
   void initState() {
     super.initState();
-    _carregarUsuarioLogado();
+    _carregarDados();
     _carregarProfessores();
   }
 
-  Future<void> _carregarUsuarioLogado() async {
+  Future<void> _carregarDados() async {
     setState(() => isLoading = true);
+    try {
+      // 1. Tentar carregar do Firebase (se houver atendimento em andamento)
+      final dadosFirebase = await _obterDadosDoFirebase();
+      if (dadosFirebase != null) {
+        _instanciarDadosFirebase(dadosFirebase);
+        return;
+      }
+
+      // 2. Tentar carregar do cache local
+      final dadosCache = await _obterDadosDoCache();
+      if (dadosCache != null) {
+        _instanciarDadosCache(dadosCache);
+        return;
+      }
+
+      await _carregarUsuarioLogado();
+    } catch (e) {
+      print('Erro ao carregar dados: $e');
+      ToastUtil.showToast(
+        context: context,
+        message: 'Falha ao carregar dados',
+        isError: true,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  Future<Map<String, dynamic>?> _obterDadosDoFirebase() async {
+    try {
+      final atendimentoAtual =
+          await _atendimentoService.obterAtendimentoAtual();
+      if (atendimentoAtual != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('atendimento')
+            .doc(atendimentoAtual)
+            .get();
+
+        if (doc.exists) {
+          return doc.data();
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao carregar do Firebase: $e');
+      return null;
+    }
+  }
+
+  void _instanciarDadosFirebase(Map<String, dynamic> dados) {
+    setState(() {
+      _estagiarioNomeController.text = dados['estagiarioNome'] ?? '';
+      _professorSelecionado = dados['professorNome'] ?? 'Selecione';
+    });
+  }
+
+  Future<Map<String, dynamic>?> _obterDadosDoCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final estagiario =
+          prefs.getString('hospital_atendimento_conduta.estagiario');
+      final professor =
+          prefs.getString('hospital_atendimento_conduta.professor');
+
+      if (estagiario != null || professor != null) {
+        return {
+          'estagiarioNome': estagiario,
+          'professorNome': professor,
+        };
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao carregar do cache: $e');
+      return null;
+    }
+  }
+
+  void _instanciarDadosCache(Map<String, dynamic> dados) {
+    setState(() {
+      _estagiarioNomeController.text = dados['estagiarioNome'] ?? '';
+      _professorSelecionado = dados['professorNome'] ?? 'Selecione';
+    });
+  }
+
+  Future<void> _carregarUsuarioLogado() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -57,13 +145,6 @@ class _HospitalAtendimentoCondutaNutricionalPageState
       }
     } catch (e) {
       print('Erro ao carregar usuário logado: $e');
-      ToastUtil.showToast(
-        context: context,
-        message: 'Falha ao carregar dados do usuário',
-        isError: true,
-      );
-    } finally {
-      setState(() => isLoading = false);
     }
   }
 
@@ -113,27 +194,37 @@ class _HospitalAtendimentoCondutaNutricionalPageState
 
     setState(() => isLoading = true);
     try {
-      // Salva o professor selecionado independente do sucesso
+      // 1. Buscar IDs do estagiário e professor
+      final estagiarioId =
+          await _buscarIdUsuarioPorNome(_estagiarioNomeController.text);
+      final professorId = await _buscarIdUsuarioPorNome(_professorSelecionado!);
+
+      if (estagiarioId == null || professorId == null) {
+        throw Exception('Não foi possível encontrar os IDs necessários');
+      }
+
+      // 2. Salva o professor selecionado
       await _atendimentoService
           .salvarProfessorSelecionado(_professorSelecionado!);
 
-      // 1. Salva conduta localmente
+      // 3. Salva conduta localmente com os IDs
       await _atendimentoService.salvarCondutaNutricional(
         estagiario: _estagiarioNomeController.text,
         professor: _professorSelecionado!,
+        idEstagiario: estagiarioId,
+        idProfessor: professorId,
       );
 
-      // 2. Obtém todos os dados consolidados localmente
+      // 4. Obtém todos os dados consolidados localmente
       final dadosCompletos = await _atendimentoService.obterDadosCompletos();
 
-      print('Dados completos: $dadosCompletos');
-      // 3. Salva os dados completos no Firebase
+      // 5. Salva os dados completos no Firebase
       await _atendimentoService.salvarAtendimentoNoFirebase(dadosCompletos);
 
-      // 4. Limpa dados locais (incluindo o professor selecionado)
+      // 6. Limpa dados locais (incluindo o professor selecionado)
       await _atendimentoService.limparTodosDados();
 
-      // 5. Feedback e navegação
+      // 7. Feedback e navegação
       ToastUtil.showToast(
         context: context,
         message: 'Atendimento salvo com sucesso!',
@@ -141,10 +232,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
       );
 
       if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => AtendimentoPage()),
-          (route) => false,
-        );
+        Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
       ToastUtil.showToast(
@@ -160,6 +248,23 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     }
   }
 
+  Future<String?> _buscarIdUsuarioPorNome(String nome) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('nome', isEqualTo: nome)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first.id;
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao buscar ID do usuário: $e');
+      return null;
+    }
+  }
 
   void _showCancelConfirmationDialog() {
     showDialog(

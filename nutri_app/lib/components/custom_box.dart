@@ -14,7 +14,7 @@ class CustomBox extends StatelessWidget {
     required this.imagePath,
     required this.onTap,
     this.labelFontSize = 14,
-    this.cardWidth = 80,
+    this.cardWidth = 90,
   });
 
   @override
