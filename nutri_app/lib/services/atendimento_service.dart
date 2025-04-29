@@ -10,7 +10,7 @@ class AtendimentoService {
   Future<void> salvarDadosIdentificacao({
     required String nome,
     required String sexo,
-    required String data_nascimento,
+    required Timestamp data_nascimento,
     required String hospital,
     required String clinica,
     required String quarto,
@@ -20,8 +20,8 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
     await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
-    await prefs.setString(
-        '$_prefsKeyIdentificacao.data_nascimento', data_nascimento);
+    await prefs.setString('$_prefsKeyIdentificacao.data_nascimento',
+        data_nascimento.toDate().toIso8601String());
     await prefs.setString('$_prefsKeyIdentificacao.hospital', hospital);
     await prefs.setString('$_prefsKeyIdentificacao.clinica', clinica);
     await prefs.setString('$_prefsKeyIdentificacao.quarto', quarto);
@@ -29,13 +29,28 @@ class AtendimentoService {
     await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
   }
 
-  Future<Map<String, String>> carregarDadosIdentificacao() async {
+  Future<Map<String, dynamic>> carregarDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Carrega a data como string
+    final dataString =
+        prefs.getString('$_prefsKeyIdentificacao.data_nascimento') ?? '';
+
+    // Converte para Timestamp se a string não estiver vazia
+    Timestamp? dataTimestamp;
+    if (dataString.isNotEmpty) {
+      try {
+        final dateTime = DateTime.parse(dataString);
+        dataTimestamp = Timestamp.fromDate(dateTime);
+      } catch (e) {
+        print("Erro ao converter data: $e");
+      }
+    }
+
     return {
       'nome': prefs.getString('$_prefsKeyIdentificacao.nome') ?? '',
       'sexo': prefs.getString('$_prefsKeyIdentificacao.sexo') ?? 'Selecione',
-      'data_nascimento':
-          prefs.getString('$_prefsKeyIdentificacao.data_nascimento') ?? '',
+      'data_nascimento': dataTimestamp, // Retorna como Timestamp ou null
       'hospital': prefs.getString('$_prefsKeyIdentificacao.hospital') ?? '',
       'clinica': prefs.getString('$_prefsKeyIdentificacao.clinica') ?? '',
       'quarto': prefs.getString('$_prefsKeyIdentificacao.quarto') ?? '',
@@ -650,12 +665,12 @@ class AtendimentoService {
       'kcal_kg': prefs.getString('$_prefsKeyRequerimentos.kcal_kg') ?? '',
       'cho': prefs.getString('$_prefsKeyRequerimentos.cho') ?? '',
       'lip': prefs.getString('$_prefsKeyRequerimentos.lip') ?? '',
-      'Ptn':
-          prefs.getString('$_prefsKeyRequerimentos.Ptn') ?? '',
+      'Ptn': prefs.getString('$_prefsKeyRequerimentos.Ptn') ?? '',
       'ptn_kg': prefs.getString('$_prefsKeyRequerimentos.ptn_kg') ?? '',
       'ptn_dia': prefs.getString('$_prefsKeyRequerimentos.ptn_dia') ?? '',
       'liquido_kg': prefs.getString('$_prefsKeyRequerimentos.liquido_kg') ?? '',
-      'liquido_dia': prefs.getString('$_prefsKeyRequerimentos.liquido_dia') ?? '',
+      'liquido_dia':
+          prefs.getString('$_prefsKeyRequerimentos.liquido_dia') ?? '',
       'fibras': prefs.getString('$_prefsKeyRequerimentos.fibras') ?? '',
       'outros': prefs.getString('$_prefsKeyRequerimentos.outros') ?? '',
     };
@@ -774,12 +789,12 @@ class AtendimentoService {
 
   Future<void> salvarProfessorSelecionado(String professor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('professor_selecionado', professor);
+    await prefs.setString('hospital_atendimento.professor_selecionado', professor);
   }
 
   Future<String?> carregarProfessorSelecionado() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('professor_selecionado');
+    return prefs.getString('hospital_atendimento.professor_selecionado');
   }
 
   obterAtendimentoAtual() {}

@@ -135,10 +135,20 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   Future<void> _salvarDadosIdentificacao() async {
+    // Converte a string "DD/MM/AAAA" para DateTime
+    final dateParts = birthDateController.text.split('/');
+    final parsedDate = DateTime(
+      int.parse(dateParts[2]), // Ano
+      int.parse(dateParts[1]), // Mês
+      int.parse(dateParts[0]), // Dia
+    );
+
+    final timestamp = Timestamp.fromDate(parsedDate);
+
     await _atendimentoService.salvarDadosIdentificacao(
       nome: nameController.text,
       sexo: selectedGender,
-      data_nascimento: birthDateController.text,
+      data_nascimento: timestamp,
       hospital: hospitalController.text,
       clinica: clinicController.text,
       quarto: roomController.text,
