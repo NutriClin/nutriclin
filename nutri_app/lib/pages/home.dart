@@ -49,22 +49,22 @@ class HomePage extends StatelessWidget {
     cards.add(const SizedBox(width: 10));
 
     if (tipoUsuario == 'Professor' || tipoUsuario == 'Aluno') {
-      cards.addAll([
-        CustomBox(
-          labelFontSize: labelFontSize,
-          text: 'Relatórios',
-          imagePath: 'assets/imagens/relatorio.svg',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RelatoriosPage(),
-              ),
-            );
-          },
-        ),
-      ]);
-      cards.add(const SizedBox(width: 10));
+      // cards.addAll([
+      //   CustomBox(
+      //     labelFontSize: labelFontSize,
+      //     text: 'Relatórios',
+      //     imagePath: 'assets/imagens/relatorio.svg',
+      //     onTap: () {
+      //       Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //           builder: (context) => RelatoriosPage(),
+      //         ),
+      //       );
+      //     },
+      //   ),
+      // ]);
+      // cards.add(const SizedBox(width: 10));
     }
 
     // Exibe os cards dependendo do tipo de usuário

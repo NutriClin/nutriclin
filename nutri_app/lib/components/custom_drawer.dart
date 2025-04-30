@@ -128,40 +128,41 @@ List<Widget> _buildMenuItems(BuildContext context, String? tipoUsuario) {
         },
       ),
     );
-    items.add(
-      ListTile(
-        leading: const Icon(Icons.insert_drive_file_rounded,
-            color: Color(0xFF007AFF)),
-        title: const Text('Relatórios'),
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RelatoriosPage(),
-            ),
-          );
-        },
-      ),
-    );
-  } else if (tipoUsuario == 'Professor') {
-    items.add(
-      ListTile(
-        leading: const Icon(Icons.insert_drive_file_rounded,
-            color: Color(0xFF007AFF)),
-        title: const Text('Relatórios'),
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RelatoriosPage(),
-            ),
-          );
-        },
-      ),
-    );
+    // items.add(
+    //   ListTile(
+    //     leading: const Icon(Icons.insert_drive_file_rounded,
+    //         color: Color(0xFF007AFF)),
+    //     title: const Text('Relatórios'),
+    //     onTap: () {
+    //       Navigator.pop(context);
+    //       Navigator.push(
+    //         context,
+    //         MaterialPageRoute(
+    //           builder: (context) => RelatoriosPage(),
+    //         ),
+    //       );
+    //     },
+    //   ),
+    // );
   }
+  // else if (tipoUsuario == 'Professor') {
+  //   items.add(
+  //     ListTile(
+  //       leading: const Icon(Icons.insert_drive_file_rounded,
+  //           color: Color(0xFF007AFF)),
+  //       title: const Text('Relatórios'),
+  //       onTap: () {
+  //         Navigator.pop(context);
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => RelatoriosPage(),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 
   return items;
 }
