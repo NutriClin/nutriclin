@@ -1,4 +1,3 @@
 [build]
   base = "nutri_app"
   publish = "build/web"
-  command = "flutter build web"
