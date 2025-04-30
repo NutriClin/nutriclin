@@ -1,1 +1,39 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"nutriclin-f4e29","configurations":{"android":"1:386693907771:android:9a441f722d90957255a31e","ios":"1:386693907771:ios:c5407af3d8669d9855a31e","macos":"1:386693907771:ios:c5407af3d8669d9855a31e","web":"1:386693907771:web:6266cae40803b0cc55a31e","windows":"1:386693907771:web:642e771dd0547bd855a31e"}}},"android":{"default":{"projectId":"nutriclin-f4e29","appId":"1:386693907771:android:9a441f722d90957255a31e","fileOutput":"android/app/google-services.json"}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "nutriclin-f4e29",
+          "configurations": {
+            "android": "1:386693907771:android:9a441f722d90957255a31e",
+            "ios": "1:386693907771:ios:c5407af3d8669d9855a31e",
+            "macos": "1:386693907771:ios:c5407af3d8669d9855a31e",
+            "web": "1:386693907771:web:6266cae40803b0cc55a31e",
+            "windows": "1:386693907771:web:642e771dd0547bd855a31e"
+          }
+        }
+      },
+      "android": {
+        "default": {
+          "projectId": "nutriclin-f4e29",
+          "appId": "1:386693907771:android:9a441f722d90957255a31e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
