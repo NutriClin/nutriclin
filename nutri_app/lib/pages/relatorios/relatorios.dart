@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/toast_util.dart';
-import 'package:nutri_app/components/custom_list_atendimento.dart'; // Importa o novo widget
+import 'package:nutri_app/components/custom_list_atendimento.dart';
 
 class RelatoriosPage extends StatefulWidget {
   const RelatoriosPage({super.key});

@@ -46,7 +46,26 @@ class HomePage extends StatelessWidget {
         },
       ),
     );
-    cards.add(const SizedBox(width: 20));
+    cards.add(const SizedBox(width: 10));
+
+    if (tipoUsuario == 'Professor' || tipoUsuario == 'Aluno') {
+      // cards.addAll([
+      //   CustomBox(
+      //     labelFontSize: labelFontSize,
+      //     text: 'Relatórios',
+      //     imagePath: 'assets/imagens/relatorio.svg',
+      //     onTap: () {
+      //       Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //           builder: (context) => RelatoriosPage(),
+      //         ),
+      //       );
+      //     },
+      //   ),
+      // ]);
+      // cards.add(const SizedBox(width: 10));
+    }
 
     // Exibe os cards dependendo do tipo de usuário
     if (tipoUsuario == 'Coordenador') {
@@ -60,23 +79,6 @@ class HomePage extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => const UsuarioPage(),
-              ),
-            );
-          },
-        ),
-      ]);
-    } else if (tipoUsuario == 'Professor') {
-      cards.addAll([
-        CustomBox(
-          labelFontSize: labelFontSize,
-          cardWidth: 40,
-          text: 'Relatórios',
-          imagePath: 'assets/imagens/relatorio.svg',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RelatoriosPage(),
               ),
             );
           },

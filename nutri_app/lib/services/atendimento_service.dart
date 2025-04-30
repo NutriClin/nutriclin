@@ -8,51 +8,67 @@ class AtendimentoService {
       'hospital_atendimento_identificacao';
 
   Future<void> salvarDadosIdentificacao({
-    required String name,
-    required String gender,
-    required String birthDate,
+    required String nome,
+    required String sexo,
+    required Timestamp data_nascimento,
     required String hospital,
-    required String clinic,
-    required String room,
-    required String bed,
-    required String record,
+    required String clinica,
+    required String quarto,
+    required String leito,
+    required String registro,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('$_prefsKeyIdentificacao.name', name);
-    await prefs.setString('$_prefsKeyIdentificacao.gender', gender);
-    await prefs.setString('$_prefsKeyIdentificacao.birthDate', birthDate);
+    await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
+    await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
+    await prefs.setString('$_prefsKeyIdentificacao.data_nascimento',
+        data_nascimento.toDate().toIso8601String());
     await prefs.setString('$_prefsKeyIdentificacao.hospital', hospital);
-    await prefs.setString('$_prefsKeyIdentificacao.clinic', clinic);
-    await prefs.setString('$_prefsKeyIdentificacao.room', room);
-    await prefs.setString('$_prefsKeyIdentificacao.bed', bed);
-    await prefs.setString('$_prefsKeyIdentificacao.record', record);
+    await prefs.setString('$_prefsKeyIdentificacao.clinica', clinica);
+    await prefs.setString('$_prefsKeyIdentificacao.quarto', quarto);
+    await prefs.setString('$_prefsKeyIdentificacao.leito', leito);
+    await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
   }
 
-  Future<Map<String, String>> carregarDadosIdentificacao() async {
+  Future<Map<String, dynamic>> carregarDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Carrega a data como string
+    final dataString =
+        prefs.getString('$_prefsKeyIdentificacao.data_nascimento') ?? '';
+
+    // Converte para Timestamp se a string não estiver vazia
+    Timestamp? dataTimestamp;
+    if (dataString.isNotEmpty) {
+      try {
+        final dateTime = DateTime.parse(dataString);
+        dataTimestamp = Timestamp.fromDate(dateTime);
+      } catch (e) {
+        print("Erro ao converter data: $e");
+      }
+    }
+
     return {
-      'name': prefs.getString('$_prefsKeyIdentificacao.name') ?? '',
-      'gender':
-          prefs.getString('$_prefsKeyIdentificacao.gender') ?? 'Selecione',
-      'birthDate': prefs.getString('$_prefsKeyIdentificacao.birthDate') ?? '',
+      'nome': prefs.getString('$_prefsKeyIdentificacao.nome') ?? '',
+      'sexo': prefs.getString('$_prefsKeyIdentificacao.sexo') ?? 'Selecione',
+      'data_nascimento': dataTimestamp, // Retorna como Timestamp ou null
       'hospital': prefs.getString('$_prefsKeyIdentificacao.hospital') ?? '',
-      'clinic': prefs.getString('$_prefsKeyIdentificacao.clinic') ?? '',
-      'room': prefs.getString('$_prefsKeyIdentificacao.room') ?? '',
-      'bed': prefs.getString('$_prefsKeyIdentificacao.bed') ?? '',
-      'record': prefs.getString('$_prefsKeyIdentificacao.record') ?? '',
+      'clinica': prefs.getString('$_prefsKeyIdentificacao.clinica') ?? '',
+      'quarto': prefs.getString('$_prefsKeyIdentificacao.quarto') ?? '',
+      'leito': prefs.getString('$_prefsKeyIdentificacao.leito') ?? '',
+      'registro': prefs.getString('$_prefsKeyIdentificacao.registro') ?? '',
     };
   }
 
   Future<void> limparDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('$_prefsKeyIdentificacao.name');
-    await prefs.remove('$_prefsKeyIdentificacao.gender');
-    await prefs.remove('$_prefsKeyIdentificacao.birthDate');
+    await prefs.remove('$_prefsKeyIdentificacao.nome');
+    await prefs.remove('$_prefsKeyIdentificacao.sexo');
+    await prefs.remove('$_prefsKeyIdentificacao.data_nascimento');
     await prefs.remove('$_prefsKeyIdentificacao.hospital');
-    await prefs.remove('$_prefsKeyIdentificacao.clinic');
-    await prefs.remove('$_prefsKeyIdentificacao.room');
-    await prefs.remove('$_prefsKeyIdentificacao.bed');
-    await prefs.remove('$_prefsKeyIdentificacao.record');
+    await prefs.remove('$_prefsKeyIdentificacao.clinica');
+    await prefs.remove('$_prefsKeyIdentificacao.quarto');
+    await prefs.remove('$_prefsKeyIdentificacao.leito');
+    await prefs.remove('$_prefsKeyIdentificacao.registro');
   }
 
   // Dados socioeconômicos
@@ -74,66 +90,70 @@ class AtendimentoService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setBool('$_prefsKeySocioeconomico.aguaEncanada', aguaEncanada);
+    await prefs.setBool('$_prefsKeySocioeconomico.agua_encanada', aguaEncanada);
     await prefs.setBool(
-        '$_prefsKeySocioeconomico.esgotoEncanado', esgotoEncanado);
-    await prefs.setBool('$_prefsKeySocioeconomico.coletaLixo', coletaLixo);
-    await prefs.setBool('$_prefsKeySocioeconomico.luzEletrica', luzEletrica);
-    await prefs.setString('$_prefsKeySocioeconomico.tipoCasa', tipoCasa);
-    await prefs.setString('$_prefsKeySocioeconomico.numPessoas', numPessoas);
+        '$_prefsKeySocioeconomico.esgoto_encanado', esgotoEncanado);
+    await prefs.setBool('$_prefsKeySocioeconomico.coleta_lixo', coletaLixo);
+    await prefs.setBool('$_prefsKeySocioeconomico.luz_eletrica', luzEletrica);
+    await prefs.setString('$_prefsKeySocioeconomico.tipo_casa', tipoCasa);
     await prefs.setString(
-        '$_prefsKeySocioeconomico.rendaFamiliar', rendaFamiliar);
+        '$_prefsKeySocioeconomico.numero_pessoas_moram_junto', numPessoas);
     await prefs.setString(
-        '$_prefsKeySocioeconomico.rendaPerCapita', rendaPerCapita);
+        '$_prefsKeySocioeconomico.renda_familiar', rendaFamiliar);
+    await prefs.setString(
+        '$_prefsKeySocioeconomico.renda_per_capita', rendaPerCapita);
     await prefs.setString(
         '$_prefsKeySocioeconomico.escolaridade', escolaridade);
     await prefs.setString('$_prefsKeySocioeconomico.profissao', profissao);
     await prefs.setString(
-        '$_prefsKeySocioeconomico.producaoAlimentos', producaoAlimentos);
+        '$_prefsKeySocioeconomico.producao_domestica_alimentos',
+        producaoAlimentos);
   }
 
   Future<Map<String, dynamic>> carregarDadosSocioeconomicos() async {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'aguaEncanada':
-          prefs.getBool('$_prefsKeySocioeconomico.aguaEncanada') ?? false,
-      'esgotoEncanado':
-          prefs.getBool('$_prefsKeySocioeconomico.esgotoEncanado') ?? false,
-      'coletaLixo':
-          prefs.getBool('$_prefsKeySocioeconomico.coletaLixo') ?? false,
-      'luzEletrica':
-          prefs.getBool('$_prefsKeySocioeconomico.luzEletrica') ?? false,
-      'tipoCasa':
-          prefs.getString('$_prefsKeySocioeconomico.tipoCasa') ?? 'Selecione',
-      'numPessoas':
-          prefs.getString('$_prefsKeySocioeconomico.numPessoas') ?? '',
-      'rendaFamiliar':
-          prefs.getString('$_prefsKeySocioeconomico.rendaFamiliar') ?? '',
-      'rendaPerCapita':
-          prefs.getString('$_prefsKeySocioeconomico.rendaPerCapita') ?? '',
+      'agua_encanada':
+          prefs.getBool('$_prefsKeySocioeconomico.agua_encanada') ?? false,
+      'esgoto_encanado':
+          prefs.getBool('$_prefsKeySocioeconomico.esgoto_encanado') ?? false,
+      'coleta_lixo':
+          prefs.getBool('$_prefsKeySocioeconomico.coleta_lixo') ?? false,
+      'luz_eletrica':
+          prefs.getBool('$_prefsKeySocioeconomico.luz_eletrica') ?? false,
+      'tipo_casa':
+          prefs.getString('$_prefsKeySocioeconomico.tipo_casa') ?? 'Selecione',
+      'numero_pessoas_moram_junto': prefs.getString(
+              '$_prefsKeySocioeconomico.numero_pessoas_moram_junto') ??
+          '',
+      'renda_familiar':
+          prefs.getString('$_prefsKeySocioeconomico.renda_familiar') ?? '',
+      'renda_per_capita':
+          prefs.getString('$_prefsKeySocioeconomico.renda_per_capita') ?? '',
       'escolaridade':
           prefs.getString('$_prefsKeySocioeconomico.escolaridade') ?? '',
       'profissao': prefs.getString('$_prefsKeySocioeconomico.profissao') ?? '',
-      'producaoAlimentos':
-          prefs.getString('$_prefsKeySocioeconomico.producaoAlimentos') ?? '',
+      'producao_domestica_alimentos': prefs.getString(
+              '$_prefsKeySocioeconomico.producao_domestica_alimentos') ??
+          '',
     };
   }
 
   Future<void> limparDadosSocioeconomicos() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeySocioeconomico.aguaEncanada');
-    await prefs.remove('$_prefsKeySocioeconomico.esgotoEncanado');
-    await prefs.remove('$_prefsKeySocioeconomico.coletaLixo');
-    await prefs.remove('$_prefsKeySocioeconomico.luzEletrica');
-    await prefs.remove('$_prefsKeySocioeconomico.tipoCasa');
-    await prefs.remove('$_prefsKeySocioeconomico.numPessoas');
-    await prefs.remove('$_prefsKeySocioeconomico.rendaFamiliar');
-    await prefs.remove('$_prefsKeySocioeconomico.rendaPerCapita');
+    await prefs.remove('$_prefsKeySocioeconomico.agua_encanada');
+    await prefs.remove('$_prefsKeySocioeconomico.esgoto_encanado');
+    await prefs.remove('$_prefsKeySocioeconomico.coleta_lixo');
+    await prefs.remove('$_prefsKeySocioeconomico.luz_eletrica');
+    await prefs.remove('$_prefsKeySocioeconomico.tipo_casa');
+    await prefs.remove('$_prefsKeySocioeconomico.numero_pessoas_moram_junto');
+    await prefs.remove('$_prefsKeySocioeconomico.renda_familiar');
+    await prefs.remove('$_prefsKeySocioeconomico.renda_per_capita');
     await prefs.remove('$_prefsKeySocioeconomico.escolaridade');
     await prefs.remove('$_prefsKeySocioeconomico.profissao');
-    await prefs.remove('$_prefsKeySocioeconomico.producaoAlimentos');
+    await prefs.remove('$_prefsKeySocioeconomico.producao_domestica_alimentos');
   }
 
 // Antecedentes pessoais
@@ -156,11 +176,11 @@ class AtendimentoService {
     await prefs.setBool('$_prefsKeyAntecedentesPessoais.has', has);
     await prefs.setBool('$_prefsKeyAntecedentesPessoais.cancer', cancer);
     await prefs.setBool(
-        '$_prefsKeyAntecedentesPessoais.excessoPeso', excessoPeso);
+        '$_prefsKeyAntecedentesPessoais.excesso_peso', excessoPeso);
     await prefs.setBool('$_prefsKeyAntecedentesPessoais.diabetes', diabetes);
     await prefs.setBool('$_prefsKeyAntecedentesPessoais.outros', outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesPessoais.outrosDescricao', outrosDescricao);
+        '$_prefsKeyAntecedentesPessoais.outros_descricao', outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesPessoais() async {
@@ -172,13 +192,13 @@ class AtendimentoService {
               false,
       'has': prefs.getBool('$_prefsKeyAntecedentesPessoais.has') ?? false,
       'cancer': prefs.getBool('$_prefsKeyAntecedentesPessoais.cancer') ?? false,
-      'excessoPeso':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.excessoPeso') ?? false,
+      'excesso_peso':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.excesso_peso') ?? false,
       'diabetes':
           prefs.getBool('$_prefsKeyAntecedentesPessoais.diabetes') ?? false,
       'outros': prefs.getBool('$_prefsKeyAntecedentesPessoais.outros') ?? false,
-      'outrosDescricao':
-          prefs.getString('$_prefsKeyAntecedentesPessoais.outrosDescricao') ??
+      'outros_descricao':
+          prefs.getString('$_prefsKeyAntecedentesPessoais.outros_descricao') ??
               '',
     };
   }
@@ -189,10 +209,10 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyAntecedentesPessoais.dislipidemias');
     await prefs.remove('$_prefsKeyAntecedentesPessoais.has');
     await prefs.remove('$_prefsKeyAntecedentesPessoais.cancer');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.excessoPeso');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.excesso_peso');
     await prefs.remove('$_prefsKeyAntecedentesPessoais.diabetes');
     await prefs.remove('$_prefsKeyAntecedentesPessoais.outros');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.outrosDescricao');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.outros_descricao');
   }
 
 // Antecedentes familiares
@@ -215,11 +235,11 @@ class AtendimentoService {
     await prefs.setBool('$_prefsKeyAntecedentesFamiliares.has', has);
     await prefs.setBool('$_prefsKeyAntecedentesFamiliares.cancer', cancer);
     await prefs.setBool(
-        '$_prefsKeyAntecedentesFamiliares.excessoPeso', excessoPeso);
+        '$_prefsKeyAntecedentesFamiliares.excesso_peso', excessoPeso);
     await prefs.setBool('$_prefsKeyAntecedentesFamiliares.diabetes', diabetes);
     await prefs.setBool('$_prefsKeyAntecedentesFamiliares.outros', outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesFamiliares.outrosDescricao', outrosDescricao);
+        '$_prefsKeyAntecedentesFamiliares.outros_descricao', outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesFamiliares() async {
@@ -232,16 +252,16 @@ class AtendimentoService {
       'has': prefs.getBool('$_prefsKeyAntecedentesFamiliares.has') ?? false,
       'cancer':
           prefs.getBool('$_prefsKeyAntecedentesFamiliares.cancer') ?? false,
-      'excessoPeso':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.excessoPeso') ??
+      'excesso_peso':
+          prefs.getBool('$_prefsKeyAntecedentesFamiliares.excesso_peso') ??
               false,
       'diabetes':
           prefs.getBool('$_prefsKeyAntecedentesFamiliares.diabetes') ?? false,
       'outros':
           prefs.getBool('$_prefsKeyAntecedentesFamiliares.outros') ?? false,
-      'outrosDescricao':
-          prefs.getString('$_prefsKeyAntecedentesFamiliares.outrosDescricao') ??
-              '',
+      'outros_descricao': prefs
+              .getString('$_prefsKeyAntecedentesFamiliares.outros_descricao') ??
+          '',
     };
   }
 
@@ -254,7 +274,7 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyAntecedentesFamiliares.excessoPeso');
     await prefs.remove('$_prefsKeyAntecedentesFamiliares.diabetes');
     await prefs.remove('$_prefsKeyAntecedentesFamiliares.outros');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.outrosDescricao');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.outros_descricao');
   }
 
 // Dados clínicos e nutricionais
@@ -289,150 +309,188 @@ class AtendimentoService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Dados básicos
-    await prefs.setString('$_prefsKeyDadosClinicos.diagnostico', diagnostico);
-    await prefs.setString('$_prefsKeyDadosClinicos.prescricao', prescricao);
+    // Dados clínicos e nutricionais
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.diagnostico_clinico', diagnostico);
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.prescricao_dietoterapica', prescricao);
     await prefs.setString('$_prefsKeyDadosClinicos.aceitacao', aceitacao);
 
     // Alimentação
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.alimentacaoHabitual', alimentacaoHabitual);
-    await prefs.setString('$_prefsKeyDadosClinicos.especificarAlimentacao',
+        '$_prefsKeyDadosClinicos.alimentacao_habitual', alimentacaoHabitual);
+    await prefs.setString('$_prefsKeyDadosClinicos.resumo_outro_nutriente',
         especificarAlimentacao);
 
     // Histórico médico
     await prefs.setBool(
-        '$_prefsKeyDadosClinicos.doencaAnterior', doencaAnterior);
+        '$_prefsKeyDadosClinicos.possui_doenca_anterior', doencaAnterior);
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.doencaAnteriorDesc', doencaAnteriorDesc);
+        '$_prefsKeyDadosClinicos.diagnostico_nutricional', doencaAnteriorDesc);
     await prefs.setBool(
-        '$_prefsKeyDadosClinicos.cirurgiaRecente', cirurgiaRecente);
-    await prefs.setString('$_prefsKeyDadosClinicos.cirurgiaDesc', cirurgiaDesc);
-    await prefs.setBool('$_prefsKeyDadosClinicos.febre', febre);
+        '$_prefsKeyDadosClinicos.possui_cirurgia_recente', cirurgiaRecente);
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos',
+        cirurgiaDesc);
+    await prefs.setBool('$_prefsKeyDadosClinicos.possui_febre', febre);
 
     // Peso
-    await prefs.setBool('$_prefsKeyDadosClinicos.alteracaoPeso', alteracaoPeso);
-    await prefs.setString('$_prefsKeyDadosClinicos.quantoPeso', quantoPeso);
+    await prefs.setBool(
+        '$_prefsKeyDadosClinicos.possui_alteracao_peso_recente', alteracaoPeso);
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.quantidade_perca_peso_recente', quantoPeso);
 
     // Nutrição
-    await prefs.setBool('$_prefsKeyDadosClinicos.desconfortos', desconfortos);
     await prefs.setBool(
-        '$_prefsKeyDadosClinicos.necessidadeDieta', necessidadeDieta);
-    await prefs.setString('$_prefsKeyDadosClinicos.qualDieta', qualDieta);
-    await prefs.setBool('$_prefsKeyDadosClinicos.suplementacao', suplementacao);
+        '$_prefsKeyDadosClinicos.possui_desconforto_oral_gastrointestinal',
+        desconfortos);
+    await prefs.setBool(
+        '$_prefsKeyDadosClinicos.possui_necessidade_dieta_hospitalar',
+        necessidadeDieta);
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.tipoSuplementacao', tipoSuplementacao);
+        '$_prefsKeyDadosClinicos.resumo_necessidade_dieta_hospitalar',
+        qualDieta);
+    await prefs.setBool(
+        '$_prefsKeyDadosClinicos.possui_suplementacao_nutricional',
+        suplementacao);
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.resumo_suplemento_nutricional',
+        tipoSuplementacao);
 
     // Hábitos
-    await prefs.setBool('$_prefsKeyDadosClinicos.tabagismo', tabagismo);
-    await prefs.setBool('$_prefsKeyDadosClinicos.etilismo', etilismo);
+    await prefs.setBool('$_prefsKeyDadosClinicos.possui_tabagismo', tabagismo);
+    await prefs.setBool('$_prefsKeyDadosClinicos.possui_etilismo', etilismo);
 
     // Condição funcional
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.condicaoFuncional', condicaoFuncional);
-    await prefs.setString(
-        '$_prefsKeyDadosClinicos.especificarCondicao', especificarCondicao);
+        '$_prefsKeyDadosClinicos.possui_condicao_funcional', condicaoFuncional);
+    await prefs.setString('$_prefsKeyDadosClinicos.resumo_condicao_funcional',
+        especificarCondicao);
 
     // Exames e medicamentos
-    await prefs.setString('$_prefsKeyDadosClinicos.medicamentos', medicamentos);
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.examesLaboratoriais', examesLaboratoriais);
-    await prefs.setString('$_prefsKeyDadosClinicos.exameFisico', exameFisico);
+        '$_prefsKeyDadosClinicos.resumo_exames_laboratoriais', medicamentos);
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.resumo_exame_fisico', examesLaboratoriais);
+    await prefs.setString(
+        '$_prefsKeyDadosClinicos.resumo_exame_fisico', exameFisico);
   }
 
   Future<Map<String, dynamic>> carregarDadosClinicosNutricionais() async {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      // Dados básicos
-      'diagnostico':
-          prefs.getString('$_prefsKeyDadosClinicos.diagnostico') ?? '',
-      'prescricao': prefs.getString('$_prefsKeyDadosClinicos.prescricao') ?? '',
+      // Dados clínicos e nutricionais
+      'diagnostico_clinico':
+          prefs.getString('$_prefsKeyDadosClinicos.diagnostico_clinico') ?? '',
+      'prescricao_dietoterapica':
+          prefs.getString('$_prefsKeyDadosClinicos.prescricao_dietoterapica') ??
+              '',
       'aceitacao': prefs.getString('$_prefsKeyDadosClinicos.aceitacao') ?? '',
 
       // Alimentação
-      'alimentacaoHabitual':
-          prefs.getString('$_prefsKeyDadosClinicos.alimentacaoHabitual') ??
+      'alimentacao_habitual':
+          prefs.getString('$_prefsKeyDadosClinicos.alimentacao_habitual') ??
               'Selecione',
-      'especificarAlimentacao':
-          prefs.getString('$_prefsKeyDadosClinicos.especificarAlimentacao') ??
+      'resumo_outro_nutriente':
+          prefs.getString('$_prefsKeyDadosClinicos.resumo_outro_nutriente') ??
               '',
 
       // Histórico médico
-      'doencaAnterior':
-          prefs.getBool('$_prefsKeyDadosClinicos.doencaAnterior') ?? false,
-      'doencaAnteriorDesc':
-          prefs.getString('$_prefsKeyDadosClinicos.doencaAnteriorDesc') ?? '',
-      'cirurgiaRecente':
-          prefs.getBool('$_prefsKeyDadosClinicos.cirurgiaRecente') ?? false,
-      'cirurgiaDesc':
-          prefs.getString('$_prefsKeyDadosClinicos.cirurgiaDesc') ?? '',
-      'febre': prefs.getBool('$_prefsKeyDadosClinicos.febre') ?? false,
+      'possui_doenca_anterior':
+          prefs.getBool('$_prefsKeyDadosClinicos.possui_doenca_anterior') ??
+              false,
+      'diagnostico_nutricional':
+          prefs.getString('$_prefsKeyDadosClinicos.diagnostico_nutricional') ??
+              '',
+      'possui_cirurgia_recente':
+          prefs.getBool('$_prefsKeyDadosClinicos.possui_cirurgia_recente') ??
+              false,
+      'resumo_medicamentos_vitaminas_minerais_prescritos': prefs.getString(
+              '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos') ??
+          '',
+      'possui_febre':
+          prefs.getBool('$_prefsKeyDadosClinicos.possui_febre') ?? false,
 
       // Peso
-      'alteracaoPeso':
-          prefs.getBool('$_prefsKeyDadosClinicos.alteracaoPeso') ?? false,
-      'quantoPeso': prefs.getString('$_prefsKeyDadosClinicos.quantoPeso') ?? '',
+      'possui_alteracao_peso_recente': prefs.getBool(
+              '$_prefsKeyDadosClinicos.possui_alteracao_peso_recente') ??
+          false,
+      'quantidade_perca_peso_recente': prefs.getString(
+              '$_prefsKeyDadosClinicos.quantidade_perca_peso_recente') ??
+          '',
 
       // Nutrição
-      'desconfortos':
-          prefs.getBool('$_prefsKeyDadosClinicos.desconfortos') ?? false,
-      'necessidadeDieta':
-          prefs.getBool('$_prefsKeyDadosClinicos.necessidadeDieta') ?? false,
-      'qualDieta': prefs.getString('$_prefsKeyDadosClinicos.qualDieta') ?? '',
-      'suplementacao':
-          prefs.getBool('$_prefsKeyDadosClinicos.suplementacao') ?? false,
-      'tipoSuplementacao':
-          prefs.getString('$_prefsKeyDadosClinicos.tipoSuplementacao') ?? '',
+      'possui_desconforto_oral_gastrointestinal': prefs.getBool(
+              '$_prefsKeyDadosClinicos.possui_desconforto_oral_gastrointestinal') ??
+          false,
+      'possui_necessidade_dieta_hospitalar': prefs.getBool(
+              '$_prefsKeyDadosClinicos.possui_necessidade_dieta_hospitalar') ??
+          false,
+      'resumo_necessidade_dieta_hospitalar': prefs.getString(
+              '$_prefsKeyDadosClinicos.resumo_necessidade_dieta_hospitalar') ??
+          '',
+      'possui_suplementacao_nutricional': prefs.getBool(
+              '$_prefsKeyDadosClinicos.possui_suplementacao_nutricional') ??
+          false,
+      'resumo_suplemento_nutricional': prefs.getString(
+              '$_prefsKeyDadosClinicos.resumo_suplemento_nutricional') ??
+          '',
 
       // Hábitos
-      'tabagismo': prefs.getBool('$_prefsKeyDadosClinicos.tabagismo') ?? false,
-      'etilismo': prefs.getBool('$_prefsKeyDadosClinicos.etilismo') ?? false,
+      'possui_tabagismo':
+          prefs.getBool('$_prefsKeyDadosClinicos.possui_tabagismo') ?? false,
+      'possui_etilismo':
+          prefs.getBool('$_prefsKeyDadosClinicos.possui_etilismo') ?? false,
 
       // Condição funcional
-      'condicaoFuncional':
-          prefs.getString('$_prefsKeyDadosClinicos.condicaoFuncional') ??
-              'Selecione',
-      'especificarCondicao':
-          prefs.getString('$_prefsKeyDadosClinicos.especificarCondicao') ?? '',
+      'possui_condicao_funcional': prefs
+              .getString('$_prefsKeyDadosClinicos.possui_condicao_funcional') ??
+          'Selecione',
+      'resumo_condicao_funcional': prefs
+              .getString('$_prefsKeyDadosClinicos.resumo_condicao_funcional') ??
+          '',
 
       // Exames e medicamentos
-      'medicamentos':
-          prefs.getString('$_prefsKeyDadosClinicos.medicamentos') ?? '',
-      'examesLaboratoriais':
-          prefs.getString('$_prefsKeyDadosClinicos.examesLaboratoriais') ?? '',
-      'exameFisico':
-          prefs.getString('$_prefsKeyDadosClinicos.exameFisico') ?? '',
+      'resumo_exames_laboratoriais': prefs.getString(
+              '$_prefsKeyDadosClinicos.resumo_exames_laboratoriais') ??
+          '',
+      'resumo_exame_fisico':
+          prefs.getString('$_prefsKeyDadosClinicos.resumo_exame_fisico') ?? '',
     };
   }
 
   Future<void> limparDadosClinicosNutricionais() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyDadosClinicos.diagnostico');
-    await prefs.remove('$_prefsKeyDadosClinicos.prescricao');
+    await prefs.remove('$_prefsKeyDadosClinicos.diagnostico_clinico');
+    await prefs.remove('$_prefsKeyDadosClinicos.prescricao_dietoterapica');
     await prefs.remove('$_prefsKeyDadosClinicos.aceitacao');
-    await prefs.remove('$_prefsKeyDadosClinicos.alimentacaoHabitual');
-    await prefs.remove('$_prefsKeyDadosClinicos.especificarAlimentacao');
-    await prefs.remove('$_prefsKeyDadosClinicos.doencaAnterior');
-    await prefs.remove('$_prefsKeyDadosClinicos.doencaAnteriorDesc');
-    await prefs.remove('$_prefsKeyDadosClinicos.cirurgiaRecente');
-    await prefs.remove('$_prefsKeyDadosClinicos.cirurgiaDesc');
-    await prefs.remove('$_prefsKeyDadosClinicos.febre');
-    await prefs.remove('$_prefsKeyDadosClinicos.alteracaoPeso');
-    await prefs.remove('$_prefsKeyDadosClinicos.quantoPeso');
-    await prefs.remove('$_prefsKeyDadosClinicos.desconfortos');
-    await prefs.remove('$_prefsKeyDadosClinicos.necessidadeDieta');
-    await prefs.remove('$_prefsKeyDadosClinicos.qualDieta');
-    await prefs.remove('$_prefsKeyDadosClinicos.suplementacao');
-    await prefs.remove('$_prefsKeyDadosClinicos.tipoSuplementacao');
-    await prefs.remove('$_prefsKeyDadosClinicos.tabagismo');
-    await prefs.remove('$_prefsKeyDadosClinicos.etilismo');
-    await prefs.remove('$_prefsKeyDadosClinicos.condicaoFuncional');
-    await prefs.remove('$_prefsKeyDadosClinicos.especificarCondicao');
-    await prefs.remove('$_prefsKeyDadosClinicos.medicamentos');
-    await prefs.remove('$_prefsKeyDadosClinicos.examesLaboratoriais');
-    await prefs.remove('$_prefsKeyDadosClinicos.exameFisico');
+    await prefs.remove('$_prefsKeyDadosClinicos.alimentacao_habitual');
+    await prefs.remove('$_prefsKeyDadosClinicos.resumo_outro_nutriente');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_doenca_anterior');
+    await prefs.remove('$_prefsKeyDadosClinicos.diagnostico_nutricional');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_cirurgia_recente');
+    await prefs.remove(
+        '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_febre');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_alteracao_peso_recente');
+    await prefs.remove('$_prefsKeyDadosClinicos.quantidade_perca_peso_recente');
+    await prefs.remove(
+        '$_prefsKeyDadosClinicos.possui_desconforto_oral_gastrointestinal');
+    await prefs
+        .remove('$_prefsKeyDadosClinicos.possui_necessidade_dieta_hospitalar');
+    await prefs
+        .remove('$_prefsKeyDadosClinicos.resumo_necessidade_dieta_hospitalar');
+    await prefs
+        .remove('$_prefsKeyDadosClinicos.possui_suplementacao_nutricional');
+    await prefs.remove('$_prefsKeyDadosClinicos.resumo_suplemento_nutricional');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_tabagismo');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_etilismo');
+    await prefs.remove('$_prefsKeyDadosClinicos.possui_condicao_funcional');
+    await prefs.remove('$_prefsKeyDadosClinicos.resumo_condicao_funcional');
+    await prefs.remove('$_prefsKeyDadosClinicos.resumo_exames_laboratoriais');
+    await prefs.remove('$_prefsKeyDadosClinicos.resumo_exame_fisico');
   }
 
 // Dados antropométricos
@@ -460,8 +518,8 @@ class AtendimentoService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('$_prefsKeyAntropometricos.pesoAtual', pesoAtual);
-    await prefs.setString('$_prefsKeyAntropometricos.pesoUsual', pesoUsual);
+    await prefs.setString('$_prefsKeyAntropometricos.peso_atual', pesoAtual);
+    await prefs.setString('$_prefsKeyAntropometricos.peso_usual', pesoUsual);
     await prefs.setString('$_prefsKeyAntropometricos.estatura', estatura);
     await prefs.setString('$_prefsKeyAntropometricos.imc', imc);
     await prefs.setString('$_prefsKeyAntropometricos.pi', pi);
@@ -475,9 +533,11 @@ class AtendimentoService {
     await prefs.setString('$_prefsKeyAntropometricos.cp', cp);
     await prefs.setString('$_prefsKeyAntropometricos.aj', aj);
     await prefs.setString(
-        '$_prefsKeyAntropometricos.percentualGordura', percentualGordura);
-    await prefs.setString('$_prefsKeyAntropometricos.perdaPeso', perdaPeso);
-    await prefs.setString('$_prefsKeyAntropometricos.diagnosticoNutricional',
+        '$_prefsKeyAntropometricos.porcentagem_gc', percentualGordura);
+    await prefs.setString(
+        '$_prefsKeyAntropometricos.porcentagem_perca_peso_por_tempo',
+        perdaPeso);
+    await prefs.setString('$_prefsKeyAntropometricos.diagnostico_nutricional',
         diagnosticoNutricional);
   }
 
@@ -485,8 +545,10 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'pesoAtual': prefs.getString('$_prefsKeyAntropometricos.pesoAtual') ?? '',
-      'pesoUsual': prefs.getString('$_prefsKeyAntropometricos.pesoUsual') ?? '',
+      'peso_atual':
+          prefs.getString('$_prefsKeyAntropometricos.peso_atual') ?? '',
+      'peso_usual':
+          prefs.getString('$_prefsKeyAntropometricos.peso_usual') ?? '',
       'estatura': prefs.getString('$_prefsKeyAntropometricos.estatura') ?? '',
       'imc': prefs.getString('$_prefsKeyAntropometricos.imc') ?? '',
       'pi': prefs.getString('$_prefsKeyAntropometricos.pi') ?? '',
@@ -499,20 +561,22 @@ class AtendimentoService {
       'ca': prefs.getString('$_prefsKeyAntropometricos.ca') ?? '',
       'cp': prefs.getString('$_prefsKeyAntropometricos.cp') ?? '',
       'aj': prefs.getString('$_prefsKeyAntropometricos.aj') ?? '',
-      'percentualGordura':
-          prefs.getString('$_prefsKeyAntropometricos.percentualGordura') ?? '',
-      'perdaPeso': prefs.getString('$_prefsKeyAntropometricos.perdaPeso') ?? '',
-      'diagnosticoNutricional':
-          prefs.getString('$_prefsKeyAntropometricos.diagnosticoNutricional') ??
-              '',
+      'porcentagem_gc':
+          prefs.getString('$_prefsKeyAntropometricos.porcentagem_gc') ?? '',
+      'porcentagem_perca_peso_por_tempo': prefs.getString(
+              '$_prefsKeyAntropometricos.porcentagem_perca_peso_por_tempo') ??
+          '',
+      'diagnostico_nutricional': prefs
+              .getString('$_prefsKeyAntropometricos.diagnostico_nutricional') ??
+          '',
     };
   }
 
   Future<void> limparDadosAntropometricos() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyAntropometricos.pesoAtual');
-    await prefs.remove('$_prefsKeyAntropometricos.pesoUsual');
+    await prefs.remove('$_prefsKeyAntropometricos.peso_atual');
+    await prefs.remove('$_prefsKeyAntropometricos.peso_usual');
     await prefs.remove('$_prefsKeyAntropometricos.estatura');
     await prefs.remove('$_prefsKeyAntropometricos.imc');
     await prefs.remove('$_prefsKeyAntropometricos.pi');
@@ -525,9 +589,10 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyAntropometricos.ca');
     await prefs.remove('$_prefsKeyAntropometricos.cp');
     await prefs.remove('$_prefsKeyAntropometricos.aj');
-    await prefs.remove('$_prefsKeyAntropometricos.percentualGordura');
-    await prefs.remove('$_prefsKeyAntropometricos.perdaPeso');
-    await prefs.remove('$_prefsKeyAntropometricos.diagnosticoNutricional');
+    await prefs.remove('$_prefsKeyAntropometricos.porcentagem_gc');
+    await prefs
+        .remove('$_prefsKeyAntropometricos.porcentagem_perca_peso_por_tempo');
+    await prefs.remove('$_prefsKeyAntropometricos.diagnostico_nutricional');
   }
 
 // Dados de consumo alimentar
@@ -579,16 +644,15 @@ class AtendimentoService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('$_prefsKeyRequerimentos.kcalDia', kcalDia);
-    await prefs.setString('$_prefsKeyRequerimentos.kcalKg', kcalKg);
+    await prefs.setString('$_prefsKeyRequerimentos.kcal_dia', kcalDia);
+    await prefs.setString('$_prefsKeyRequerimentos.kcal_kg', kcalKg);
     await prefs.setString('$_prefsKeyRequerimentos.cho', cho);
     await prefs.setString('$_prefsKeyRequerimentos.lip', lip);
-    await prefs.setString(
-        '$_prefsKeyRequerimentos.ptnPorcentagem', ptnPorcentagem);
-    await prefs.setString('$_prefsKeyRequerimentos.ptnKg', ptnKg);
-    await prefs.setString('$_prefsKeyRequerimentos.ptnDia', ptnDia);
-    await prefs.setString('$_prefsKeyRequerimentos.liquidoKg', liquidoKg);
-    await prefs.setString('$_prefsKeyRequerimentos.liquidoDia', liquidoDia);
+    await prefs.setString('$_prefsKeyRequerimentos.Ptn', ptnPorcentagem);
+    await prefs.setString('$_prefsKeyRequerimentos.ptn_kg', ptnKg);
+    await prefs.setString('$_prefsKeyRequerimentos.ptn_dia', ptnDia);
+    await prefs.setString('$_prefsKeyRequerimentos.liquido_kg', liquidoKg);
+    await prefs.setString('$_prefsKeyRequerimentos.liquido_dia', liquidoDia);
     await prefs.setString('$_prefsKeyRequerimentos.fibras', fibras);
     await prefs.setString('$_prefsKeyRequerimentos.outros', outros);
   }
@@ -597,16 +661,16 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'kcalDia': prefs.getString('$_prefsKeyRequerimentos.kcalDia') ?? '',
-      'kcalKg': prefs.getString('$_prefsKeyRequerimentos.kcalKg') ?? '',
+      'kcal_dia': prefs.getString('$_prefsKeyRequerimentos.kcal_dia') ?? '',
+      'kcal_kg': prefs.getString('$_prefsKeyRequerimentos.kcal_kg') ?? '',
       'cho': prefs.getString('$_prefsKeyRequerimentos.cho') ?? '',
       'lip': prefs.getString('$_prefsKeyRequerimentos.lip') ?? '',
-      'ptnPorcentagem':
-          prefs.getString('$_prefsKeyRequerimentos.ptnPorcentagem') ?? '',
-      'ptnKg': prefs.getString('$_prefsKeyRequerimentos.ptnKg') ?? '',
-      'ptnDia': prefs.getString('$_prefsKeyRequerimentos.ptnDia') ?? '',
-      'liquidoKg': prefs.getString('$_prefsKeyRequerimentos.liquidoKg') ?? '',
-      'liquidoDia': prefs.getString('$_prefsKeyRequerimentos.liquidoDia') ?? '',
+      'Ptn': prefs.getString('$_prefsKeyRequerimentos.Ptn') ?? '',
+      'ptn_kg': prefs.getString('$_prefsKeyRequerimentos.ptn_kg') ?? '',
+      'ptn_dia': prefs.getString('$_prefsKeyRequerimentos.ptn_dia') ?? '',
+      'liquido_kg': prefs.getString('$_prefsKeyRequerimentos.liquido_kg') ?? '',
+      'liquido_dia':
+          prefs.getString('$_prefsKeyRequerimentos.liquido_dia') ?? '',
       'fibras': prefs.getString('$_prefsKeyRequerimentos.fibras') ?? '',
       'outros': prefs.getString('$_prefsKeyRequerimentos.outros') ?? '',
     };
@@ -615,15 +679,15 @@ class AtendimentoService {
   Future<void> limparRequerimentosNutricionais() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyRequerimentos.kcalDia');
-    await prefs.remove('$_prefsKeyRequerimentos.kcalKg');
+    await prefs.remove('$_prefsKeyRequerimentos.kcal_dia');
+    await prefs.remove('$_prefsKeyRequerimentos.kcal_kg');
     await prefs.remove('$_prefsKeyRequerimentos.cho');
     await prefs.remove('$_prefsKeyRequerimentos.lip');
-    await prefs.remove('$_prefsKeyRequerimentos.ptnPorcentagem');
-    await prefs.remove('$_prefsKeyRequerimentos.ptnKg');
-    await prefs.remove('$_prefsKeyRequerimentos.ptnDia');
-    await prefs.remove('$_prefsKeyRequerimentos.liquidoKg');
-    await prefs.remove('$_prefsKeyRequerimentos.liquidoDia');
+    await prefs.remove('$_prefsKeyRequerimentos.Ptn');
+    await prefs.remove('$_prefsKeyRequerimentos.ptn_kg');
+    await prefs.remove('$_prefsKeyRequerimentos.ptn_dia');
+    await prefs.remove('$_prefsKeyRequerimentos.liquido_kg');
+    await prefs.remove('$_prefsKeyRequerimentos.liquido_dia');
     await prefs.remove('$_prefsKeyRequerimentos.fibras');
     await prefs.remove('$_prefsKeyRequerimentos.outros');
   }
@@ -634,10 +698,14 @@ class AtendimentoService {
   Future<void> salvarCondutaNutricional({
     required String estagiario,
     required String professor,
+    required String idEstagiario,
+    required String idProfessor,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$_prefsKeyConduta.estagiario', estagiario);
     await prefs.setString('$_prefsKeyConduta.professor', professor);
+    await prefs.setString('$_prefsKeyConduta.idEstagiario', idEstagiario);
+    await prefs.setString('$_prefsKeyConduta.idProfessor', idProfessor);
   }
 
   Future<Map<String, String>> carregarCondutaNutricional() async {
@@ -665,24 +733,35 @@ class AtendimentoService {
   // Chaves para SharedPreferences
   static const String _prefsKeyAtendimento = 'hospital_atendimento';
 
-  Future<void> salvarIdentificacao() async {
-    
-  }
+  Future<void> salvarIdentificacao() async {}
 
-Future<Map<String, dynamic>> obterDadosCompletos() async {
-  return {
-    'identificacao': await carregarDadosIdentificacao(),
-    'socioeconomicos': await carregarDadosSocioeconomicos(),
-    'antecedentesPessoais': await carregarAntecedentesPessoais(),
-    'antecedentesFamiliares': await carregarAntecedentesFamiliares(),
-    'dadosClinicos': await carregarDadosClinicosNutricionais(),
-    'antropometricos': await carregarDadosAntropometricos(),
-    'consumoAlimentar': await carregarConsumoAlimentar(),
-    'requerimentos': await carregarRequerimentosNutricionais(),
-    'conduta': await carregarCondutaNutricional(),
-    'data': DateTime.now().toIso8601String(),
-  };
-}
+  Future<Map<String, dynamic>> obterDadosCompletos() async {
+    var identificacao = await carregarDadosIdentificacao();
+    var socioeconomicos = await carregarDadosSocioeconomicos();
+    var antecedentesPessoais = await carregarAntecedentesPessoais();
+    var antecedentesFamiliares = await carregarAntecedentesFamiliares();
+    var dadosClinicos = await carregarDadosClinicosNutricionais();
+    var antropometricos = await carregarDadosAntropometricos();
+    var consumoAlimentar = await carregarConsumoAlimentar();
+    var requerimentos = await carregarRequerimentosNutricionais();
+    var conduta = await carregarCondutaNutricional();
+
+    // Garanta que a data esteja no formato Timestamp
+    Timestamp data = Timestamp.now();
+
+    return {
+      ...identificacao,
+      ...socioeconomicos,
+      ...antecedentesPessoais,
+      ...antecedentesFamiliares,
+      ...dadosClinicos,
+      ...antropometricos,
+      ...consumoAlimentar,
+      ...requerimentos,
+      ...conduta,
+      'data': data,
+    };
+  }
 
   Future<void> limparTodosDados() async {
     final prefs = await SharedPreferences.getInstance();
@@ -702,19 +781,21 @@ Future<Map<String, dynamic>> obterDadosCompletos() async {
 
     await FirebaseFirestore.instance.collection('atendimento').add({
       ...dados,
-      'criadoPor': user.uid,
-      'criadoEm': FieldValue.serverTimestamp(),
-      'status': 'enviado',
+      'criado_por': user.uid,
+      'criado_em': FieldValue.serverTimestamp(),
+      'status_atendimento': 'enviado',
     });
   }
 
   Future<void> salvarProfessorSelecionado(String professor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('professor_selecionado', professor);
+    await prefs.setString('hospital_atendimento.professor_selecionado', professor);
   }
 
   Future<String?> carregarProfessorSelecionado() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('professor_selecionado');
+    return prefs.getString('hospital_atendimento.professor_selecionado');
   }
+
+  obterAtendimentoAtual() {}
 }

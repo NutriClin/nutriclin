@@ -87,18 +87,33 @@ class _HospitalAtendimentoIdentificacaoPageState
       }
     }
 
-    final dados = await _atendimentoService.carregarDadosIdentificacao();
-    setState(() {
-      nameController.text = dados['name']!;
-      selectedGender = dados['gender']!;
-      birthDateController.text = dados['birthDate']!;
-      hospitalController.text = dados['hospital']!;
-      clinicController.text = dados['clinic']!;
-      roomController.text = dados['room']!;
-      bedController.text = dados['bed']!;
-      recordController.text = dados['record']!;
-      carregando = false;
-    });
+    try {
+      final dados = await _atendimentoService.carregarDadosIdentificacao();
+      setState(() {
+        nameController.text = dados['nome'] ?? '';
+        selectedGender = dados['gender'] ?? 'Selecione';
+        birthDateController.text = dados['birthDate'] ?? '';
+        hospitalController.text = dados['hospital'] ?? '';
+        clinicController.text = dados['clinic'] ?? '';
+        roomController.text = dados['room'] ?? '';
+        bedController.text = dados['bed'] ?? '';
+        recordController.text = dados['record'] ?? '';
+        carregando = false;
+      });
+    } catch (e) {
+      print("Erro ao carregar dados do cache: $e");
+      setState(() {
+        nameController.text = '';
+        selectedGender = 'Selecione';
+        birthDateController.text = '';
+        hospitalController.text = '';
+        clinicController.text = '';
+        roomController.text = '';
+        bedController.text = '';
+        recordController.text = '';
+        carregando = false;
+      });
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -120,15 +135,25 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   Future<void> _salvarDadosIdentificacao() async {
+    // Converte a string "DD/MM/AAAA" para DateTime
+    final dateParts = birthDateController.text.split('/');
+    final parsedDate = DateTime(
+      int.parse(dateParts[2]), // Ano
+      int.parse(dateParts[1]), // Mês
+      int.parse(dateParts[0]), // Dia
+    );
+
+    final timestamp = Timestamp.fromDate(parsedDate);
+
     await _atendimentoService.salvarDadosIdentificacao(
-      name: nameController.text,
-      gender: selectedGender,
-      birthDate: birthDateController.text,
+      nome: nameController.text,
+      sexo: selectedGender,
+      data_nascimento: timestamp,
       hospital: hospitalController.text,
-      clinic: clinicController.text,
-      room: roomController.text,
-      bed: bedController.text,
-      record: recordController.text,
+      clinica: clinicController.text,
+      quarto: roomController.text,
+      leito: bedController.text,
+      registro: recordController.text,
     );
   }
 
@@ -267,7 +292,7 @@ class _HospitalAtendimentoIdentificacaoPageState
                             ),
                             CustomButton(
                               text: 'Próximo',
-                              onPressed: _proceedToNext, 
+                              onPressed: _proceedToNext,
                             ),
                           ],
                         ),
