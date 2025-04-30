@@ -40,9 +40,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/usuario': (context) => const UsuarioPage(),
-        '/home': (context) => const HomePage(
-              tipoUsuario: 'Aluno',
-            ),
+        '/home': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return HomePage(tipoUsuario: args?['tipoUsuario'] ?? 'Aluno');
+        },
         '/atendimento': (context) => AtendimentoPage(),
       },
     );

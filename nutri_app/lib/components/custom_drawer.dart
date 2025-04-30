@@ -5,6 +5,7 @@ import 'package:nutri_app/pages/calculos/calculos.dart';
 import 'package:nutri_app/pages/relatorios/relatorios.dart';
 import 'package:nutri_app/pages/usuarios/usuarios.dart';
 import 'package:nutri_app/services/preferences_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -53,24 +54,52 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
+  Future<String> _getAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo.version;
+  }
+
   // Widget do logout separado
   Widget _buildLogoutItem(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-      ),
-      child: ListTile(
-        leading: const Icon(Icons.exit_to_app, color: Colors.red),
-        title: const Text(
-          'Sair',
-          style: TextStyle(color: Colors.red),
-        ),
-        onTap: () {
-          PreferencesService.clearUserType();
-          Navigator.pushReplacementNamed(context, '/login');
-        },
-      ),
+    return FutureBuilder<String>(
+      future: _getAppVersion(),
+      builder: (context, snapshot) {
+        final version = snapshot.data ?? '0.1.0';
+
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+          ),
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.exit_to_app, color: Colors.red),
+                title: const Text(
+                  'Sair',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  PreferencesService.clearUserType();
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    'Versão $version',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
