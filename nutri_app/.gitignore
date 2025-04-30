@@ -23,15 +23,11 @@ migrate_working_dir/
 
 # Flutter/Dart/Pub related
 **/doc/api/
-**/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-build/
-!build/web/
-!build/web/**
 
 # Symbolication related
 app.*.symbols
@@ -43,6 +39,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-**/GeneratedPluginRegistrant.*
 .env
 
+#build

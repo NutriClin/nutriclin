@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- House outline -->
+  <path d="M32 12L12 24V52H52V24L32 12Z" stroke="#007AFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Larger + sign centered in square body -->
+  <path d="M32 30V46" stroke="#007AFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M22 38H42" stroke="#007AFF" stroke-width="4" stroke-linecap="round"/>
+</svg>

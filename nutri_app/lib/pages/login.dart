@@ -9,6 +9,7 @@ import 'package:nutri_app/services/auth_service.dart';
 import 'package:nutri_app/services/preferences_service.dart';
 import 'package:nutri_app/components/toast_util.dart';
 
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 

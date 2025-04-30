@@ -3,7 +3,6 @@ import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/calculos/calculos.dart';
-import 'package:nutri_app/pages/relatorios/relatorios.dart';
 import 'usuarios/usuarios.dart';
 
 class HomePage extends StatelessWidget {
