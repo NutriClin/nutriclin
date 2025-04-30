@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/calculos/calculos.dart';
+import 'package:nutri_app/pages/relatorios/relatorios.dart';
 import 'package:nutri_app/pages/usuarios/usuarios.dart';
 import 'package:nutri_app/services/preferences_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -158,41 +159,40 @@ List<Widget> _buildMenuItems(BuildContext context, String? tipoUsuario) {
         },
       ),
     );
-    // items.add(
-    //   ListTile(
-    //     leading: const Icon(Icons.insert_drive_file_rounded,
-    //         color: Color(0xFF007AFF)),
-    //     title: const Text('Relatórios'),
-    //     onTap: () {
-    //       Navigator.pop(context);
-    //       Navigator.push(
-    //         context,
-    //         MaterialPageRoute(
-    //           builder: (context) => RelatoriosPage(),
-    //         ),
-    //       );
-    //     },
-    //   ),
-    // );
+    items.add(
+      ListTile(
+        leading: const Icon(Icons.insert_drive_file_rounded,
+            color: Color(0xFF007AFF)),
+        title: const Text('Relatórios'),
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RelatoriosPage(),
+            ),
+          );
+        },
+      ),
+    );
+  } else if (tipoUsuario == 'Professor') {
+    items.add(
+      ListTile(
+        leading: const Icon(Icons.insert_drive_file_rounded,
+            color: Color(0xFF007AFF)),
+        title: const Text('Relatórios'),
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RelatoriosPage(),
+            ),
+          );
+        },
+      ),
+    );
   }
-  // else if (tipoUsuario == 'Professor') {
-  //   items.add(
-  //     ListTile(
-  //       leading: const Icon(Icons.insert_drive_file_rounded,
-  //           color: Color(0xFF007AFF)),
-  //       title: const Text('Relatórios'),
-  //       onTap: () {
-  //         Navigator.pop(context);
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => RelatoriosPage(),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
 
   return items;
 }
