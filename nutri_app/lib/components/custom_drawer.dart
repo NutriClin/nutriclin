@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
@@ -78,7 +79,8 @@ class CustomDrawer extends StatelessWidget {
                   'Sair',
                   style: TextStyle(color: Colors.red),
                 ),
-                onTap: () {
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
                   PreferencesService.clearUserType();
                   Navigator.pushReplacementNamed(context, '/login');
                 },

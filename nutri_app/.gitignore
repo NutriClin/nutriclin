@@ -42,3 +42,9 @@ app.*.map.json
 .env
 
 #build
+# Arquivos de cache e build
+/cache.dill
+.track.dill
+/nutri_app/build/
+/NOTICES
+/nutri_app/build/flutter_assets/
