@@ -7,14 +7,13 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_socioeconomico.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoIdentificacaoPage extends StatefulWidget {
-  final String? idAtendimento;
-
-  const HospitalAtendimentoIdentificacaoPage({super.key, this.idAtendimento});
+  const HospitalAtendimentoIdentificacaoPage({super.key});
 
   @override
   _HospitalAtendimentoIdentificacaoPageState createState() =>
@@ -36,6 +35,16 @@ class _HospitalAtendimentoIdentificacaoPageState
 
   bool carregando = true;
 
+  // Variáveis para controle de erros
+  bool _nameError = false;
+  bool _genderError = false;
+  bool _birthDateError = false;
+  bool _hospitalError = false;
+  bool _clinicError = false;
+  bool _roomError = false;
+  bool _bedError = false;
+  bool _recordError = false;
+
   @override
   void initState() {
     super.initState();
@@ -55,62 +64,32 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   Future<void> _carregarDados() async {
-    if (widget.idAtendimento != null) {
-      try {
-        final doc = await FirebaseFirestore.instance
-            .collection('atendimento')
-            .doc(widget.idAtendimento)
-            .get();
-
-        if (doc.exists) {
-          final data = doc.data()!;
-          final birthDate = data['data_nascimento'] as Timestamp?;
-          final formattedDate = birthDate != null
-              ? "${birthDate.toDate().day.toString().padLeft(2, '0')}/${birthDate.toDate().month.toString().padLeft(2, '0')}/${birthDate.toDate().year}"
-              : '';
-
-          setState(() {
-            nameController.text = data['nome'] ?? '';
-            selectedGender = data['sexo'] ?? 'Selecione';
-            birthDateController.text = formattedDate;
-            hospitalController.text = data['hospital'] ?? '';
-            clinicController.text = data['clinica'] ?? '';
-            roomController.text = data['quarto'] ?? '';
-            bedController.text = data['leito'] ?? '';
-            recordController.text = data['registro'] ?? '';
-            carregando = false;
-          });
-          return;
-        }
-      } catch (e) {
-        print("Erro ao buscar atendimento: $e");
-      }
-    }
-
     try {
       final dados = await _atendimentoService.carregarDadosIdentificacao();
+
+      // Formata a data se existir
+      String formattedDate = '';
+      if (dados['data_nascimento'] != null) {
+        final date = dados['data_nascimento'] as Timestamp;
+        formattedDate = "${date.toDate().day.toString().padLeft(2, '0')}/"
+            "${date.toDate().month.toString().padLeft(2, '0')}/"
+            "${date.toDate().year}";
+      }
+
       setState(() {
         nameController.text = dados['nome'] ?? '';
-        selectedGender = dados['gender'] ?? 'Selecione';
-        birthDateController.text = dados['birthDate'] ?? '';
+        selectedGender = dados['sexo'] ?? 'Selecione';
+        birthDateController.text = formattedDate;
         hospitalController.text = dados['hospital'] ?? '';
-        clinicController.text = dados['clinic'] ?? '';
-        roomController.text = dados['room'] ?? '';
-        bedController.text = dados['bed'] ?? '';
-        recordController.text = dados['record'] ?? '';
+        clinicController.text = dados['clinica'] ?? '';
+        roomController.text = dados['quarto'] ?? '';
+        bedController.text = dados['leito'] ?? '';
+        recordController.text = dados['registro'] ?? '';
         carregando = false;
       });
     } catch (e) {
-      print("Erro ao carregar dados do cache: $e");
+      print("Erro ao carregar dados: $e");
       setState(() {
-        nameController.text = '';
-        selectedGender = 'Selecione';
-        birthDateController.text = '';
-        hospitalController.text = '';
-        clinicController.text = '';
-        roomController.text = '';
-        bedController.text = '';
-        recordController.text = '';
         carregando = false;
       });
     }
@@ -130,25 +109,115 @@ class _HospitalAtendimentoIdentificacaoPageState
           "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       setState(() {
         birthDateController.text = formattedDate;
+        _birthDateError = false;
       });
     }
   }
 
-  Future<void> _salvarDadosIdentificacao() async {
-    // Converte a string "DD/MM/AAAA" para DateTime
-    final dateParts = birthDateController.text.split('/');
-    final parsedDate = DateTime(
-      int.parse(dateParts[2]), // Ano
-      int.parse(dateParts[1]), // Mês
-      int.parse(dateParts[0]), // Dia
-    );
+  bool _validarCampos() {
+    bool valido = true;
 
-    final timestamp = Timestamp.fromDate(parsedDate);
+    // Validação do nome
+    if (nameController.text.trim().isEmpty) {
+      _nameError = true;
+      valido = false;
+    } else {
+      _nameError = false;
+    }
+
+    // Validação do sexo
+    if (selectedGender == 'Selecione') {
+      _genderError = true;
+      valido = false;
+    } else {
+      _genderError = false;
+    }
+
+    // Validação da data de nascimento
+    if (birthDateController.text.trim().isEmpty) {
+      _birthDateError = true;
+      valido = false;
+    } else {
+      _birthDateError = false;
+    }
+
+    // Validação do hospital
+    if (hospitalController.text.trim().isEmpty) {
+      _hospitalError = true;
+      valido = false;
+    } else {
+      _hospitalError = false;
+    }
+
+    // Validação da clínica
+    if (clinicController.text.trim().isEmpty) {
+      _clinicError = true;
+      valido = false;
+    } else {
+      _clinicError = false;
+    }
+
+    // Validação do quarto
+    if (roomController.text.trim().isEmpty) {
+      _roomError = true;
+      valido = false;
+    } else {
+      _roomError = false;
+    }
+
+    // Validação do leito
+    if (bedController.text.trim().isEmpty) {
+      _bedError = true;
+      valido = false;
+    } else {
+      _bedError = false;
+    }
+
+    // Validação do registro
+    if (recordController.text.trim().isEmpty) {
+      _recordError = true;
+      valido = false;
+    } else {
+      _recordError = false;
+    }
+
+    setState(() {});
+
+    return valido;
+  }
+
+  Future<void> _salvarDadosIdentificacao() async {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
+
+    // Converte a string "DD/MM/AAAA" para DateTime
+    DateTime parsedDate;
+    try {
+      final dateParts = birthDateController.text.split('/');
+      parsedDate = DateTime(
+        int.parse(dateParts[2]), // Ano
+        int.parse(dateParts[1]), // Mês
+        int.parse(dateParts[0]), // Dia
+      );
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Data de nascimento inválida!',
+        isError: true,
+      );
+      return;
+    }
 
     await _atendimentoService.salvarDadosIdentificacao(
       nome: nameController.text,
       sexo: selectedGender,
-      data_nascimento: timestamp,
+      data_nascimento: Timestamp.fromDate(parsedDate),
       hospital: hospitalController.text,
       clinica: clinicController.text,
       quarto: roomController.text,
@@ -158,6 +227,15 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   void _proceedToNext() async {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
+
     await _salvarDadosIdentificacao();
     Navigator.push(
       context,
@@ -224,15 +302,30 @@ class _HospitalAtendimentoIdentificacaoPageState
                           label: 'Nome',
                           controller: nameController,
                           keyboardType: TextInputType.text,
+                          error: _nameError,
+                          errorMessage: 'Campo obrigatório',
                           obrigatorio: true,
+                          onChanged: (value) {
+                            if (_nameError && value.isNotEmpty) {
+                              setState(() => _nameError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
                           label: 'Sexo',
                           value: selectedGender,
                           items: const ['Selecione', 'Masculino', 'Feminino'],
-                          onChanged: (value) =>
-                              setState(() => selectedGender = value!),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedGender = value!;
+                              if (_genderError && value != 'Selecione') {
+                                _genderError = false;
+                              }
+                            });
+                          },
+                          error: _genderError,
+                          errorMessage: 'Campo obrigatório',
                           obrigatorio: true,
                         ),
                         SizedBox(height: espacamentoCards),
@@ -244,7 +337,14 @@ class _HospitalAtendimentoIdentificacaoPageState
                               controller: birthDateController,
                               keyboardType: TextInputType.datetime,
                               hintText: 'DD/MM/AAAA',
+                              error: _birthDateError,
+                              errorMessage: 'Campo obrigatório',
                               obrigatorio: true,
+                              onChanged: (value) {
+                                if (_birthDateError && value.isNotEmpty) {
+                                  setState(() => _birthDateError = false);
+                                }
+                              },
                             ),
                           ),
                         ),
@@ -253,30 +353,70 @@ class _HospitalAtendimentoIdentificacaoPageState
                           label: 'Hospital',
                           controller: hospitalController,
                           keyboardType: TextInputType.text,
+                          error: _hospitalError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_hospitalError && value.isNotEmpty) {
+                              setState(() => _hospitalError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Clínica',
                           controller: clinicController,
                           keyboardType: TextInputType.text,
+                          error: _clinicError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_clinicError && value.isNotEmpty) {
+                              setState(() => _clinicError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Quarto',
                           controller: roomController,
                           keyboardType: TextInputType.text,
+                          error: _roomError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_roomError && value.isNotEmpty) {
+                              setState(() => _roomError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Leito',
                           controller: bedController,
                           keyboardType: TextInputType.text,
+                          error: _bedError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_bedError && value.isNotEmpty) {
+                              setState(() => _bedError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Registro',
                           controller: recordController,
                           keyboardType: TextInputType.text,
+                          error: _recordError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_recordError && value.isNotEmpty) {
+                              setState(() => _recordError = false);
+                            }
+                          },
                         ),
                         const SizedBox(height: 15),
                         Row(

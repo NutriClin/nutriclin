@@ -70,7 +70,7 @@ class CustomListAtendimento extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => HospitalAtendimentoIdentificacaoPage(idAtendimento: report["id"]),
+                  builder: (context) => const HospitalAtendimentoIdentificacaoPage(),
                 ),
               );
               print("clicou no atendimento");
