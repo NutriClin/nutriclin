@@ -40,12 +40,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF5F5F5)),
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginPage(),
         '/usuario': (context) => AuthGuard(child: const UsuarioPage()),
         '/home': (context) => AuthGuard(
-              child: const HomePage(tipoUsuario: 'Aluno'),
+              child: const HomePage(tipoUsuario: 'Coordenador'),
             ),
         '/atendimento': (context) => AuthGuard(child: AtendimentoPage()),
       },

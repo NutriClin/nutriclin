@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nutri_app/components/custom_button.dart';
@@ -8,7 +9,6 @@ import 'package:nutri_app/pages/home.dart';
 import 'package:nutri_app/services/auth_service.dart';
 import 'package:nutri_app/services/preferences_service.dart';
 import 'package:nutri_app/components/toast_util.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -42,6 +42,18 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final usuario = await _authService.login(email, senha);
 
+      final usuarioAtivo = await verificarUsuarioAtivo(email);
+
+      if (usuarioAtivo == false) {
+        ToastUtil.showToast(
+          context: context,
+          message:
+              "Erro ao fazer login. Por favor consulte a coordenação para mais detalhes",
+          isError: true,
+        );
+        return;
+      }
+
       if (usuario != null) {
         await PreferencesService.saveUserType(usuario['tipo_usuario']);
 
@@ -70,6 +82,23 @@ class _LoginPageState extends State<LoginPage> {
       );
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<bool> verificarUsuarioAtivo(String email) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) return false;
+
+      return snapshot.docs.first.get('ativo') ?? false;
+    } catch (e) {
+      print("Erro ao verificar usuário ativo: $e");
+      return false;
     }
   }
 

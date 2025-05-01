@@ -22,7 +22,8 @@ class _UsuarioPageState extends State<UsuarioPage> {
   bool _error = false;
   bool _initialLoading = true;
   bool _loadingMore = false;
-  final int _limit = 100; // Número de itens por página
+  final int _limit = 100;
+  String _filtroAtivo = 'todos'; // 'todos' ou 'ativos'
 
   List<Map<String, dynamic>> _usuarios = [];
   List<Map<String, dynamic>> _usuariosFiltrados = [];
@@ -144,9 +145,46 @@ class _UsuarioPageState extends State<UsuarioPage> {
     String query = _searchController.text.toLowerCase();
     setState(() {
       _usuariosFiltrados = _usuarios.where((usuario) {
-        return usuario["nome"].toLowerCase().contains(query);
+        final nomeMatch = usuario["nome"].toLowerCase().contains(query);
+        final ativoMatch = _filtroAtivo == 'todos' || usuario["ativo"] == true;
+        return nomeMatch && ativoMatch;
       }).toList();
     });
+  }
+
+  Widget _buildFiltroAtivo() {
+    return Container(
+      margin: const EdgeInsets.only(left: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _filtroAtivo,
+          items: const [
+            DropdownMenuItem(
+              value: 'todos',
+              child: Text('Todos'),
+            ),
+            DropdownMenuItem(
+              value: 'ativos',
+              child: Text('Ativos'),
+            ),
+          ],
+          onChanged: (String? value) {
+            if (value != null) {
+              setState(() {
+                _filtroAtivo = value;
+                _filtrarUsuarios();
+              });
+            }
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
 
   @override
@@ -160,7 +198,14 @@ class _UsuarioPageState extends State<UsuarioPage> {
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                CustomInputSearch(controller: _searchController),
+                Row(
+                  children: [
+                    Expanded(
+                        child:
+                            CustomInputSearch(controller: _searchController)),
+                    _buildFiltroAtivo(),
+                  ],
+                ),
                 const SizedBox(height: 10),
                 Expanded(
                   child: _buildUsersList(),
@@ -255,7 +300,7 @@ class _UsuarioPageState extends State<UsuarioPage> {
           return CustomListUsuario(report: usuario);
         } else {
           if (_isLastPage) {
-            return const SizedBox(height: 100); // Espaço vazio quando não há mais usuários
+            return const SizedBox(height: 100);
           } else {
             return _buildLoader();
           }
