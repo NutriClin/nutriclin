@@ -3,7 +3,6 @@ import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_identificacao.dart';
-import 'package:nutri_app/pages/calculos/tmb.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -103,7 +102,7 @@ class AtendimentoPage extends StatelessWidget {
         onTap: () => _verificarDadosExistente(
           context,
           'clinica_atendimento',
-          const TMBPage(),
+          const HospitalAtendimentoIdentificacaoPage(),
           'clínica',
         ),
       ),

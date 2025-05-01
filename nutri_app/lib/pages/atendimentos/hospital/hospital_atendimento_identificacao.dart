@@ -23,6 +23,7 @@ class HospitalAtendimentoIdentificacaoPage extends StatefulWidget {
 class _HospitalAtendimentoIdentificacaoPageState
     extends State<HospitalAtendimentoIdentificacaoPage> {
   String selectedGender = 'Selecione';
+  String? tipoAtendimento;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController birthDateController = TextEditingController();
   final TextEditingController hospitalController = TextEditingController();
@@ -34,6 +35,7 @@ class _HospitalAtendimentoIdentificacaoPageState
   final AtendimentoService _atendimentoService = AtendimentoService();
 
   bool carregando = true;
+  bool isHospital = true;
 
   // Variáveis para controle de erros
   bool _nameError = false;
@@ -66,6 +68,14 @@ class _HospitalAtendimentoIdentificacaoPageState
   Future<void> _carregarDados() async {
     try {
       final dados = await _atendimentoService.carregarDadosIdentificacao();
+      tipoAtendimento = await _atendimentoService.obterTipoAtendimento();
+
+      print("Tipo de atendimento: $tipoAtendimento");
+
+      // Determina se é atendimento hospitalar
+      setState(() {
+        isHospital = tipoAtendimento == 'hospital';
+      });
 
       // Formata a data se existir
       String formattedDate = '';
@@ -117,7 +127,7 @@ class _HospitalAtendimentoIdentificacaoPageState
   bool _validarCampos() {
     bool valido = true;
 
-    // Validação do nome
+    // Validações comuns a ambos os tipos
     if (nameController.text.trim().isEmpty) {
       _nameError = true;
       valido = false;
@@ -125,7 +135,6 @@ class _HospitalAtendimentoIdentificacaoPageState
       _nameError = false;
     }
 
-    // Validação do sexo
     if (selectedGender == 'Selecione') {
       _genderError = true;
       valido = false;
@@ -133,7 +142,6 @@ class _HospitalAtendimentoIdentificacaoPageState
       _genderError = false;
     }
 
-    // Validação da data de nascimento
     if (birthDateController.text.trim().isEmpty) {
       _birthDateError = true;
       valido = false;
@@ -141,48 +149,45 @@ class _HospitalAtendimentoIdentificacaoPageState
       _birthDateError = false;
     }
 
-    // Validação do hospital
-    if (hospitalController.text.trim().isEmpty) {
-      _hospitalError = true;
-      valido = false;
-    } else {
-      _hospitalError = false;
-    }
+    // Validações específicas para hospital
+    if (isHospital) {
+      if (hospitalController.text.trim().isEmpty) {
+        _hospitalError = true;
+        valido = false;
+      } else {
+        _hospitalError = false;
+      }
 
-    // Validação da clínica
-    if (clinicController.text.trim().isEmpty) {
-      _clinicError = true;
-      valido = false;
-    } else {
-      _clinicError = false;
-    }
+      if (clinicController.text.trim().isEmpty) {
+        _clinicError = true;
+        valido = false;
+      } else {
+        _clinicError = false;
+      }
 
-    // Validação do quarto
-    if (roomController.text.trim().isEmpty) {
-      _roomError = true;
-      valido = false;
-    } else {
-      _roomError = false;
-    }
+      if (roomController.text.trim().isEmpty) {
+        _roomError = true;
+        valido = false;
+      } else {
+        _roomError = false;
+      }
 
-    // Validação do leito
-    if (bedController.text.trim().isEmpty) {
-      _bedError = true;
-      valido = false;
-    } else {
-      _bedError = false;
-    }
+      if (bedController.text.trim().isEmpty) {
+        _bedError = true;
+        valido = false;
+      } else {
+        _bedError = false;
+      }
 
-    // Validação do registro
-    if (recordController.text.trim().isEmpty) {
-      _recordError = true;
-      valido = false;
-    } else {
-      _recordError = false;
+      if (recordController.text.trim().isEmpty) {
+        _recordError = true;
+        valido = false;
+      } else {
+        _recordError = false;
+      }
     }
 
     setState(() {});
-
     return valido;
   }
 
@@ -214,15 +219,16 @@ class _HospitalAtendimentoIdentificacaoPageState
       return;
     }
 
+    // Call the method with named parameters
     await _atendimentoService.salvarDadosIdentificacao(
       nome: nameController.text,
       sexo: selectedGender,
       data_nascimento: Timestamp.fromDate(parsedDate),
-      hospital: hospitalController.text,
-      clinica: clinicController.text,
-      quarto: roomController.text,
-      leito: bedController.text,
-      registro: recordController.text,
+      hospital: isHospital ? hospitalController.text : null,
+      clinica: isHospital ? clinicController.text : null,
+      quarto: isHospital ? roomController.text : null,
+      leito: isHospital ? bedController.text : null,
+      registro: isHospital ? recordController.text : null,
     );
   }
 
@@ -348,76 +354,81 @@ class _HospitalAtendimentoIdentificacaoPageState
                             ),
                           ),
                         ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Hospital',
-                          controller: hospitalController,
-                          keyboardType: TextInputType.text,
-                          error: _hospitalError,
-                          errorMessage: 'Campo obrigatório',
-                          obrigatorio: true,
-                          onChanged: (value) {
-                            if (_hospitalError && value.isNotEmpty) {
-                              setState(() => _hospitalError = false);
-                            }
-                          },
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Clínica',
-                          controller: clinicController,
-                          keyboardType: TextInputType.text,
-                          error: _clinicError,
-                          errorMessage: 'Campo obrigatório',
-                          obrigatorio: true,
-                          onChanged: (value) {
-                            if (_clinicError && value.isNotEmpty) {
-                              setState(() => _clinicError = false);
-                            }
-                          },
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Quarto',
-                          controller: roomController,
-                          keyboardType: TextInputType.text,
-                          error: _roomError,
-                          errorMessage: 'Campo obrigatório',
-                          obrigatorio: true,
-                          onChanged: (value) {
-                            if (_roomError && value.isNotEmpty) {
-                              setState(() => _roomError = false);
-                            }
-                          },
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Leito',
-                          controller: bedController,
-                          keyboardType: TextInputType.text,
-                          error: _bedError,
-                          errorMessage: 'Campo obrigatório',
-                          obrigatorio: true,
-                          onChanged: (value) {
-                            if (_bedError && value.isNotEmpty) {
-                              setState(() => _bedError = false);
-                            }
-                          },
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Registro',
-                          controller: recordController,
-                          keyboardType: TextInputType.text,
-                          error: _recordError,
-                          errorMessage: 'Campo obrigatório',
-                          obrigatorio: true,
-                          onChanged: (value) {
-                            if (_recordError && value.isNotEmpty) {
-                              setState(() => _recordError = false);
-                            }
-                          },
-                        ),
+
+                        // Campos específicos para hospital (renderizados condicionalmente)
+                        if (isHospital) ...[
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Hospital',
+                            controller: hospitalController,
+                            keyboardType: TextInputType.text,
+                            error: _hospitalError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_hospitalError && value.isNotEmpty) {
+                                setState(() => _hospitalError = false);
+                              }
+                            },
+                          ),
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Clínica',
+                            controller: clinicController,
+                            keyboardType: TextInputType.text,
+                            error: _clinicError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_clinicError && value.isNotEmpty) {
+                                setState(() => _clinicError = false);
+                              }
+                            },
+                          ),
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Quarto',
+                            controller: roomController,
+                            keyboardType: TextInputType.text,
+                            error: _roomError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_roomError && value.isNotEmpty) {
+                                setState(() => _roomError = false);
+                              }
+                            },
+                          ),
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Leito',
+                            controller: bedController,
+                            keyboardType: TextInputType.text,
+                            error: _bedError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_bedError && value.isNotEmpty) {
+                                setState(() => _bedError = false);
+                              }
+                            },
+                          ),
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Registro',
+                            controller: recordController,
+                            keyboardType: TextInputType.text,
+                            error: _recordError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_recordError && value.isNotEmpty) {
+                                setState(() => _recordError = false);
+                              }
+                            },
+                          ),
+                        ],
+
                         const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

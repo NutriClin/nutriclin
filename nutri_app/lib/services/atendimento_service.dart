@@ -7,27 +7,43 @@ class AtendimentoService {
   static const String _prefsKeyIdentificacao =
       'hospital_atendimento_identificacao';
 
-  Future<void> salvarDadosIdentificacao({
-    required String nome,
-    required String sexo,
-    required Timestamp data_nascimento,
-    required String hospital,
-    required String clinica,
-    required String quarto,
-    required String leito,
-    required String registro,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
-    await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
-    await prefs.setString('$_prefsKeyIdentificacao.data_nascimento',
-        data_nascimento.toDate().toIso8601String());
+ Future<void> salvarDadosIdentificacao({
+  required String nome,
+  required String sexo,
+  required Timestamp data_nascimento,
+  String? hospital,
+  String? clinica,
+  String? quarto,
+  String? leito,
+  String? registro,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  
+  // Dados básicos (comuns a ambos os tipos)
+  await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
+  await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
+  await prefs.setString(
+    '$_prefsKeyIdentificacao.data_nascimento',
+    data_nascimento.toDate().toIso8601String(),
+  );
+
+  // Dados específicos do hospital (opcionais)
+  if (hospital != null) {
     await prefs.setString('$_prefsKeyIdentificacao.hospital', hospital);
+  }
+  if (clinica != null) {
     await prefs.setString('$_prefsKeyIdentificacao.clinica', clinica);
+  }
+  if (quarto != null) {
     await prefs.setString('$_prefsKeyIdentificacao.quarto', quarto);
+  }
+  if (leito != null) {
     await prefs.setString('$_prefsKeyIdentificacao.leito', leito);
+  }
+  if (registro != null) {
     await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
   }
+}
 
   Future<Map<String, dynamic>> carregarDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
@@ -717,7 +733,8 @@ class AtendimentoService {
     };
   }
 
-  static const String _prefsKeytipoAtendimento = 'hospital_atendimento_tipo_atendimento';
+  static const String _prefsKeytipoAtendimento =
+      'hospital_atendimento_tipo_atendimento';
 
   Future<void> salvarTipoAtendimento(String tipo) async {
     final prefs = await SharedPreferences.getInstance();
@@ -749,8 +766,6 @@ class AtendimentoService {
 
   // Chaves para SharedPreferences
   static const String _prefsKeyAtendimento = 'hospital_atendimento';
-
-  Future<void> salvarIdentificacao() async {}
 
   Future<Map<String, dynamic>> obterDadosCompletos() async {
     var identificacao = await carregarDadosIdentificacao();
