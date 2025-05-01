@@ -717,6 +717,23 @@ class AtendimentoService {
     };
   }
 
+  static const String _prefsKeytipoAtendimento = 'hospital_atendimento_tipo_atendimento';
+
+  Future<void> salvarTipoAtendimento(String tipo) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefsKeytipoAtendimento, tipo);
+  }
+
+  Future<String?> obterTipoAtendimento() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_prefsKeytipoAtendimento);
+  }
+
+  Future<void> excluirTipoAtendimento() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefsKeytipoAtendimento);
+  }
+
   Future<void> limparTodosDadosAtendimento() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -789,7 +806,8 @@ class AtendimentoService {
 
   Future<void> salvarProfessorSelecionado(String professor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('hospital_atendimento.professor_selecionado', professor);
+    await prefs.setString(
+        'hospital_atendimento.professor_selecionado', professor);
   }
 
   Future<String?> carregarProfessorSelecionado() async {

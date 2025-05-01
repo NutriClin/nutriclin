@@ -31,14 +31,16 @@ class AtendimentoPage extends StatelessWidget {
     BuildContext context,
     String prefKey,
     Widget nextPage,
+    String tipoAtendimento,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys();
     final dadosExistentes = keys.where((key) => key.startsWith(prefKey));
 
     if (dadosExistentes.isNotEmpty) {
-      _mostrarModalConfirmacao(context, prefKey, nextPage);
+      _mostrarModalConfirmacao(context, prefKey, nextPage, tipoAtendimento);
     } else {
+      await _atendimentoService.salvarTipoAtendimento(tipoAtendimento);
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => nextPage));
     }
@@ -48,6 +50,7 @@ class AtendimentoPage extends StatelessWidget {
     BuildContext context,
     String prefKey,
     Widget nextPage,
+    String tipoAtendimento,
   ) {
     showDialog(
       context: context,
@@ -74,6 +77,7 @@ class AtendimentoPage extends StatelessWidget {
           );
 
           await _atendimentoService.limparTodosDados();
+          await _atendimentoService.salvarTipoAtendimento(tipoAtendimento);
 
           Navigator.of(context, rootNavigator: true).pop();
           Navigator.of(context, rootNavigator: true).pop();
@@ -100,6 +104,7 @@ class AtendimentoPage extends StatelessWidget {
           context,
           'clinica_atendimento',
           const TMBPage(),
+          'clínica',
         ),
       ),
       const SizedBox(width: 20),
@@ -111,6 +116,7 @@ class AtendimentoPage extends StatelessWidget {
           context,
           'hospital_atendimento',
           const HospitalAtendimentoIdentificacaoPage(),
+          'hospital',
         ),
       ),
     ]);
