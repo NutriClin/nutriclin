@@ -44,10 +44,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/usuario': (context) => AuthGuard(child: const UsuarioPage()),
-        '/home': (context) => AuthGuard(
-              child: const HomePage(tipoUsuario: 'Coordenador'),
-            ),
-        '/atendimento': (context) => AuthGuard(child: AtendimentoPage()),
+        '/home': (context) => const HomePage(tipoUsuario: 'Coordenador'),
+        '/atendimento': (context) => AtendimentoPage()
       },
     );
   }

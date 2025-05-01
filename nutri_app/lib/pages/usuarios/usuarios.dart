@@ -146,43 +146,95 @@ class _UsuarioPageState extends State<UsuarioPage> {
     setState(() {
       _usuariosFiltrados = _usuarios.where((usuario) {
         final nomeMatch = usuario["nome"].toLowerCase().contains(query);
-        final ativoMatch = _filtroAtivo == 'todos' || usuario["ativo"] == true;
-        return nomeMatch && ativoMatch;
+        final ativo = usuario["ativo"] ?? true;
+
+        if (_filtroAtivo == 'todos') return nomeMatch;
+        if (_filtroAtivo == 'ativos') return nomeMatch && ativo;
+        if (_filtroAtivo == 'inativos') return nomeMatch && !ativo;
+
+        return nomeMatch;
       }).toList();
     });
   }
 
   Widget _buildFiltroAtivo() {
-    return Container(
-      margin: const EdgeInsets.only(left: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _filtroAtivo,
-          items: const [
-            DropdownMenuItem(
-              value: 'todos',
-              child: Text('Todos'),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(width: 10),
+          Container(
+            height: 36,
+            width: 130, // Aumentei um pouco para caber "Inativos"
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 2.5,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
-            DropdownMenuItem(
-              value: 'ativos',
-              child: Text('Ativos'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _filtroAtivo,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down,
+                      size: 20, color: Colors.black54),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                    color: Colors.black,
+                  ),
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      setState(() {
+                        _filtroAtivo = value;
+                        _filtrarUsuarios();
+                      });
+                    }
+                  },
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'todos',
+                      child: Text('Todos'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'ativos',
+                      child: Text('Ativos'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'inativos',
+                      child: Text('Inativos'),
+                    ),
+                  ],
+                  selectedItemBuilder: (BuildContext context) {
+                    return ['Todos', 'Ativos', 'Inativos'].map((String value) {
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
             ),
-          ],
-          onChanged: (String? value) {
-            if (value != null) {
-              setState(() {
-                _filtroAtivo = value;
-                _filtrarUsuarios();
-              });
-            }
-          },
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          borderRadius: BorderRadius.circular(8),
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -206,7 +258,6 @@ class _UsuarioPageState extends State<UsuarioPage> {
                     _buildFiltroAtivo(),
                   ],
                 ),
-                const SizedBox(height: 10),
                 Expanded(
                   child: _buildUsersList(),
                 ),
