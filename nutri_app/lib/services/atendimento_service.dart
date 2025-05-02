@@ -403,7 +403,8 @@ class AtendimentoService {
       'prescricao_dietoterapica':
           prefs.getString('$_prefsKeyDadosClinicos.prescricao_dietoterapica') ??
               '',
-      'aceitacao': prefs.getString('$_prefsKeyDadosClinicos.aceitacao') ?? '',
+      'aceitacao':
+          prefs.getString('$_prefsKeyDadosClinicos.aceitacao') ?? 'Selecione',
 
       // Alimentação
       'alimentacao_habitual':
@@ -417,8 +418,8 @@ class AtendimentoService {
       'possui_doenca_anterior':
           prefs.getBool('$_prefsKeyDadosClinicos.possui_doenca_anterior') ??
               false,
-      'diagnostico_nutricional':
-          prefs.getString('$_prefsKeyDadosClinicos.diagnostico_nutricional') ??
+      'resumo_doenca_anterior':
+          prefs.getString('$_prefsKeyDadosClinicos.resumo_doenca_anterior') ??
               '',
       'possui_cirurgia_recente':
           prefs.getBool('$_prefsKeyDadosClinicos.possui_cirurgia_recente') ??
@@ -461,6 +462,7 @@ class AtendimentoService {
           prefs.getBool('$_prefsKeyDadosClinicos.possui_etilismo') ?? false,
 
       // Condição funcional
+
       'possui_condicao_funcional': prefs
               .getString('$_prefsKeyDadosClinicos.possui_condicao_funcional') ??
           'Selecione',
@@ -619,11 +621,18 @@ class AtendimentoService {
   Future<void> salvarConsumoAlimentar({
     required String habitual,
     required String atual,
+    required String ingestaoHidrica,
+    required String evacuacao,
+    required String diurese,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString('$_prefsKeyConsumoAlimentar.habitual', habitual);
     await prefs.setString('$_prefsKeyConsumoAlimentar.atual', atual);
+    await prefs.setString(
+        '$_prefsKeyConsumoAlimentar.ingestao_hidrica', ingestaoHidrica);
+    await prefs.setString('$_prefsKeyConsumoAlimentar.evacuacao', evacuacao);
+    await prefs.setString('$_prefsKeyConsumoAlimentar.diurese', diurese);
   }
 
   Future<Map<String, String>> carregarConsumoAlimentar() async {
@@ -632,6 +641,11 @@ class AtendimentoService {
     return {
       'habitual': prefs.getString('$_prefsKeyConsumoAlimentar.habitual') ?? '',
       'atual': prefs.getString('$_prefsKeyConsumoAlimentar.atual') ?? '',
+      'ingestao_hidrica':
+          prefs.getString('$_prefsKeyConsumoAlimentar.ingestao_hidrica') ?? '',
+      'evacuacao':
+          prefs.getString('$_prefsKeyConsumoAlimentar.evacuacao') ?? '',
+      'diurese': prefs.getString('$_prefsKeyConsumoAlimentar.diurese') ?? '',
     };
   }
 
@@ -640,6 +654,9 @@ class AtendimentoService {
 
     await prefs.remove('$_prefsKeyConsumoAlimentar.habitual');
     await prefs.remove('$_prefsKeyConsumoAlimentar.atual');
+    await prefs.remove('$_prefsKeyConsumoAlimentar.ingestao_hidrica');
+    await prefs.remove('$_prefsKeyConsumoAlimentar.evacuacao');
+    await prefs.remove('$_prefsKeyConsumoAlimentar.diurese');
   }
 
 // Dados de requerimentos nutricionais

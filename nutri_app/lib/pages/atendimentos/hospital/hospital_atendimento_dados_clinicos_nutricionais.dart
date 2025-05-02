@@ -24,7 +24,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   // Controllers para campos de texto
   final TextEditingController _diagnosticoController = TextEditingController();
   final TextEditingController _prescricaoController = TextEditingController();
-  final TextEditingController _acetaceboController = TextEditingController();
   final TextEditingController _alimentacaoHabitualController =
       TextEditingController();
   final TextEditingController _especificarAlimentacaoController =
@@ -54,6 +53,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
 
   String selectedAlimentacaoHabitual = 'Selecione';
   String selectedCondicaoFuncional = 'Selecione';
+  String selectedAceitacao = 'Selecione';
 
   // Estados para os switches/checkboxes
   bool _doencaAnterior = false;
@@ -82,7 +82,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     // Dispose de todos os controllers
     _diagnosticoController.dispose();
     _prescricaoController.dispose();
-    _acetaceboController.dispose(); // Novo dispose
     _alimentacaoHabitualController.dispose();
     _especificarAlimentacaoController.dispose();
     _doencaAnteriorController.dispose();
@@ -109,17 +108,19 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
       // Controllers de texto
       _diagnosticoController.text = dados['diagnostico_clinico'] ?? '';
       _prescricaoController.text = dados['prescricao_dietoterapica'] ?? '';
-      _acetaceboController.text = dados['aceitacao'] ?? '';
       _alimentacaoHabitualController.text =
           dados['resumo_alimentacao_habitual'] ?? '';
-      _doencaAnteriorController.text = dados['doencaAnteriorDesc'] ?? '';
+      _doencaAnteriorController.text = dados['resumo_doenca_anterior'] ?? '';
       _cirurgiaController.text = dados['cirurgiaDesc'] ?? '';
       _quantoPesoController.text = dados['quantidade_perca_peso_recente'] ?? '';
-      _qualDietaController.text = dados['resumo_necessidade_dieta_hospitalar'] ?? '';
-      _tipoSuplementacaoController.text = dados['resumo_suplemento_nutricional'] ?? '';
+      _qualDietaController.text =
+          dados['resumo_necessidade_dieta_hospitalar'] ?? '';
+      _tipoSuplementacaoController.text =
+          dados['resumo_suplemento_nutricional'] ?? '';
       _especificarCondicaoController.text =
           dados['resumo_condicao_funcional'] ?? '';
-      _medicamentosController.text = dados['resumo_medicamentos_vitaminas_minerais_prescritos'] ?? '';
+      _medicamentosController.text =
+          dados['resumo_medicamentos_vitaminas_minerais_prescritos'] ?? '';
       _examesLaboratoriaisController.text =
           dados['resumo_exames_laboratoriais'] ?? '';
       _exameFisicoController.text = dados['resumo_exame_fisico'] ?? '';
@@ -129,6 +130,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
           dados['alimentacao_habitual']?.toString() ?? 'Selecione';
       selectedCondicaoFuncional =
           dados['possui_condicao_funcional']?.toString() ?? 'Selecione';
+      selectedAceitacao = dados['aceitacao']?.toString() ?? 'Selecione';
 
       _alimentacaoInadequada = selectedAlimentacaoHabitual == 'Inadequada';
       _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
@@ -150,7 +152,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     await _atendimentoService.salvarDadosClinicosNutricionais(
       diagnostico: _diagnosticoController.text,
       prescricao: _prescricaoController.text,
-      aceitacao: _acetaceboController.text,
+      aceitacao: selectedAceitacao,
       alimentacaoHabitual: selectedAlimentacaoHabitual,
       especificarAlimentacao: _alimentacaoHabitualController.text,
       doencaAnterior: _doencaAnterior,
@@ -199,6 +201,11 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
         _especificarCondicaoController.clear();
       }
     });
+  }
+
+  void _onAceitacaoChanged(String? value) {
+    if (value == null) return;
+    setState(() => selectedAceitacao = value);
   }
 
   void _proceedToNext() {
@@ -271,10 +278,18 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Aceitação:',
-                          controller: _acetaceboController,
-                          keyboardType: TextInputType.text,
+                        CustomDropdown(
+                          label: 'Aceitação',
+                          value: selectedAceitacao,
+                          items: const [
+                            'Selecione',
+                            '0%',
+                            '25%',
+                            '50%',
+                            '75%',
+                            '100%'
+                          ],
+                          onChanged: _onAceitacaoChanged,
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
@@ -299,6 +314,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                               setState(() => _doencaAnterior = value),
                           enabled: true,
                         ),
+                        if (_doencaAnterior) ...[
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Qual',
+                            controller: _doencaAnteriorController,
+                            keyboardType: TextInputType.text,
+                          ),
+                        ],
                         SizedBox(height: espacamentoCards),
                         CustomSwitch(
                           label: 'Cirurgia Recente',

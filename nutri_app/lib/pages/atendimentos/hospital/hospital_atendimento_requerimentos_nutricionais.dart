@@ -163,43 +163,43 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomInput(
-                            label: 'Kcal / dia:',
+                            label: 'Kcal / dia',
                             controller: _kcalDiaController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Kcal / kg:', controller: _kcalKgController),
+                            label: 'Kcal / kg', controller: _kcalKgController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'CHO %:', controller: _choController),
+                            label: 'CHO %', controller: _choController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Lip %:', controller: _lipController),
+                            label: 'Lip %', controller: _lipController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Ptn %:',
+                            label: 'Ptn %',
                             controller: _ptnPorcentagemController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Ptn g / kg:', controller: _ptnKgController),
+                            label: 'Ptn g / kg', controller: _ptnKgController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Ptn g / dia:',
+                            label: 'Ptn g / dia',
                             controller: _ptnDiaController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Líquido ml / kg:',
+                            label: 'Líquido ml / kg',
                             controller: _liquidoKgController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Líquido ml / dia:',
+                            label: 'Líquido ml / dia',
                             controller: _liquidoDiaController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Fibras g/dia:',
+                            label: 'Fibras g/dia',
                             controller: _fibrasController),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                          label: 'Outros:',
+                          label: 'Outros',
                           controller: _outrosController,
                         ),
                         const SizedBox(height: 20),

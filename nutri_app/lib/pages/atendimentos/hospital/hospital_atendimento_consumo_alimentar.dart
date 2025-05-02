@@ -21,6 +21,10 @@ class _HospitalAtendimentoConsumoAlimentarPageState
     extends State<HospitalAtendimentoConsumoAlimentarPage> {
   final TextEditingController _habitualController = TextEditingController();
   final TextEditingController _atualController = TextEditingController();
+  final TextEditingController _ingestaoHidricaController =
+      TextEditingController();
+  final TextEditingController _evacuacaoController = TextEditingController();
+  final TextEditingController _diureseController = TextEditingController();
 
   // Services
   final AtendimentoService _atendimentoService = AtendimentoService();
@@ -35,6 +39,9 @@ class _HospitalAtendimentoConsumoAlimentarPageState
   void dispose() {
     _habitualController.dispose();
     _atualController.dispose();
+    _ingestaoHidricaController.dispose();
+    _evacuacaoController.dispose();
+    _diureseController.dispose();
     super.dispose();
   }
 
@@ -44,6 +51,9 @@ class _HospitalAtendimentoConsumoAlimentarPageState
     setState(() {
       _habitualController.text = dados['habitual'] ?? '';
       _atualController.text = dados['atual'] ?? '';
+      _ingestaoHidricaController.text = dados['ingestao_hidrica'] ?? '';
+      _evacuacaoController.text = dados['evacuacao'] ?? '';
+      _diureseController.text = dados['diurese'] ?? '';
     });
   }
 
@@ -51,6 +61,9 @@ class _HospitalAtendimentoConsumoAlimentarPageState
     await _atendimentoService.salvarConsumoAlimentar(
       habitual: _habitualController.text,
       atual: _atualController.text,
+      ingestaoHidrica: _ingestaoHidricaController.text,
+      evacuacao: _evacuacaoController.text,
+      diurese: _diureseController.text,
     );
   }
 
@@ -120,6 +133,24 @@ class _HospitalAtendimentoConsumoAlimentarPageState
                         CustomInput(
                           label: 'Dia alimentar atual (Rec 24h):',
                           controller: _atualController,
+                        ),
+                        SizedBox(height: espacamentoCards),
+                        CustomInput(
+                          label: 'Ingestão hídrica',
+                          controller: _ingestaoHidricaController,
+                          keyboardType: TextInputType.text,
+                        ),
+                        SizedBox(height: espacamentoCards),
+                        CustomInput(
+                          label: 'Evacuação',
+                          controller: _evacuacaoController,
+                          keyboardType: TextInputType.text,
+                        ),
+                        SizedBox(height: espacamentoCards),
+                        CustomInput(
+                          label: 'Diurese',
+                          controller: _diureseController,
+                          keyboardType: TextInputType.text,
                         ),
                         SizedBox(height: 20),
                         Row(
