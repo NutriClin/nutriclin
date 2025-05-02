@@ -7,43 +7,43 @@ class AtendimentoService {
   static const String _prefsKeyIdentificacao =
       'hospital_atendimento_identificacao';
 
- Future<void> salvarDadosIdentificacao({
-  required String nome,
-  required String sexo,
-  required Timestamp data_nascimento,
-  String? hospital,
-  String? clinica,
-  String? quarto,
-  String? leito,
-  String? registro,
-}) async {
-  final prefs = await SharedPreferences.getInstance();
-  
-  // Dados básicos (comuns a ambos os tipos)
-  await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
-  await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
-  await prefs.setString(
-    '$_prefsKeyIdentificacao.data_nascimento',
-    data_nascimento.toDate().toIso8601String(),
-  );
+  Future<void> salvarDadosIdentificacao({
+    required String nome,
+    required String sexo,
+    required Timestamp data_nascimento,
+    String? hospital,
+    String? clinica,
+    String? quarto,
+    String? leito,
+    String? registro,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
 
-  // Dados específicos do hospital (opcionais)
-  if (hospital != null) {
-    await prefs.setString('$_prefsKeyIdentificacao.hospital', hospital);
+    // Dados básicos (comuns a ambos os tipos)
+    await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
+    await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
+    await prefs.setString(
+      '$_prefsKeyIdentificacao.data_nascimento',
+      data_nascimento.toDate().toIso8601String(),
+    );
+
+    // Dados específicos do hospital (opcionais)
+    if (hospital != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.hospital', hospital);
+    }
+    if (clinica != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.clinica', clinica);
+    }
+    if (quarto != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.quarto', quarto);
+    }
+    if (leito != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.leito', leito);
+    }
+    if (registro != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
+    }
   }
-  if (clinica != null) {
-    await prefs.setString('$_prefsKeyIdentificacao.clinica', clinica);
-  }
-  if (quarto != null) {
-    await prefs.setString('$_prefsKeyIdentificacao.quarto', quarto);
-  }
-  if (leito != null) {
-    await prefs.setString('$_prefsKeyIdentificacao.leito', leito);
-  }
-  if (registro != null) {
-    await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
-  }
-}
 
   Future<Map<String, dynamic>> carregarDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
@@ -335,19 +335,19 @@ class AtendimentoService {
     // Alimentação
     await prefs.setString(
         '$_prefsKeyDadosClinicos.alimentacao_habitual', alimentacaoHabitual);
-    await prefs.setString('$_prefsKeyDadosClinicos.resumo_outro_nutriente',
+    await prefs.setString('$_prefsKeyDadosClinicos.resumo_alimentacao_habitual',
         especificarAlimentacao);
 
     // Histórico médico
     await prefs.setBool(
         '$_prefsKeyDadosClinicos.possui_doenca_anterior', doencaAnterior);
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.diagnostico_nutricional', doencaAnteriorDesc);
+        '$_prefsKeyDadosClinicos.resumo_doenca_anterior', doencaAnteriorDesc);
     await prefs.setBool(
         '$_prefsKeyDadosClinicos.possui_cirurgia_recente', cirurgiaRecente);
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos',
-        cirurgiaDesc);
+        '$_prefsKeyDadosClinicos.resumo_cirurgia_recente', cirurgiaDesc);
+
     await prefs.setBool('$_prefsKeyDadosClinicos.possui_febre', febre);
 
     // Peso
@@ -385,9 +385,10 @@ class AtendimentoService {
 
     // Exames e medicamentos
     await prefs.setString(
-        '$_prefsKeyDadosClinicos.resumo_exames_laboratoriais', medicamentos);
-    await prefs.setString(
-        '$_prefsKeyDadosClinicos.resumo_exame_fisico', examesLaboratoriais);
+        '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos',
+        medicamentos);
+    await prefs.setString('$_prefsKeyDadosClinicos.resumo_exames_laboratoriais',
+        examesLaboratoriais);
     await prefs.setString(
         '$_prefsKeyDadosClinicos.resumo_exame_fisico', exameFisico);
   }
@@ -408,9 +409,9 @@ class AtendimentoService {
       'alimentacao_habitual':
           prefs.getString('$_prefsKeyDadosClinicos.alimentacao_habitual') ??
               'Selecione',
-      'resumo_outro_nutriente':
-          prefs.getString('$_prefsKeyDadosClinicos.resumo_outro_nutriente') ??
-              '',
+      'resumo_alimentacao_habitual': prefs.getString(
+              '$_prefsKeyDadosClinicos.resumo_alimentacao_habitual') ??
+          '',
 
       // Histórico médico
       'possui_doenca_anterior':

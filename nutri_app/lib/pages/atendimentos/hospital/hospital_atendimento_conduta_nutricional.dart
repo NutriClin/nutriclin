@@ -43,14 +43,6 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   Future<void> _carregarDados() async {
     setState(() => isLoading = true);
     try {
-      // 1. Tentar carregar do Firebase (se houver atendimento em andamento)
-      final dadosFirebase = await _obterDadosDoFirebase();
-      if (dadosFirebase != null) {
-        _instanciarDadosFirebase(dadosFirebase);
-        return;
-      }
-
-      // 2. Tentar carregar do cache local
       final dadosCache = await _obterDadosDoCache();
       if (dadosCache != null) {
         _instanciarDadosCache(dadosCache);
@@ -70,34 +62,6 @@ class _HospitalAtendimentoCondutaNutricionalPageState
         setState(() => isLoading = false);
       }
     }
-  }
-
-  Future<Map<String, dynamic>?> _obterDadosDoFirebase() async {
-    try {
-      final atendimentoAtual =
-          await _atendimentoService.obterAtendimentoAtual();
-      if (atendimentoAtual != null) {
-        final doc = await FirebaseFirestore.instance
-            .collection('atendimento')
-            .doc(atendimentoAtual)
-            .get();
-
-        if (doc.exists) {
-          return doc.data();
-        }
-      }
-      return null;
-    } catch (e) {
-      print('Erro ao carregar do Firebase: $e');
-      return null;
-    }
-  }
-
-  void _instanciarDadosFirebase(Map<String, dynamic> dados) {
-    setState(() {
-      _estagiarioNomeController.text = dados['estagiarioNome'] ?? '';
-      _professorSelecionado = dados['professorNome'] ?? 'Selecione';
-    });
   }
 
   Future<Map<String, dynamic>?> _obterDadosDoCache() async {

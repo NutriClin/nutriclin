@@ -42,8 +42,8 @@ class _HospitalAtendimentoConsumoAlimentarPageState
     final dados = await _atendimentoService.carregarConsumoAlimentar();
 
     setState(() {
-      _habitualController.text = dados['habitual']!;
-      _atualController.text = dados['atual']!;
+      _habitualController.text = dados['habitual'] ?? '';
+      _atualController.text = dados['atual'] ?? '';
     });
   }
 

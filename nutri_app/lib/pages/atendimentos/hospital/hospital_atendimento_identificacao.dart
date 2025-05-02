@@ -219,7 +219,6 @@ class _HospitalAtendimentoIdentificacaoPageState
       return;
     }
 
-    // Call the method with named parameters
     await _atendimentoService.salvarDadosIdentificacao(
       nome: nameController.text,
       sexo: selectedGender,
@@ -233,14 +232,14 @@ class _HospitalAtendimentoIdentificacaoPageState
   }
 
   void _proceedToNext() async {
-    if (!_validarCampos()) {
-      ToastUtil.showToast(
-        context: context,
-        message: 'Por favor, verifique o formulário!',
-        isError: true,
-      );
-      return;
-    }
+    // if (!_validarCampos()) {
+    //   ToastUtil.showToast(
+    //     context: context,
+    //     message: 'Por favor, verifique o formulário!',
+    //     isError: true,
+    //   );
+    //   return;
+    // }
 
     await _salvarDadosIdentificacao();
     Navigator.push(

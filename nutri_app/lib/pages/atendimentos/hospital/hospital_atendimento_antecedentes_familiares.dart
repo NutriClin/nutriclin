@@ -45,13 +45,13 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
     final dados = await _atendimentoService.carregarAntecedentesFamiliares();
 
     setState(() {
-      _dislipidemias = dados['dislipidemias'] as bool;
-      _has = dados['has'] as bool;
-      _cancer = dados['cancer'] as bool;
-      _excessoPeso = dados['excessoPeso'] as bool;
-      _diabetes = dados['diabetes'] as bool;
-      _outros = dados['outros'] as bool;
-      _outrosController.text = dados['outrosDescricao'] as String;
+      _dislipidemias = dados['dislipidemias'] ?? false;
+      _has = dados['has'] ?? false;
+      _cancer = dados['cancer'] ?? false;
+      _excessoPeso = dados['excesso_peso'] ?? false;
+      _diabetes = dados['diabetes'] ?? false;
+      _outros = dados['outros'] ?? false;
+      _outrosController.text = dados['outros_descricao'] ?? '';
     });
   }
 

@@ -63,15 +63,15 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
           await _atendimentoService.carregarRequerimentosNutricionais();
       if (mounted) {
         setState(() {
-          _kcalDiaController.text = dados['kcalDia'] ?? '';
-          _kcalKgController.text = dados['kcalKg'] ?? '';
+          _kcalDiaController.text = dados['kcal_dia'] ?? '';
+          _kcalKgController.text = dados['kcal_kg'] ?? '';
           _choController.text = dados['cho'] ?? '';
           _lipController.text = dados['lip'] ?? '';
-          _ptnPorcentagemController.text = dados['ptnPorcentagem'] ?? '';
-          _ptnKgController.text = dados['ptnKg'] ?? '';
-          _ptnDiaController.text = dados['ptnDia'] ?? '';
-          _liquidoKgController.text = dados['liquidoKg'] ?? '';
-          _liquidoDiaController.text = dados['liquidoDia'] ?? '';
+          _ptnPorcentagemController.text = dados['Ptn'] ?? '';
+          _ptnKgController.text = dados['ptn_kg'] ?? '';
+          _ptnDiaController.text = dados['ptn_dia'] ?? '';
+          _liquidoKgController.text = dados['liquido_kg'] ?? '';
+          _liquidoDiaController.text = dados['liquido_dia'] ?? '';
           _fibrasController.text = dados['fibras'] ?? '';
           _outrosController.text = dados['outros'] ?? '';
         });

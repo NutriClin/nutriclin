@@ -107,43 +107,42 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
 
     setState(() {
       // Controllers de texto
-      _diagnosticoController.text = dados['diagnostico'] as String;
-      _prescricaoController.text = dados['prescricao'] as String;
-      _acetaceboController.text = dados['aceitacao'] as String;
+      _diagnosticoController.text = dados['diagnostico_clinico'] ?? '';
+      _prescricaoController.text = dados['prescricao_dietoterapica'] ?? '';
+      _acetaceboController.text = dados['aceitacao'] ?? '';
       _alimentacaoHabitualController.text =
-          dados['especificarAlimentacao'] as String;
-      _doencaAnteriorController.text = dados['doencaAnteriorDesc'] as String;
-      _cirurgiaController.text = dados['cirurgiaDesc'] as String;
-      _quantoPesoController.text = dados['quantoPeso'] as String;
-      _qualDietaController.text = dados['qualDieta'] as String;
-      _tipoSuplementacaoController.text = dados['tipoSuplementacao'] as String;
+          dados['resumo_alimentacao_habitual'] ?? '';
+      _doencaAnteriorController.text = dados['doencaAnteriorDesc'] ?? '';
+      _cirurgiaController.text = dados['cirurgiaDesc'] ?? '';
+      _quantoPesoController.text = dados['quantidade_perca_peso_recente'] ?? '';
+      _qualDietaController.text = dados['resumo_necessidade_dieta_hospitalar'] ?? '';
+      _tipoSuplementacaoController.text = dados['resumo_suplemento_nutricional'] ?? '';
       _especificarCondicaoController.text =
-          dados['especificarCondicao'] as String;
-      _medicamentosController.text = dados['medicamentos'] as String;
+          dados['resumo_condicao_funcional'] ?? '';
+      _medicamentosController.text = dados['resumo_medicamentos_vitaminas_minerais_prescritos'] ?? '';
       _examesLaboratoriaisController.text =
-          dados['examesLaboratoriais'] as String;
-      _exameFisicoController.text = dados['exameFisico'] as String;
+          dados['resumo_exames_laboratoriais'] ?? '';
+      _exameFisicoController.text = dados['resumo_exame_fisico'] ?? '';
 
       // Dropdowns
       selectedAlimentacaoHabitual =
-          dados['alimentacaoHabitual']?.toString() ?? 'Selecione';
+          dados['alimentacao_habitual']?.toString() ?? 'Selecione';
       selectedCondicaoFuncional =
-          dados['condicaoFuncional']?.toString() ?? 'Selecione';
+          dados['possui_condicao_funcional']?.toString() ?? 'Selecione';
 
       _alimentacaoInadequada = selectedAlimentacaoHabitual == 'Inadequada';
       _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
 
       // Switches
-      _doencaAnterior = dados['doencaAnterior'] as bool;
-      _cirurgiaRecente = dados['cirurgiaRecente'] as bool;
-      _febre = dados['febre'] as bool;
-      _alteracaoPeso = dados['alteracaoPeso'] as bool;
-      _desconforto = dados['desconfortos'] as bool;
-      _necessidadeDieta = dados['necessidadeDieta'] as bool;
-      _suplementacao = dados['suplementacao'] as bool;
-      _tabagismo = dados['tabagismo'] as bool;
-      _etilismo = dados['etilismo'] as bool;
-      _condicaoFuncional = selectedCondicaoFuncional == 'Desfavorável';
+      _doencaAnterior = dados['possui_doenca_anterior'] ?? false;
+      _cirurgiaRecente = dados['possui_cirurgia_recente'] ?? false;
+      _febre = dados['possui_febre'] ?? false;
+      _alteracaoPeso = dados['possui_alteracao_peso_recente'] ?? false;
+      _desconforto = dados['possui_desconforto_oral_gastrointestinal'] ?? false;
+      _necessidadeDieta = dados['possui_necessidade_dieta_hospitalar'] ?? false;
+      _suplementacao = dados['possui_suplementacao_nutricional'] ?? false;
+      _tabagismo = dados['possui_tabagismo'] ?? false;
+      _etilismo = dados['possui_etilismo'] ?? false;
     });
   }
 
@@ -260,14 +259,6 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Dados Clínicos e Nutricionais',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 20),
                         CustomInput(
                           label: 'Diagnóstico Clínico',
                           controller: _diagnosticoController,

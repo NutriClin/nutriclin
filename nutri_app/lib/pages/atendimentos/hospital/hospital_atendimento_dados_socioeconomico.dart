@@ -58,17 +58,17 @@ class _HospitalAtendimentoDadosSocioeconomicoPageState
     final dados = await _atendimentoService.carregarDadosSocioeconomicos();
 
     setState(() {
-      _aguaEncanada = dados['aguaEncanada'] as bool;
-      _esgotoEncanado = dados['esgotoEncanado'] as bool;
-      _coletaLixo = dados['coletaLixo'] as bool;
-      _luzEletrica = dados['luzEletrica'] as bool;
-      selectedHouseType = dados['tipoCasa'] as String;
-      pessoasController.text = dados['numPessoas'] as String;
-      rendaFamiliarController.text = dados['rendaFamiliar'] as String;
-      rendaPerCapitaController.text = dados['rendaPerCapita'] as String;
+      _aguaEncanada = dados['agua_encanada'] as bool;
+      _esgotoEncanado = dados['esgoto_encanado'] as bool;
+      _coletaLixo = dados['coleta_lixo'] as bool;
+      _luzEletrica = dados['luz_eletrica'] as bool;
+      selectedHouseType = dados['tipo_casa'] as String;
+      pessoasController.text = dados['numero_pessoas_moram_junto'] as String;
+      rendaFamiliarController.text = dados['renda_familiar'] as String;
+      rendaPerCapitaController.text = dados['renda_per_capita'] as String;
       escolaridadeController.text = dados['escolaridade'] as String;
       profissaoController.text = dados['profissao'] as String;
-      producaoAlimentosController.text = dados['producaoAlimentos'] as String;
+      producaoAlimentosController.text = dados['producao_domestica_alimentos'] as String;
     });
   }
 

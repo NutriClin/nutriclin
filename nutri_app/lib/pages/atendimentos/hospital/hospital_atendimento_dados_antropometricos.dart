@@ -76,23 +76,23 @@ class _HospitalAtendimentoDadosAntropometricosPageState
     final dados = await _atendimentoService.carregarDadosAntropometricos();
 
     setState(() {
-      _pesoAtualController.text = dados['pesoAtual']!;
-      _pesoUsualController.text = dados['pesoUsual']!;
-      _estaturaController.text = dados['estatura']!;
-      _imcController.text = dados['imc']!;
-      _piController.text = dados['pi']!;
-      _cbController.text = dados['cb']!;
-      _pctController.text = dados['pct']!;
-      _pcbController.text = dados['pcb']!;
-      _pcseController.text = dados['pcse']!;
-      _pcsiController.text = dados['pcsi']!;
-      _cmbController.text = dados['cmb']!;
-      _caController.text = dados['ca']!;
-      _cpController.text = dados['cp']!;
-      _ajController.text = dados['aj']!;
-      _percentualGorduraController.text = dados['percentualGordura']!;
-      _perdaPesoController.text = dados['perdaPeso']!;
-      _diagnosticoNutricionalController.text = dados['diagnosticoNutricional']!;
+      _pesoAtualController.text = dados['peso_atual'] ?? '';
+      _pesoUsualController.text = dados['peso_usual'] ?? '';
+      _estaturaController.text = dados['estatura'] ?? '';
+      _imcController.text = dados['imc'] ?? '';
+      _piController.text = dados['pi'] ?? '';
+      _cbController.text = dados['cb'] ?? '';
+      _pctController.text = dados['pct'] ?? '';
+      _pcbController.text = dados['pcb'] ?? '';
+      _pcseController.text = dados['pcse'] ?? '';
+      _pcsiController.text = dados['pcsi'] ?? '';
+      _cmbController.text = dados['cmb'] ?? '';
+      _caController.text = dados['ca'] ?? '';
+      _cpController.text = dados['cp'] ?? '';
+      _ajController.text = dados['aj'] ?? '';
+      _percentualGorduraController.text = dados['porcentagem_gc'] ?? '';
+      _perdaPesoController.text = dados['porcentagem_perca_peso_por_tempo'] ?? '';
+      _diagnosticoNutricionalController.text = dados['diagnostico_nutricional'] ?? '';
     });
   }
 
