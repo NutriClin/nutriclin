@@ -753,11 +753,10 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
     return {
       'estagiario': prefs.getString('$_prefsKeyConduta.estagiario') ?? '',
-      'professor':
-          prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
-      'proxima_consulta':
-          prefs.getString('$_prefsKeyConduta.proxima_consulta') ??
-              '', // Novo campo
+      'professor': prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
+      'idProfessor': prefs.getString('$_prefsKeyConduta.idProfessor') ?? '', // Adicionado
+      'idEstagiario': prefs.getString('$_prefsKeyConduta.idEstagiario') ?? '', // Adicionado
+      'proxima_consulta': prefs.getString('$_prefsKeyConduta.proxima_consulta') ?? '',
     };
   }
 
@@ -819,6 +818,12 @@ class AtendimentoService {
       ...consumoAlimentar,
       ...requerimentos,
       ...conduta,
+      'id_professor_supervisor': conduta['idProfessor'],
+      'id_aluno': conduta['idEstagiario'],
+      'nome_professor': conduta['professor'],
+      'nome_aluno': conduta['estagiario'],
+      'status_atendimento': 'pendente',
+      'criado_em': FieldValue.serverTimestamp(),
       'data': data,
     };
   }
