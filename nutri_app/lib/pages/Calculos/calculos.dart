@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/pages/calculos/get.dart';
+import 'package:nutri_app/pages/calculos/hb.dart';
 import 'package:nutri_app/pages/calculos/imc.dart';
 import 'package:nutri_app/pages/calculos/tmb.dart';
 
@@ -60,12 +61,12 @@ class CalculosPage extends StatelessWidget {
       ),
       const SizedBox(width: 20),
       CustomBox(
-        text: 'Harris-Benedict',
+        text: 'Equação de Harris-Benedict',
         labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/hb.svg',
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const IMCPage()),
+          MaterialPageRoute(builder: (context) => const HarrisBenedictPage()),
         ),
       ),
     ];
