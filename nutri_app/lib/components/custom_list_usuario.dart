@@ -3,8 +3,13 @@ import 'package:nutri_app/pages/usuarios/usuario_detalhe.dart';
 
 class CustomListUsuario extends StatelessWidget {
   final Map<String, dynamic> report;
+  final VoidCallback? onUsuarioUpdated;
 
-  const CustomListUsuario({super.key, required this.report});
+  const CustomListUsuario({
+    super.key,
+    required this.report,
+    this.onUsuarioUpdated,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +57,19 @@ class CustomListUsuario extends StatelessWidget {
               const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
             ],
           ),
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => UsuarioDetalhe(
-                    idUsuario: report["id"]), // <-- Alterado aqui
+                  idUsuario: report["id"],
+                ),
               ),
             );
+
+            if (onUsuarioUpdated != null) {
+              onUsuarioUpdated!();
+            }
           },
         ),
         const Divider(),
