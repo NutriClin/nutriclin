@@ -734,12 +734,19 @@ class AtendimentoService {
     required String professor,
     required String idEstagiario,
     required String idProfessor,
+    String? proximaConsulta, // Novo parâmetro opcional
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$_prefsKeyConduta.estagiario', estagiario);
     await prefs.setString('$_prefsKeyConduta.professor', professor);
     await prefs.setString('$_prefsKeyConduta.idEstagiario', idEstagiario);
     await prefs.setString('$_prefsKeyConduta.idProfessor', idProfessor);
+
+    // Salva o campo opcional apenas se não for nulo
+    if (proximaConsulta != null) {
+      await prefs.setString(
+          '$_prefsKeyConduta.proxima_consulta', proximaConsulta);
+    }
   }
 
   Future<Map<String, String>> carregarCondutaNutricional() async {
@@ -748,6 +755,9 @@ class AtendimentoService {
       'estagiario': prefs.getString('$_prefsKeyConduta.estagiario') ?? '',
       'professor':
           prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
+      'proxima_consulta':
+          prefs.getString('$_prefsKeyConduta.proxima_consulta') ??
+              '', // Novo campo
     };
   }
 

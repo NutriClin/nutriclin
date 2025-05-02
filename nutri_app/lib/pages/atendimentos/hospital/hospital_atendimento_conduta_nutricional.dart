@@ -24,6 +24,8 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     extends State<HospitalAtendimentoCondutaNutricionalPage> {
   final TextEditingController _estagiarioNomeController =
       TextEditingController();
+  final TextEditingController _proximaConsultaController =
+      TextEditingController(); // Novo controller
 
   final AtendimentoService _atendimentoService = AtendimentoService();
 
@@ -32,12 +34,21 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   bool isLoading = false;
   bool _professorSelecionadoError = false;
   String? _errorMessage = '';
+  bool _isHospital = true; // Variável para controlar o tipo de atendimento
 
   @override
   void initState() {
     super.initState();
     _carregarDados();
     _carregarProfessores();
+    _verificarTipoAtendimento();
+  }
+
+  Future<void> _verificarTipoAtendimento() async {
+    final tipo = await _atendimentoService.obterTipoAtendimento();
+    setState(() {
+      _isHospital = tipo == 'hospital';
+    });
   }
 
   Future<void> _carregarDados() async {
@@ -71,11 +82,14 @@ class _HospitalAtendimentoCondutaNutricionalPageState
           prefs.getString('hospital_atendimento_conduta.estagiario');
       final professor =
           prefs.getString('hospital_atendimento_conduta.professor');
+      final proximaConsulta =
+          prefs.getString('hospital_atendimento_conduta.proxima_consulta');
 
-      if (estagiario != null || professor != null) {
+      if (estagiario != null || professor != null || proximaConsulta != null) {
         return {
           'estagiarioNome': estagiario,
           'professorNome': professor,
+          'proximaConsulta': proximaConsulta,
         };
       }
       return null;
@@ -89,6 +103,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     setState(() {
       _estagiarioNomeController.text = dados['estagiarioNome'] ?? '';
       _professorSelecionado = dados['professorNome'] ?? 'Selecione';
+      _proximaConsultaController.text = dados['proximaConsulta'] ?? '';
     });
   }
 
@@ -177,6 +192,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
         professor: _professorSelecionado!,
         idEstagiario: estagiarioId,
         idProfessor: professorId,
+        proximaConsulta: _isHospital ? _proximaConsultaController.text : null,
       );
 
       // 4. Obtém todos os dados consolidados localmente
@@ -304,6 +320,17 @@ class _HospitalAtendimentoCondutaNutricionalPageState
                           });
                         },
                       ),
+
+                      // Campo condicional para hospital
+                      if (_isHospital) ...[
+                        SizedBox(height: espacamentoCards),
+                        CustomInput(
+                          label: 'Programação próxima consulta',
+                          controller: _proximaConsultaController,
+                          keyboardType: TextInputType.text,
+                        ),
+                      ],
+
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
