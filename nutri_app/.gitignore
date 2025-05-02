@@ -48,3 +48,6 @@ app.*.map.json
 /nutri_app/build/
 /NOTICES
 /nutri_app/build/flutter_assets/
+
+# Ignorar todas as pastas build
+**/build/

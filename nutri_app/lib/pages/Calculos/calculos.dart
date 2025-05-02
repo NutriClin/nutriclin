@@ -15,20 +15,30 @@ class CalculosPage extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: _buildCards(context),
+            children: [
+              // First row with 3 cards
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: _buildFirstRowCards(context),
+              ),
+              const SizedBox(height: 20),
+              // Second row with 1 card
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: _buildSecondRowCard(context),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildCards(BuildContext context) {
-    List<Widget> cards = [];
-
+  List<Widget> _buildFirstRowCards(BuildContext context) {
     double labelFontSize = 12;
-    cards.addAll([
+    return [
       CustomBox(
         text: 'Taxa metabólica basal',
         labelFontSize: labelFontSize,
@@ -50,6 +60,21 @@ class CalculosPage extends StatelessWidget {
       ),
       const SizedBox(width: 20),
       CustomBox(
+        text: 'Harris-Benedict',
+        labelFontSize: labelFontSize,
+        imagePath: 'assets/imagens/hb.svg',
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const IMCPage()),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildSecondRowCard(BuildContext context) {
+    double labelFontSize = 12;
+    return [
+      CustomBox(
         text: 'Índice de massa corporal',
         labelFontSize: labelFontSize,
         imagePath: 'assets/imagens/imc-text.svg',
@@ -58,8 +83,6 @@ class CalculosPage extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const IMCPage()),
         ),
       ),
-    ]);
-
-    return cards;
+    ];
   }
 }

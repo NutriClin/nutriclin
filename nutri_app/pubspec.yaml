@@ -87,6 +87,7 @@ flutter:
     - assets/imagens/plus.svg
     - assets/imagens/doctor.svg
     - assets/imagens/relatorio.svg
+    - assets/imagens/hb.svg
     - assets/fonts/
 
   fonts:
