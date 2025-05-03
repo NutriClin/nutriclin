@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Adicione esta importação
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
@@ -25,6 +26,10 @@ class _HospitalAtendimentoConsumoAlimentarPageState
       TextEditingController();
   final TextEditingController _evacuacaoController = TextEditingController();
   final TextEditingController _diureseController = TextEditingController();
+
+  // Filtro para aceitar apenas números
+  final FilteringTextInputFormatter _numerosFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 
   // Services
   final AtendimentoService _atendimentoService = AtendimentoService();
@@ -138,19 +143,22 @@ class _HospitalAtendimentoConsumoAlimentarPageState
                         CustomInput(
                           label: 'Ingestão hídrica',
                           controller: _ingestaoHidricaController,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Evacuação',
                           controller: _evacuacaoController,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Diurese',
                           controller: _diureseController,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: 20),
                         Row(

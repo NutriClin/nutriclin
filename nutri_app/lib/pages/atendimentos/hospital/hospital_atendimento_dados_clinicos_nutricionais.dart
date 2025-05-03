@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_antropometricos.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
@@ -67,6 +68,11 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   bool _tabagismo = false;
   bool _etilismo = false;
   bool _condicaoFuncional = false;
+
+  //Validacao de campos
+  bool _diagnosticoError = false;
+  bool _prescricaoError = false;
+  bool _aceitacaoError = false;
 
   // Serviço para manipulação de dados
   final AtendimentoService _atendimentoService = AtendimentoService();
@@ -148,6 +154,34 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     });
   }
 
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (_diagnosticoController.text.trim().isEmpty) {
+      _diagnosticoError = true;
+      valido = false;
+    } else {
+      _diagnosticoError = false;
+    }
+
+    if (_prescricaoController.text.trim().isEmpty) {
+      _prescricaoError = true;
+      valido = false;
+    } else {
+      _prescricaoError = false;
+    }
+
+    if (selectedAceitacao == 'Selecione') {
+      _aceitacaoError = true;
+      valido = false;
+    } else {
+      _aceitacaoError = false;
+    }
+
+    setState(() {});
+    return valido;
+  }
+
   Future<void> _salvarDadosClinicosNutricionais() async {
     await _atendimentoService.salvarDadosClinicosNutricionais(
       diagnostico: _diagnosticoController.text,
@@ -209,6 +243,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   }
 
   void _proceedToNext() {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
     _salvarDadosClinicosNutricionais();
     Navigator.push(
       context,
@@ -270,12 +312,28 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           label: 'Diagnóstico Clínico',
                           controller: _diagnosticoController,
                           keyboardType: TextInputType.text,
+                          error: _diagnosticoError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_diagnosticoError && value.isNotEmpty) {
+                              setState(() => _diagnosticoError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Prescrição Dietoterápica',
                           controller: _prescricaoController,
                           keyboardType: TextInputType.text,
+                          error: _prescricaoError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_prescricaoError && value.isNotEmpty) {
+                              setState(() => _prescricaoError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
@@ -289,7 +347,15 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             '75%',
                             '100%'
                           ],
-                          onChanged: _onAceitacaoChanged,
+                          onChanged: (value) {
+                            _onAceitacaoChanged(value);
+                            if (_aceitacaoError && value != 'Selecione') {
+                              setState(() => _aceitacaoError = false);
+                            }
+                          },
+                          error: _aceitacaoError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
