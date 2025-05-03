@@ -69,15 +69,12 @@ class _HospitalAtendimentoIdentificacaoPageState
     try {
       final dados = await _atendimentoService.carregarDadosIdentificacao();
       tipoAtendimento = await _atendimentoService.obterTipoAtendimento();
-
-      print("Tipo de atendimento: $tipoAtendimento");
-
+      
       // Determina se é atendimento hospitalar
       setState(() {
         isHospital = tipoAtendimento == 'hospital';
       });
 
-      // Formata a data se existir
       String formattedDate = '';
       if (dados['data_nascimento'] != null) {
         final date = dados['data_nascimento'] as Timestamp;
