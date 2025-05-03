@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Importação necessária para TextInputFormatter
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_consumo_alimentar.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
@@ -39,6 +41,14 @@ class _HospitalAtendimentoDadosAntropometricosPageState
   final TextEditingController _perdaPesoController = TextEditingController();
   final TextEditingController _diagnosticoNutricionalController =
       TextEditingController();
+
+  // Validação dos campos
+  bool _pesoAtualError = false;
+  bool _pesoUsualError = false;
+  bool _estaturaError = false;
+
+  final FilteringTextInputFormatter _numerosFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'));
 
   // Serviço para manipulação de dados
   final AtendimentoService _atendimentoService = AtendimentoService();
@@ -91,9 +101,39 @@ class _HospitalAtendimentoDadosAntropometricosPageState
       _cpController.text = dados['cp'] ?? '';
       _ajController.text = dados['aj'] ?? '';
       _percentualGorduraController.text = dados['porcentagem_gc'] ?? '';
-      _perdaPesoController.text = dados['porcentagem_perca_peso_por_tempo'] ?? '';
-      _diagnosticoNutricionalController.text = dados['diagnostico_nutricional'] ?? '';
+      _perdaPesoController.text =
+          dados['porcentagem_perca_peso_por_tempo'] ?? '';
+      _diagnosticoNutricionalController.text =
+          dados['diagnostico_nutricional'] ?? '';
     });
+  }
+
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (_pesoAtualController.text.trim().isEmpty) {
+      _pesoAtualError = true;
+      valido = false;
+    } else {
+      _pesoAtualError = false;
+    }
+
+    if (_pesoUsualController.text.trim().isEmpty) {
+      _pesoUsualError = true;
+      valido = false;
+    } else {
+      _pesoUsualError = false;
+    }
+
+    if (_estaturaController.text.trim().isEmpty) {
+      _estaturaError = true;
+      valido = false;
+    } else {
+      _estaturaError = false;
+    }
+
+    setState(() {});
+    return valido;
   }
 
   Future<void> _salvarDadosAntropometricos() async {
@@ -119,6 +159,14 @@ class _HospitalAtendimentoDadosAntropometricosPageState
   }
 
   void _proceedToNext() {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
     _salvarDadosAntropometricos();
     Navigator.push(
       context,
@@ -176,102 +224,160 @@ class _HospitalAtendimentoDadosAntropometricosPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Todos os campos numéricos com máscara
                         CustomInput(
                           label: 'Peso atual (kg)',
                           controller: _pesoAtualController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                          error: _pesoAtualError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_pesoAtualError && value.isNotEmpty) {
+                              setState(() => _pesoAtualError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Peso usual (kg)',
                           controller: _pesoUsualController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                          error: _pesoUsualError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_pesoUsualError && value.isNotEmpty) {
+                              setState(() => _pesoUsualError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Estatura (cm)',
                           controller: _estaturaController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                          error: _estaturaError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_estaturaError && value.isNotEmpty) {
+                              setState(() => _estaturaError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'IMC',
                           controller: _imcController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'PI',
                           controller: _piController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'CB (cm)',
                           controller: _cbController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'PCT (mm)',
                           controller: _pctController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'PCB (mm)',
                           controller: _pcbController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'PCSE (mm)',
                           controller: _pcseController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'PCSI (mm)',
                           controller: _pcsiController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'CMB (cm)',
                           controller: _cmbController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'CA (cm)',
                           controller: _caController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'CP (cm)',
                           controller: _cpController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'AJ (cm)',
                           controller: _ajController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: '% de GC',
                           controller: _percentualGorduraController,
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: '% perda peso/tempo',
                           controller: _perdaPesoController,
-                          keyboardType: TextInputType.text,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
                         ),
                         SizedBox(height: espacamentoCards),
+                        // Único campo que não tem máscara numérica
                         CustomInput(
                           label: 'Diagnóstico Nutricional',
                           controller: _diagnosticoNutricionalController,

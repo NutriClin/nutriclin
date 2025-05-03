@@ -25,7 +25,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   final TextEditingController _estagiarioNomeController =
       TextEditingController();
   final TextEditingController _proximaConsultaController =
-      TextEditingController(); // Novo controller
+      TextEditingController(); 
 
   final AtendimentoService _atendimentoService = AtendimentoService();
 
@@ -34,7 +34,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   bool isLoading = false;
   bool _professorSelecionadoError = false;
   String? _errorMessage = '';
-  bool _isHospital = true; // Variável para controlar o tipo de atendimento
+  bool _isHospital = true;
 
   @override
   void initState() {

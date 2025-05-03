@@ -36,3 +36,8 @@ doc/api/
 
 # Ignorar todas as pastas build
 **/build/
+**/macos_build/
+**/ios_build/  
+**/android_build/
+**/web_build/
+**/macos/

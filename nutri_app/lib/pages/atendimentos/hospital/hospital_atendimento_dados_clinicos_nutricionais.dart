@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
 import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_antropometricos.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
@@ -26,23 +27,12 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   final TextEditingController _prescricaoController = TextEditingController();
   final TextEditingController _alimentacaoHabitualController =
       TextEditingController();
-  final TextEditingController _especificarAlimentacaoController =
-      TextEditingController();
   final TextEditingController _doencaAnteriorController =
       TextEditingController();
   final TextEditingController _cirurgiaController = TextEditingController();
-  final TextEditingController _alteracaoPesoController =
-      TextEditingController();
   final TextEditingController _quantoPesoController = TextEditingController();
-  final TextEditingController _desconfortosController = TextEditingController();
-  final TextEditingController _dietaHospitalarController =
-      TextEditingController();
   final TextEditingController _qualDietaController = TextEditingController();
-  final TextEditingController _suplementacaoController =
-      TextEditingController();
   final TextEditingController _tipoSuplementacaoController =
-      TextEditingController();
-  final TextEditingController _condicaoFuncionalController =
       TextEditingController();
   final TextEditingController _especificarCondicaoController =
       TextEditingController();
@@ -68,6 +58,18 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
   bool _etilismo = false;
   bool _condicaoFuncional = false;
 
+  //Validacao de campos
+  bool _diagnosticoError = false;
+  bool _prescricaoError = false;
+  bool _aceitacaoError = false;
+  bool _alimentacaoError = false;
+  bool _doencaAnteriorError = false;
+  bool _cirurgiaError = false;
+  bool _quantoPesoError = false;
+  bool _qualDietaError = false;
+  bool _tipoSuplementacaoError = false;
+  bool _especificarCondicaoError = false;
+
   // Serviço para manipulação de dados
   final AtendimentoService _atendimentoService = AtendimentoService();
 
@@ -83,17 +85,11 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     _diagnosticoController.dispose();
     _prescricaoController.dispose();
     _alimentacaoHabitualController.dispose();
-    _especificarAlimentacaoController.dispose();
     _doencaAnteriorController.dispose();
     _cirurgiaController.dispose();
-    _alteracaoPesoController.dispose();
     _quantoPesoController.dispose();
-    _desconfortosController.dispose();
-    _dietaHospitalarController.dispose();
     _qualDietaController.dispose();
-    _suplementacaoController.dispose();
     _tipoSuplementacaoController.dispose();
-    _condicaoFuncionalController.dispose();
     _especificarCondicaoController.dispose();
     _medicamentosController.dispose();
     _examesLaboratoriaisController.dispose();
@@ -148,6 +144,87 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     });
   }
 
+  bool _validarCampos() {
+    bool valido = true;
+
+    // Campos sempre obrigatórios
+    if (_diagnosticoController.text.trim().isEmpty) {
+      _diagnosticoError = true;
+      valido = false;
+    } else {
+      _diagnosticoError = false;
+    }
+
+    if (_prescricaoController.text.trim().isEmpty) {
+      _prescricaoError = true;
+      valido = false;
+    } else {
+      _prescricaoError = false;
+    }
+
+    if (selectedAceitacao == 'Selecione') {
+      _aceitacaoError = true;
+      valido = false;
+    } else {
+      _aceitacaoError = false;
+    }
+
+    // Campos condicionais
+    if (_alimentacaoInadequada &&
+        _alimentacaoHabitualController.text.trim().isEmpty) {
+      _alimentacaoError = true;
+      valido = false;
+    } else {
+      _alimentacaoError = false;
+    }
+
+    if (_doencaAnterior && _doencaAnteriorController.text.trim().isEmpty) {
+      _doencaAnteriorError = true;
+      valido = false;
+    } else {
+      _doencaAnteriorError = false;
+    }
+
+    if (_cirurgiaRecente && _cirurgiaController.text.trim().isEmpty) {
+      _cirurgiaError = true;
+      valido = false;
+    } else {
+      _cirurgiaError = false;
+    }
+
+    if (_alteracaoPeso && _quantoPesoController.text.trim().isEmpty) {
+      _quantoPesoError = true;
+      valido = false;
+    } else {
+      _quantoPesoError = false;
+    }
+
+    if (_necessidadeDieta && _qualDietaController.text.trim().isEmpty) {
+      _qualDietaError = true;
+      valido = false;
+    } else {
+      _qualDietaError = false;
+    }
+
+    if (_suplementacao && _tipoSuplementacaoController.text.trim().isEmpty) {
+      _tipoSuplementacaoError = true;
+      valido = false;
+    } else {
+      _tipoSuplementacaoError = false;
+    }
+
+    if (_condicaoFuncional &&
+        _especificarCondicaoController.text.trim().isEmpty) {
+      _especificarCondicaoError = true;
+      valido = false;
+    } else {
+      _especificarCondicaoError = false;
+    }
+
+    setState(() {});
+    return valido;
+  }
+
   Future<void> _salvarDadosClinicosNutricionais() async {
     await _atendimentoService.salvarDadosClinicosNutricionais(
       diagnostico: _diagnosticoController.text,
@@ -183,6 +260,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     setState(() {
       selectedAlimentacaoHabitual = value;
       _alimentacaoInadequada = value == 'Inadequada';
+      _alimentacaoError = false; // Reseta o erro ao mudar a seleção
 
       if (!_alimentacaoInadequada) {
         _alimentacaoHabitualController.clear();
@@ -196,6 +274,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
     setState(() {
       selectedCondicaoFuncional = value;
       _condicaoFuncional = value == 'Desfavorável';
+      _especificarCondicaoError = false; // Reseta o erro ao mudar a seleção
 
       if (!_condicaoFuncional) {
         _especificarCondicaoController.clear();
@@ -205,10 +284,21 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
 
   void _onAceitacaoChanged(String? value) {
     if (value == null) return;
-    setState(() => selectedAceitacao = value);
+    setState(() {
+      selectedAceitacao = value;
+      _aceitacaoError = false; // Reseta o erro ao mudar a seleção
+    });
   }
 
   void _proceedToNext() {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
     _salvarDadosClinicosNutricionais();
     Navigator.push(
       context,
@@ -270,12 +360,28 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                           label: 'Diagnóstico Clínico',
                           controller: _diagnosticoController,
                           keyboardType: TextInputType.text,
+                          error: _diagnosticoError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_diagnosticoError && value.isNotEmpty) {
+                              setState(() => _diagnosticoError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
                           label: 'Prescrição Dietoterápica',
                           controller: _prescricaoController,
                           keyboardType: TextInputType.text,
+                          error: _prescricaoError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
+                          onChanged: (value) {
+                            if (_prescricaoError && value.isNotEmpty) {
+                              setState(() => _prescricaoError = false);
+                            }
+                          },
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
@@ -289,7 +395,15 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             '75%',
                             '100%'
                           ],
-                          onChanged: _onAceitacaoChanged,
+                          onChanged: (value) {
+                            _onAceitacaoChanged(value);
+                            if (_aceitacaoError && value != 'Selecione') {
+                              setState(() => _aceitacaoError = false);
+                            }
+                          },
+                          error: _aceitacaoError,
+                          errorMessage: 'Campo obrigatório',
+                          obrigatorio: true,
                         ),
                         SizedBox(height: espacamentoCards),
                         CustomDropdown(
@@ -304,6 +418,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             label: 'Especificar',
                             controller: _alimentacaoHabitualController,
                             keyboardType: TextInputType.text,
+                            error: _alimentacaoError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_alimentacaoError && value.isNotEmpty) {
+                                setState(() => _alimentacaoError = false);
+                              }
+                            },
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
@@ -320,6 +442,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             label: 'Qual',
                             controller: _doencaAnteriorController,
                             keyboardType: TextInputType.text,
+                            error: _doencaAnteriorError,
+                            obrigatorio: true,
+                            errorMessage: 'Campo obrigatório',
+                            onChanged: (value) {
+                              if (_doencaAnteriorError && value.isNotEmpty) {
+                                setState(() => _doencaAnteriorError = false);
+                              }
+                            },
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
@@ -330,6 +460,22 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                               setState(() => _cirurgiaRecente = value),
                           enabled: true,
                         ),
+                        if (_cirurgiaRecente) ...[
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Qual',
+                            controller: _cirurgiaController,
+                            keyboardType: TextInputType.text,
+                            error: _cirurgiaError,
+                            obrigatorio: true,
+                            errorMessage: 'Campo obrigatório',
+                            onChanged: (value) {
+                              if (_cirurgiaError && value.isNotEmpty) {
+                                setState(() => _cirurgiaError = false);
+                              }
+                            },
+                          ),
+                        ],
                         SizedBox(height: espacamentoCards),
                         CustomSwitch(
                           label: 'Febre',
@@ -351,6 +497,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             label: 'Quanto',
                             controller: _quantoPesoController,
                             keyboardType: TextInputType.text,
+                            error: _quantoPesoError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_quantoPesoError && value.isNotEmpty) {
+                                setState(() => _quantoPesoError = false);
+                              }
+                            },
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
@@ -375,6 +529,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             label: 'Qual',
                             controller: _qualDietaController,
                             keyboardType: TextInputType.text,
+                            error: _qualDietaError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_qualDietaError && value.isNotEmpty) {
+                                setState(() => _qualDietaError = false);
+                              }
+                            },
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
@@ -391,6 +553,14 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             label: 'Tipo /razão',
                             controller: _tipoSuplementacaoController,
                             keyboardType: TextInputType.text,
+                            error: _tipoSuplementacaoError,
+                            obrigatorio: true,
+                            errorMessage: 'Campo obrigatório',
+                            onChanged: (value) {
+                              if (_tipoSuplementacaoError && value.isNotEmpty) {
+                                setState(() => _tipoSuplementacaoError = false);
+                              }
+                            },
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
@@ -426,6 +596,16 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
                             label: 'Especificar',
                             controller: _especificarCondicaoController,
                             keyboardType: TextInputType.text,
+                            error: _especificarCondicaoError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_especificarCondicaoError &&
+                                  value.isNotEmpty) {
+                                setState(
+                                    () => _especificarCondicaoError = false);
+                              }
+                            },
                           ),
                         ],
                         SizedBox(height: espacamentoCards),
