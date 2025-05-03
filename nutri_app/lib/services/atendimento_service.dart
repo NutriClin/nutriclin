@@ -16,10 +16,10 @@ class AtendimentoService {
     String? quarto,
     String? leito,
     String? registro,
+    String? prontuario,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Dados básicos (comuns a ambos os tipos)
     await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
     await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
     await prefs.setString(
@@ -43,16 +43,19 @@ class AtendimentoService {
     if (registro != null) {
       await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
     }
+
+    // Novo campo de prontuário (opcional)
+    if (prontuario != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.prontuario', prontuario);
+    }
   }
 
   Future<Map<String, dynamic>> carregarDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Carrega a data como string
     final dataString =
         prefs.getString('$_prefsKeyIdentificacao.data_nascimento') ?? '';
 
-    // Converte para Timestamp se a string não estiver vazia
     Timestamp? dataTimestamp;
     if (dataString.isNotEmpty) {
       try {
@@ -66,12 +69,13 @@ class AtendimentoService {
     return {
       'nome': prefs.getString('$_prefsKeyIdentificacao.nome') ?? '',
       'sexo': prefs.getString('$_prefsKeyIdentificacao.sexo') ?? 'Selecione',
-      'data_nascimento': dataTimestamp, // Retorna como Timestamp ou null
+      'data_nascimento': dataTimestamp,
       'hospital': prefs.getString('$_prefsKeyIdentificacao.hospital') ?? '',
       'clinica': prefs.getString('$_prefsKeyIdentificacao.clinica') ?? '',
       'quarto': prefs.getString('$_prefsKeyIdentificacao.quarto') ?? '',
       'leito': prefs.getString('$_prefsKeyIdentificacao.leito') ?? '',
       'registro': prefs.getString('$_prefsKeyIdentificacao.registro') ?? '',
+      'prontuario': prefs.getString('$_prefsKeyIdentificacao.prontuario') ?? '',
     };
   }
 
@@ -85,6 +89,7 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyIdentificacao.quarto');
     await prefs.remove('$_prefsKeyIdentificacao.leito');
     await prefs.remove('$_prefsKeyIdentificacao.registro');
+    await prefs.remove('$_prefsKeyIdentificacao.prontuario');
   }
 
   // Dados socioeconômicos
@@ -753,10 +758,14 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
     return {
       'estagiario': prefs.getString('$_prefsKeyConduta.estagiario') ?? '',
-      'professor': prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
-      'idProfessor': prefs.getString('$_prefsKeyConduta.idProfessor') ?? '', // Adicionado
-      'idEstagiario': prefs.getString('$_prefsKeyConduta.idEstagiario') ?? '', // Adicionado
-      'proxima_consulta': prefs.getString('$_prefsKeyConduta.proxima_consulta') ?? '',
+      'professor':
+          prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
+      'idProfessor':
+          prefs.getString('$_prefsKeyConduta.idProfessor') ?? '', // Adicionado
+      'idEstagiario':
+          prefs.getString('$_prefsKeyConduta.idEstagiario') ?? '', // Adicionado
+      'proxima_consulta':
+          prefs.getString('$_prefsKeyConduta.proxima_consulta') ?? '',
     };
   }
 
@@ -844,7 +853,16 @@ class AtendimentoService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw Exception('Usuário não autenticado');
 
-    await FirebaseFirestore.instance.collection('atendimento').add({
+    final tipoAtendimento = await obterTipoAtendimento();
+    var tabelaBaseDados = '';
+
+    if (tipoAtendimento == 'hospital') {
+      tabelaBaseDados = 'atendimento';
+    } else {
+      tabelaBaseDados = 'clinica';
+    }
+
+    await FirebaseFirestore.instance.collection(tabelaBaseDados).add({
       ...dados,
       'criado_por': user.uid,
       'criado_em': FieldValue.serverTimestamp(),

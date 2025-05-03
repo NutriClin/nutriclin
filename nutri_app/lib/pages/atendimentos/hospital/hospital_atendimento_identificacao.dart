@@ -31,6 +31,7 @@ class _HospitalAtendimentoIdentificacaoPageState
   final TextEditingController roomController = TextEditingController();
   final TextEditingController bedController = TextEditingController();
   final TextEditingController recordController = TextEditingController();
+  final TextEditingController prontuarioController = TextEditingController(); // Novo campo
 
   final AtendimentoService _atendimentoService = AtendimentoService();
 
@@ -46,6 +47,7 @@ class _HospitalAtendimentoIdentificacaoPageState
   bool _roomError = false;
   bool _bedError = false;
   bool _recordError = false;
+  bool _prontuarioError = false; // Novo erro
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _HospitalAtendimentoIdentificacaoPageState
     roomController.dispose();
     bedController.dispose();
     recordController.dispose();
+    prontuarioController.dispose(); // Dispose do novo controller
     super.dispose();
   }
 
@@ -92,6 +95,7 @@ class _HospitalAtendimentoIdentificacaoPageState
         roomController.text = dados['quarto'] ?? '';
         bedController.text = dados['leito'] ?? '';
         recordController.text = dados['registro'] ?? '';
+        prontuarioController.text = dados['prontuario'] ?? ''; // Carrega o novo campo
         carregando = false;
       });
     } catch (e) {
@@ -182,6 +186,14 @@ class _HospitalAtendimentoIdentificacaoPageState
       } else {
         _recordError = false;
       }
+    } else {
+      // Validação específica para clínica
+      if (prontuarioController.text.trim().isEmpty) {
+        _prontuarioError = true;
+        valido = false;
+      } else {
+        _prontuarioError = false;
+      }
     }
 
     setState(() {});
@@ -225,6 +237,7 @@ class _HospitalAtendimentoIdentificacaoPageState
       quarto: isHospital ? roomController.text : null,
       leito: isHospital ? bedController.text : null,
       registro: isHospital ? recordController.text : null,
+      prontuario: !isHospital ? prontuarioController.text : null,
     );
   }
 
@@ -420,6 +433,22 @@ class _HospitalAtendimentoIdentificacaoPageState
                             onChanged: (value) {
                               if (_recordError && value.isNotEmpty) {
                                 setState(() => _recordError = false);
+                              }
+                            },
+                          ),
+                        ] else ...[
+                          // Campo específico para clínica
+                          SizedBox(height: espacamentoCards),
+                          CustomInput(
+                            label: 'Número de Prontuário',
+                            controller: prontuarioController,
+                            keyboardType: TextInputType.text,
+                            error: _prontuarioError,
+                            errorMessage: 'Campo obrigatório',
+                            obrigatorio: true,
+                            onChanged: (value) {
+                              if (_prontuarioError && value.isNotEmpty) {
+                                setState(() => _prontuarioError = false);
                               }
                             },
                           ),
