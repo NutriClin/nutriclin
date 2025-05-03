@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CustomSwitch extends StatelessWidget {
   final String label;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
   final bool enabled;
   final bool obrigatorio;
   final double? height;
@@ -12,7 +12,7 @@ class CustomSwitch extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
     this.enabled = true,
     this.obrigatorio = false,
     this.height,

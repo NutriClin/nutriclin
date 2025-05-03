@@ -4,7 +4,7 @@ class CustomDropdown extends StatelessWidget {
   final String label;
   final List<String> items;
   final String value;
-  final ValueChanged<String?> onChanged;
+  final ValueChanged<String?>? onChanged;
   final bool enabled;
   final bool obrigatorio;
   final bool error;
@@ -16,7 +16,7 @@ class CustomDropdown extends StatelessWidget {
     required this.label,
     required this.items,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
     this.enabled = true,
     this.obrigatorio = false,
     this.error = false,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_identificacao.dart';
+import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_identificacao.dart';
 
 class CustomListAtendimento extends StatelessWidget {
   final Map<String, dynamic> report;
@@ -66,22 +66,25 @@ class CustomListAtendimento extends StatelessWidget {
           ),
           onTap: () {
             if (report["origem"] == "atendimento") {
-              print(report["id"]);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const HospitalAtendimentoIdentificacaoPage(),
+                  builder: (context) => RelatorioProfessorIdentificacaoPage(
+                    atendimentoId: report["id"],
+                    isHospital: true, // Indica que é hospital
+                  ),
                 ),
               );
-              print("clicou no atendimento");
-            } else {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => UsuarioDetalhe(idUsuario: report["id"]),
-              //   ),
-              // );
-              print("clicou na clinica");
+            } else if (report["origem"] == "clinica") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RelatorioProfessorIdentificacaoPage(
+                    atendimentoId: report["id"],
+                    isHospital: false, // Indica que é clínica
+                  ),
+                ),
+              );
             }
           },
         ),
