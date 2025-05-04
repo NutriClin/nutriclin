@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_dados_antropometricos.dart';
 
 class RelatorioProfessorDadosClinicosNutricionaisPage extends StatefulWidget {
   final String atendimentoId;
@@ -404,15 +405,15 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                             CustomButton(
                               text: 'Próximo',
                               onPressed: () {
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (context) => RelatorioProfessorDadosAntropometricosPage(
-                                //       atendimentoId: widget.atendimentoId,
-                                //       isHospital: widget.isHospital,
-                                //     ),
-                                //   ),
-                                // );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RelatorioProfessorDadosAntropometricosPage(
+                                      atendimentoId: widget.atendimentoId,
+                                      isHospital: widget.isHospital,
+                                    ),
+                                  ),
+                                );
                               },
                             ),
                           ],
