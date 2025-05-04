@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
@@ -25,13 +26,39 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
 
   List<Map<String, dynamic>> _atendimentos = [];
   List<Map<String, dynamic>> _atendimentosFiltrados = [];
+  String? _userType;
+  String? _userId;
+  String orderBy = 'data';
 
   @override
   void initState() {
     super.initState();
-    _fetchInitialData();
+    _getUserInfo().then((_) {
+      _fetchInitialData();
+    });
     _scrollController.addListener(_scrollListener);
     _searchController.addListener(_filtrarAtendimentos);
+  }
+
+  Future<void> _getUserInfo() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userInfo = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .get();
+
+        if (userInfo.exists) {
+          setState(() {
+            _userType = userInfo['tipo_usuario'];
+            _userId = user.uid;
+          });
+        }
+      }
+    } catch (e) {
+      _handleError(e);
+    }
   }
 
   @override
@@ -54,22 +81,26 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
 
   Future<void> _fetchInitialData() async {
     try {
-      final atendimentoSnapshot = await FirebaseFirestore.instance
+      Query query = FirebaseFirestore.instance
           .collection('atendimento')
-          .orderBy('nome')
-          .limit(_limit)
-          .get();
+          .orderBy(orderBy, descending: true);
 
-      _processQuerySnapshot(
-          atendimentoSnapshot, 'atendimento'); // Passa 'atendimento'
+      if (_userType == 'professor') {
+        query = query.where('id_professor_supervisor', isEqualTo: _userId);
+      } else if (_userType == 'aluno') {
+        query = query.where('id_aluno', isEqualTo: _userId);
+      }
+
+      final atendimentoSnapshot = await query.limit(_limit).get();
+      _processQuerySnapshot(atendimentoSnapshot, 'atendimento');
 
       final clinicaSnapshot = await FirebaseFirestore.instance
           .collection('clinica')
-          .orderBy('nome')
+          .orderBy(orderBy)
           .limit(_limit)
           .get();
 
-      _processQuerySnapshot(clinicaSnapshot, 'clinica'); // Passa 'clinica'
+      _processQuerySnapshot(clinicaSnapshot, 'clinica');
     } catch (e) {
       _handleError(e);
     }
@@ -85,19 +116,25 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     try {
       Query query = FirebaseFirestore.instance
           .collection('atendimento')
-          .orderBy('nome')
-          .limit(_limit);
+          .orderBy(orderBy, descending: true);
+
+      if (_userType == 'professor') {
+        query = query.where('id_professor_supervisor', isEqualTo: _userId);
+      } else if (_userType == 'aluno') {
+        query = query.where('id_aluno', isEqualTo: _userId);
+      }
 
       if (_lastDocument != null) {
         query = query.startAfterDocument(_lastDocument!);
       }
 
-      final querySnapshot = await query.get();
+      final querySnapshot = await query.limit(_limit).get();
       _processQuerySnapshot(querySnapshot, 'atendimento');
 
       final clinicaSnapshot = await FirebaseFirestore.instance
           .collection('clinica')
-          .orderBy('nome')
+          .orderBy(orderBy)
+          .startAfter([_lastDocument?['nome']])
           .limit(_limit)
           .get();
 
@@ -120,13 +157,13 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     }
 
     List<Map<String, dynamic>> newAtendimentos = querySnapshot.docs.map((doc) {
-      Timestamp timestamp = doc['criado_em'] ?? Timestamp.now();
+      Timestamp timestamp = doc['data'] ?? doc['criado_em'] ?? Timestamp.now();
       DateTime data = timestamp.toDate();
 
       return {
         'id': doc.id,
-        'nome': doc['nome'],
-        'status_atendimento': doc['status_atendimento'],
+        'nome': doc['nome'] ?? 'Sem nome',
+        'status_atendimento': doc['status_atendimento'] ?? 'Desconhecido',
         'data': data,
         'origem': origem,
       };

@@ -67,7 +67,6 @@ class HomePage extends StatelessWidget {
       cards.add(const SizedBox(width: 10));
     }
 
-    // Exibe os cards dependendo do tipo de usuário
     if (tipoUsuario == 'Coordenador') {
       cards.addAll([
         CustomBox(
