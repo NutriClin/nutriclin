@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_pessoais.dart';
 
 class RelatorioProfessorDadosSocioeconomicosPage extends StatefulWidget {
   final String atendimentoId;
