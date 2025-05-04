@@ -9,7 +9,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_antropometricos.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_dados_antropometricos.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosClinicosNutricionaisPage extends StatefulWidget {

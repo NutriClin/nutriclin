@@ -66,8 +66,8 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
           _cancer = data['cancer'] ?? false;
           _excessoPeso = data['excesso_peso'] ?? false;
           _diabetes = data['diabetes'] ?? false;
-          _outros = data['outros'] ?? false; // Verificar se este campo está correto
-          _outrosController.text = data['outros_descricao'] ?? ''; // Verificar se este campo está correto
+          _outros = data['outros_antecedentes_familiares'] ?? false;
+          _outrosController.text = data['outros_antecedentes_familiares_descricao'] ?? '';
           
           isLoading = false;
         });
@@ -140,7 +140,7 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                             CustomSwitch(
                               label: 'Dislipidemias',
                               value: _dislipidemias,
-                              onChanged: null, // Desabilita alteração
+                              onChanged: null,
                               enabled: false,
                             ),
                             CustomSwitch(
@@ -180,7 +180,7 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                                   label: 'Especifique',
                                   controller: _outrosController,
                                   keyboardType: TextInputType.text,
-                                  enabled: false, // Campo apenas leitura
+                                  enabled: false,
                                 ),
                               ),
                           ],

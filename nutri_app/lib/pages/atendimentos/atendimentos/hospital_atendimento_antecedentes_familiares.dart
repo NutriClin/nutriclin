@@ -8,7 +8,7 @@ import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_clinicos_nutricionais.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_dados_clinicos_nutricionais.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoAntecedentesFamiliaresPage extends StatefulWidget {
@@ -52,8 +52,8 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
       _cancer = dados['cancer'] ?? false;
       _excessoPeso = dados['excesso_peso'] ?? false;
       _diabetes = dados['diabetes'] ?? false;
-      _outros = dados['outros'] ?? false;
-      _outrosController.text = dados['outros_descricao'] ?? '';
+      _outros = dados['outros_antecedentes_familiares'] ?? false;
+      _outrosController.text = dados['outros_antecedentes_familiares_descricao'] ?? '';
     });
   }
 

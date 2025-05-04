@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/components/custom_confirmation_dialog.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_identificacao.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_identificacao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 

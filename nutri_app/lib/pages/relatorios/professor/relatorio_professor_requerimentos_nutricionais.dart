@@ -84,7 +84,7 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
           _liquidoKgController.text = data['liquido_kg']?.toString() ?? '';
           _liquidoDiaController.text = data['liquido_dia']?.toString() ?? '';
           _fibrasController.text = data['fibras']?.toString() ?? '';
-          _outrosController.text = data['outros']?.toString() ?? '';
+          _outrosController.text = data['outros_requerimentos_nutricionais']?.toString() ?? '';
           
           isLoading = false;
         });
