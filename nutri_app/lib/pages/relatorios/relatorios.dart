@@ -119,6 +119,14 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
       _processQuerySnapshot(clinicaSnapshot, 'clinica');
       _lastClinicaDoc =
           clinicaSnapshot.docs.isNotEmpty ? clinicaSnapshot.docs.last : null;
+
+      // Se ambas as consultas retornaram vazias, define _initialLoading como false
+      if (atendimentoSnapshot.docs.isEmpty && clinicaSnapshot.docs.isEmpty) {
+        setState(() {
+          _initialLoading = false;
+          _isLastPage = true;
+        });
+      }
     } catch (e) {
       _handleError(e);
     }

@@ -25,7 +25,7 @@ class _HospitalAtendimentoCondutaNutricionalPageState
   final TextEditingController _estagiarioNomeController =
       TextEditingController();
   final TextEditingController _proximaConsultaController =
-      TextEditingController(); 
+      TextEditingController();
 
   final AtendimentoService _atendimentoService = AtendimentoService();
 
@@ -132,7 +132,9 @@ class _HospitalAtendimentoCondutaNutricionalPageState
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('usuarios')
-          .where('tipo_usuario', whereIn: ['Professor', 'Coordenador']).get();
+          .where('tipo_usuario', whereIn: ['Professor', 'Coordenador'])
+          .where('ativo', isEqualTo: true)
+          .get();
 
       final professorSalvo =
           await _atendimentoService.carregarProfessorSelecionado();
