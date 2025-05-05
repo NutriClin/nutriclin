@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
@@ -9,6 +10,7 @@ import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_pessoais.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class RelatorioProfessorDadosSocioeconomicosPage extends StatefulWidget {
   final String atendimentoId;
@@ -27,6 +29,10 @@ class RelatorioProfessorDadosSocioeconomicosPage extends StatefulWidget {
 
 class _RelatorioProfessorDadosSocioeconomicosPageState
     extends State<RelatorioProfessorDadosSocioeconomicosPage> {
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   bool _aguaEncanada = false;
   bool _esgotoEncanado = false;
   bool _coletaLixo = false;
@@ -42,29 +48,36 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
 
   bool isLoading = true;
   bool hasError = false;
+  bool isProfessor = false;
+  bool isAluno = false;
+  bool isEditing = false;
 
   @override
   void initState() {
     super.initState();
-    _carregarDados();
+    _checkUserType().then((_) {
+      _carregarDados();
+    });
   }
 
-  @override
-  void dispose() {
-    pessoasController.dispose();
-    rendaFamiliarController.dispose();
-    rendaPerCapitaController.dispose();
-    escolaridadeController.dispose();
-    profissaoController.dispose();
-    producaoAlimentosController.dispose();
-    super.dispose();
+  Future<void> _checkUserType() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
+          isAluno = userDoc.data()?['tipo_usuario'] == 'Aluno';
+        });
+      }
+    }
   }
 
   Future<void> _carregarDados() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
       
-      final doc = await FirebaseFirestore.instance
+      final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
           .get();
@@ -87,6 +100,10 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
           
           isLoading = false;
         });
+
+        if (isAluno) {
+          await _carregarDadosLocais();
+        }
       } else {
         setState(() {
           hasError = true;
@@ -102,9 +119,53 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
     }
   }
 
+  Future<void> _carregarDadosLocais() async {
+    final dados = await _atendimentoService.carregarDadosSocioeconomicos();
+    setState(() {
+      _aguaEncanada = dados['agua_encanada'] ?? _aguaEncanada;
+      _esgotoEncanado = dados['esgoto_encanado'] ?? _esgotoEncanado;
+      _coletaLixo = dados['coleta_lixo'] ?? _coletaLixo;
+      _luzEletrica = dados['luz_eletrica'] ?? _luzEletrica;
+      selectedHouseType = dados['tipo_casa'] ?? selectedHouseType;
+      pessoasController.text = dados['numero_pessoas_moram_junto'] ?? pessoasController.text;
+      rendaFamiliarController.text = dados['renda_familiar'] ?? rendaFamiliarController.text;
+      rendaPerCapitaController.text = dados['renda_per_capita'] ?? rendaPerCapitaController.text;
+      escolaridadeController.text = dados['escolaridade'] ?? escolaridadeController.text;
+      profissaoController.text = dados['profissao'] ?? profissaoController.text;
+      producaoAlimentosController.text = dados['producao_domestica_alimentos'] ?? producaoAlimentosController.text;
+    });
+  }
+
+  Future<void> _salvarDadosLocais() async {
+    await _atendimentoService.salvarDadosSocioeconomicos(
+      aguaEncanada: _aguaEncanada,
+      esgotoEncanado: _esgotoEncanado,
+      coletaLixo: _coletaLixo,
+      luzEletrica: _luzEletrica,
+      tipoCasa: selectedHouseType,
+      numPessoas: pessoasController.text,
+      rendaFamiliar: rendaFamiliarController.text,
+      rendaPerCapita: rendaPerCapitaController.text,
+      escolaridade: escolaridadeController.text,
+      profissao: profissaoController.text,
+      producaoAlimentos: producaoAlimentosController.text,
+    );
+  }
+
+  void _toggleEditing() {
+    setState(() {
+      isEditing = !isEditing;
+      if (!isEditing) {
+        _salvarDadosLocais();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double espacamentoCards = 10;
+    final bool camposEditaveis = isAluno && isEditing;
+    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -140,6 +201,25 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                 child: Column(
                   children: [
                     const CustomStepper(currentStep: 2, totalSteps: 9),
+                    if (mostrarBotaoEditar) ...[
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ElevatedButton(
+                            onPressed: _toggleEditing,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isEditing ? Colors.green : Colors.blue,
+                            ),
+                            child: Text(
+                              isEditing ? 'Salvar' : 'Editar',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: MediaQuery.of(context).size.width * 0.95,
@@ -151,29 +231,37 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                             CustomSwitch(
                               label: 'Água encanada',
                               value: _aguaEncanada,
-                              onChanged: null,
-                              enabled: false,
+                              onChanged: camposEditaveis 
+                                  ? (value) => setState(() => _aguaEncanada = value)
+                                  : null,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomSwitch(
                               label: 'Esgoto encanado',
                               value: _esgotoEncanado,
-                              onChanged: null,
-                              enabled: false,
+                              onChanged: camposEditaveis
+                                  ? (value) => setState(() => _esgotoEncanado = value)
+                                  : null,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomSwitch(
                               label: 'Coleta de lixo',
                               value: _coletaLixo,
-                              onChanged: null,
-                              enabled: false,
+                              onChanged: camposEditaveis
+                                  ? (value) => setState(() => _coletaLixo = value)
+                                  : null,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomSwitch(
                               label: 'Luz elétrica',
                               value: _luzEletrica,
-                              onChanged: null,
-                              enabled: false,
+                              onChanged: camposEditaveis
+                                  ? (value) => setState(() => _luzEletrica = value)
+                                  : null,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomDropdown(
@@ -186,45 +274,47 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                 'Mista',
                                 'Outro'
                               ],
-                              onChanged: null,
-                              enabled: false,
+                              onChanged: camposEditaveis
+                                  ? (value) => setState(() => selectedHouseType = value!)
+                                  : null,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Nº de pessoas na casa',
                               controller: pessoasController,
                               keyboardType: TextInputType.number,
-                              enabled: false,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Renda familiar',
                               controller: rendaFamiliarController,
-                              enabled: false,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Renda per capita',
                               controller: rendaPerCapitaController,
-                              enabled: false,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Escolaridade',
                               controller: escolaridadeController,
-                              enabled: false,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Profissão/Ocupação',
                               controller: profissaoController,
-                              enabled: false,
+                              enabled: camposEditaveis,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Produção doméstica de alimentos: Quais?',
                               controller: producaoAlimentosController,
-                              enabled: false,
+                              enabled: camposEditaveis,
                             ),
                             const SizedBox(height: 15),
                             Row(
@@ -240,6 +330,9 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                 CustomButton(
                                   text: 'Próximo',
                                   onPressed: () {
+                                    if (isAluno && isEditing) {
+                                      _salvarDadosLocais();
+                                    }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -263,12 +356,12 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
             ),
           ),
         ),
-        // Adiciona o componente de observações
         ObservacaoRelatorio(
           pageKey: 'dados_socioeconomicos',
           atendimentoId: widget.atendimentoId,
           isHospital: widget.isHospital,
           isFinalPage: false,
+          modoLeitura: isAluno,
         ),
       ],
     );

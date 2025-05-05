@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
@@ -8,6 +9,7 @@ import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_dados_clinicos_nutricionais.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 
 class RelatorioProfessorAntecedentesFamiliaresPage extends StatefulWidget {
   final String atendimentoId;
@@ -26,6 +28,10 @@ class RelatorioProfessorAntecedentesFamiliaresPage extends StatefulWidget {
 
 class _RelatorioProfessorAntecedentesFamiliaresPageState
     extends State<RelatorioProfessorAntecedentesFamiliaresPage> {
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   bool _dislipidemias = false;
   bool _has = false;
   bool _cancer = false;
@@ -36,11 +42,16 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
 
   bool isLoading = true;
   bool hasError = false;
+  bool isProfessor = false;
+  bool isAluno = false;
+  bool isEditing = false;
 
   @override
   void initState() {
     super.initState();
-    _carregarDados();
+    _checkUserType().then((_) {
+      _carregarDados();
+    });
   }
 
   @override
@@ -49,11 +60,24 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
     super.dispose();
   }
 
+  Future<void> _checkUserType() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
+          isAluno = userDoc.data()?['tipo_usuario'] == 'Aluno';
+        });
+      }
+    }
+  }
+
   Future<void> _carregarDados() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
       
-      final doc = await FirebaseFirestore.instance
+      final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
           .get();
@@ -72,6 +96,10 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
           
           isLoading = false;
         });
+
+        if (isAluno) {
+          await _carregarDadosLocais();
+        }
       } else {
         setState(() {
           hasError = true;
@@ -87,11 +115,47 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
     }
   }
 
+  Future<void> _carregarDadosLocais() async {
+    final dados = await _atendimentoService.carregarAntecedentesFamiliares();
+    setState(() {
+      _dislipidemias = dados['dislipidemias'] ?? _dislipidemias;
+      _has = dados['has'] ?? _has;
+      _cancer = dados['cancer'] ?? _cancer;
+      _excessoPeso = dados['excesso_peso'] ?? _excessoPeso;
+      _diabetes = dados['diabetes'] ?? _diabetes;
+      _outros = dados['outros'] ?? _outros;
+      _outrosController.text = dados['outros_descricao'] ?? _outrosController.text;
+    });
+  }
+
+  Future<void> _salvarDadosLocais() async {
+    await _atendimentoService.salvarAntecedentesFamiliares(
+      dislipidemias: _dislipidemias,
+      has: _has,
+      cancer: _cancer,
+      excessoPeso: _excessoPeso,
+      diabetes: _diabetes,
+      outros: _outros,
+      outrosDescricao: _outrosController.text,
+    );
+  }
+
+  void _toggleEditing() {
+    setState(() {
+      isEditing = !isEditing;
+      if (!isEditing) {
+        _salvarDadosLocais();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
+    final bool camposEditaveis = isAluno && isEditing;
+    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -130,6 +194,25 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                       currentStep: 4,
                       totalSteps: 9,
                     ),
+                    if (mostrarBotaoEditar) ...[
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ElevatedButton(
+                            onPressed: _toggleEditing,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isEditing ? Colors.green : Colors.blue,
+                            ),
+                            child: Text(
+                              isEditing ? 'Salvar' : 'Editar',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: cardWidth,
@@ -143,38 +226,50 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                                 CustomSwitch(
                                   label: 'Dislipidemias',
                                   value: _dislipidemias,
-                                  onChanged: null,
-                                  enabled: false,
+                                  onChanged: camposEditaveis
+                                      ? (value) => setState(() => _dislipidemias = value)
+                                      : null,
+                                  enabled: camposEditaveis,
                                 ),
                                 CustomSwitch(
                                   label: 'HAS',
                                   value: _has,
-                                  onChanged: null,
-                                  enabled: false,
+                                  onChanged: camposEditaveis
+                                      ? (value) => setState(() => _has = value)
+                                      : null,
+                                  enabled: camposEditaveis,
                                 ),
                                 CustomSwitch(
                                   label: 'Câncer',
                                   value: _cancer,
-                                  onChanged: null,
-                                  enabled: false,
+                                  onChanged: camposEditaveis
+                                      ? (value) => setState(() => _cancer = value)
+                                      : null,
+                                  enabled: camposEditaveis,
                                 ),
                                 CustomSwitch(
                                   label: 'Excesso de peso',
                                   value: _excessoPeso,
-                                  onChanged: null,
-                                  enabled: false,
+                                  onChanged: camposEditaveis
+                                      ? (value) => setState(() => _excessoPeso = value)
+                                      : null,
+                                  enabled: camposEditaveis,
                                 ),
                                 CustomSwitch(
                                   label: 'Diabetes mellitus',
                                   value: _diabetes,
-                                  onChanged: null,
-                                  enabled: false,
+                                  onChanged: camposEditaveis
+                                      ? (value) => setState(() => _diabetes = value)
+                                      : null,
+                                  enabled: camposEditaveis,
                                 ),
                                 CustomSwitch(
                                   label: 'Outros',
                                   value: _outros,
-                                  onChanged: null,
-                                  enabled: false,
+                                  onChanged: camposEditaveis
+                                      ? (value) => setState(() => _outros = value)
+                                      : null,
+                                  enabled: camposEditaveis,
                                 ),
                                 if (_outros)
                                   Padding(
@@ -183,7 +278,7 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                                       label: 'Especifique',
                                       controller: _outrosController,
                                       keyboardType: TextInputType.text,
-                                      enabled: false,
+                                      enabled: camposEditaveis,
                                     ),
                                   ),
                               ],
@@ -202,6 +297,9 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                                 CustomButton(
                                   text: 'Próximo',
                                   onPressed: () {
+                                    if (isAluno && isEditing) {
+                                      _salvarDadosLocais();
+                                    }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -225,12 +323,12 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
             ),
           ),
         ),
-        // Adiciona o componente de observações
         ObservacaoRelatorio(
           pageKey: 'antecedentes_familiares',
           atendimentoId: widget.atendimentoId,
           isHospital: widget.isHospital,
           isFinalPage: false,
+          modoLeitura: isAluno,
         ),
       ],
     );

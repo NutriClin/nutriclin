@@ -4,6 +4,7 @@ import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/components/custom_list_atendimento.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RelatoriosPage extends StatefulWidget {
   const RelatoriosPage({super.key});
@@ -15,6 +16,8 @@ class RelatoriosPage extends StatefulWidget {
 class _RelatoriosPageState extends State<RelatoriosPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLastPage = false;
   DocumentSnapshot? _lastDocument;
@@ -22,6 +25,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
   bool _initialLoading = true;
   bool _loadingMore = false;
   final int _limit = 100;
+  String? _userType;
+  bool _isUserTypeLoaded = false;
 
   List<Map<String, dynamic>> _atendimentos = [];
   List<Map<String, dynamic>> _atendimentosFiltrados = [];
@@ -29,47 +34,57 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
   @override
   void initState() {
     super.initState();
-    _fetchInitialData();
-    _scrollController.addListener(_scrollListener);
+    _fetchUserType().then((_) {
+      _fetchInitialData();
+    });
     _searchController.addListener(_filtrarAtendimentos);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _searchController.removeListener(_filtrarAtendimentos);
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !_scrollController.position.outOfRange) {
-      if (!_loadingMore && !_isLastPage) {
-        _fetchMoreData();
+  Future<void> _fetchUserType() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+        if (userDoc.exists) {
+          setState(() {
+            _userType = userDoc.data()?['tipo_usuario'];
+            _isUserTypeLoaded = true;
+          });
+        }
       }
+    } catch (e) {
+      print("Erro ao carregar tipo de usuário: $e");
     }
   }
 
   Future<void> _fetchInitialData() async {
     try {
-      final atendimentoSnapshot = await FirebaseFirestore.instance
+      // Query para atendimentos hospitalares
+      Query atendimentoQuery = _firestore
           .collection('atendimento')
           .orderBy('nome')
-          .limit(_limit)
-          .get();
+          .limit(_limit);
 
-      _processQuerySnapshot(
-          atendimentoSnapshot, 'atendimento'); // Passa 'atendimento'
-
-      final clinicaSnapshot = await FirebaseFirestore.instance
+      // Query para atendimentos clínicos
+      Query clinicaQuery = _firestore
           .collection('clinica')
           .orderBy('nome')
-          .limit(_limit)
-          .get();
+          .limit(_limit);
 
-      _processQuerySnapshot(clinicaSnapshot, 'clinica'); // Passa 'clinica'
+      // Aplicar filtros baseados no tipo de usuário
+      if (_userType == 'Professor') {
+        atendimentoQuery = atendimentoQuery.where('status_atendimento', isEqualTo: 'enviado');
+        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'enviado');
+      } else if (_userType == 'Aluno') {
+        atendimentoQuery = atendimentoQuery.where('status_atendimento', isEqualTo: 'reprovado');
+        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'reprovado');
+      }
+
+      final atendimentoSnapshot = await atendimentoQuery.get();
+      _processQuerySnapshot(atendimentoSnapshot, 'atendimento');
+
+      final clinicaSnapshot = await clinicaQuery.get();
+      _processQuerySnapshot(clinicaSnapshot, 'clinica');
     } catch (e) {
       _handleError(e);
     }
@@ -83,10 +98,17 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     });
 
     try {
-      Query query = FirebaseFirestore.instance
+      Query query = _firestore
           .collection('atendimento')
           .orderBy('nome')
           .limit(_limit);
+
+      // Aplicar filtros para paginação
+      if (_userType == 'Professor') {
+        query = query.where('status_atendimento', isEqualTo: 'enviado');
+      } else if (_userType == 'Aluno') {
+        query = query.where('status_atendimento', isEqualTo: 'reprovado');
+      }
 
       if (_lastDocument != null) {
         query = query.startAfterDocument(_lastDocument!);
@@ -95,12 +117,19 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
       final querySnapshot = await query.get();
       _processQuerySnapshot(querySnapshot, 'atendimento');
 
-      final clinicaSnapshot = await FirebaseFirestore.instance
+      // Repetir para clínica
+      Query clinicaQuery = _firestore
           .collection('clinica')
           .orderBy('nome')
-          .limit(_limit)
-          .get();
+          .limit(_limit);
 
+      if (_userType == 'Professor') {
+        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'enviado');
+      } else if (_userType == 'Aluno') {
+        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'reprovado');
+      }
+
+      final clinicaSnapshot = await clinicaQuery.get();
       _processQuerySnapshot(clinicaSnapshot, 'clinica');
     } catch (e) {
       _handleError(e);
@@ -177,6 +206,17 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
                 const SizedBox(height: 10),
                 CustomInputSearch(controller: _searchController),
                 const SizedBox(height: 10),
+                if (_userType != null) ...[
+                  Text(
+                    'Visualizando: ${_getFilterDescription()}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 Expanded(
                   child: _buildAtendimentoList(),
                 ),
@@ -184,12 +224,12 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
             ),
           ),
         ),
-        if (_initialLoading)
+        if (_initialLoading || !_isUserTypeLoaded)
           ModalBarrier(
             dismissible: false,
             color: Colors.black.withOpacity(0.5),
           ),
-        if (_initialLoading)
+        if (_initialLoading || !_isUserTypeLoaded)
           const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -199,8 +239,17 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     );
   }
 
+  String _getFilterDescription() {
+    if (_userType == 'Professor') {
+      return 'Apenas relatórios enviados para correção';
+    } else if (_userType == 'Aluno') {
+      return 'Apenas relatórios reprovados para revisão';
+    }
+    return 'Todos os relatórios';
+  }
+
   Widget _buildAtendimentoList() {
-    if (_initialLoading) {
+    if (_initialLoading || !_isUserTypeLoaded) {
       return const SizedBox();
     }
 
@@ -237,7 +286,26 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     }
 
     if (_atendimentosFiltrados.isEmpty) {
-      return const Center(child: Text("Nenhum atendimento encontrado."));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.assignment, size: 50, color: Colors.grey),
+            const SizedBox(height: 10),
+            Text(
+              _userType == 'Professor'
+                  ? 'Nenhum relatório enviado para correção'
+                  : _userType == 'Aluno'
+                      ? 'Nenhum relatório reprovado para revisão'
+                      : 'Nenhum relatório encontrado',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.builder(
