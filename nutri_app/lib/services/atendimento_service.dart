@@ -711,7 +711,7 @@ class AtendimentoService {
       'liquido_dia':
           prefs.getString('$_prefsKeyRequerimentos.liquido_dia') ?? '',
       'fibras': prefs.getString('$_prefsKeyRequerimentos.fibras') ?? '',
-      'outros': prefs.getString('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais') ?? '',
+      'outros_requerimentos_nutricionais': prefs.getString('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais') ?? '',
     };
   }
 
