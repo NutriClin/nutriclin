@@ -5,6 +5,7 @@ import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/components/custom_list_atendimento.dart';
+import 'package:nutri_app/services/preferences_service.dart';
 
 class RelatoriosPage extends StatefulWidget {
   const RelatoriosPage({super.key});
@@ -44,17 +45,12 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final userInfo = await FirebaseFirestore.instance
-            .collection('usuarios')
-            .doc(user.uid)
-            .get();
+        final userType = await PreferencesService.getUserType();
 
-        if (userInfo.exists) {
-          setState(() {
-            _userType = userInfo['tipo_usuario'];
-            _userId = user.uid;
-          });
-        }
+        setState(() {
+          _userType = userType;
+          _userId = user.uid;
+        });
       }
     } catch (e) {
       _handleError(e);
@@ -81,14 +77,18 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
 
   Future<void> _fetchInitialData() async {
     try {
-      Query query = FirebaseFirestore.instance
-          .collection('atendimento')
-          .orderBy(orderBy, descending: true);
+      Query query = FirebaseFirestore.instance.collection('atendimento');
 
-      if (_userType == 'professor') {
-        query = query.where('id_professor_supervisor', isEqualTo: _userId);
-      } else if (_userType == 'aluno') {
-        query = query.where('id_aluno', isEqualTo: _userId);
+      if (_userType == 'Professor') {
+        query = query
+            .where('id_professor_supervisor', isEqualTo: _userId)
+            .orderBy('data', descending: true);
+      } else if (_userType == 'Aluno') {
+        query = query
+            .where('id_aluno', isEqualTo: _userId)
+            .orderBy('data', descending: true);
+      } else {
+        query = query.orderBy('data', descending: true);
       }
 
       final atendimentoSnapshot = await query.limit(_limit).get();
@@ -118,9 +118,9 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
           .collection('atendimento')
           .orderBy(orderBy, descending: true);
 
-      if (_userType == 'professor') {
+      if (_userType == 'Professor') {
         query = query.where('id_professor_supervisor', isEqualTo: _userId);
-      } else if (_userType == 'aluno') {
+      } else if (_userType == 'Aluno') {
         query = query.where('id_aluno', isEqualTo: _userId);
       }
 
