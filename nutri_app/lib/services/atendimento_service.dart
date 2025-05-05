@@ -258,9 +258,9 @@ class AtendimentoService {
     await prefs.setBool(
         '$_prefsKeyAntecedentesFamiliares.excesso_peso', excessoPeso);
     await prefs.setBool('$_prefsKeyAntecedentesFamiliares.diabetes', diabetes);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.outros', outros);
+    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares', outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesFamiliares.outros_descricao', outrosDescricao);
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao', outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesFamiliares() async {
