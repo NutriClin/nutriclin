@@ -5,6 +5,7 @@ import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_requerimentos_nutricionais.dart';
 
 class RelatorioProfessorConsumoAlimentarPage extends StatefulWidget {
@@ -114,92 +115,102 @@ class _RelatorioProfessorConsumoAlimentarPageState
       );
     }
 
-    return BasePage(
-      title: 'Consumo Alimentar',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Column(
-              children: [
-                const CustomStepper(
-                  currentStep: 7,
-                  totalSteps: 9,
-                ),
-                const SizedBox(height: 10),
-                CustomCard(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomInput(
-                          label: 'Dia alimentar habitual:',
-                          controller: _habitualController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Dia alimentar atual (Rec 24h):',
-                          controller: _atualController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Ingestão hídrica',
-                          controller: _ingestaoHidricaController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Evacuação',
-                          controller: _evacuacaoController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Diurese',
-                          controller: _diureseController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Consumo Alimentar',
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Column(
+                  children: [
+                    const CustomStepper(
+                      currentStep: 7,
+                      totalSteps: 9,
+                    ),
+                    const SizedBox(height: 10),
+                    CustomCard(
+                      width: cardWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.red,
-                              boxShadowColor: Colors.black,
+                            CustomInput(
+                              label: 'Dia alimentar habitual:',
+                              controller: _habitualController,
+                              enabled: false,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: () {
-                                // Navegar para a próxima página
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RelatorioProfessorRequerimentosNutricionaisPage(
-                                      atendimentoId: widget.atendimentoId,
-                                      isHospital: widget.isHospital,
-                                    ),
-                                  ),
-                                );
-                              },
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Dia alimentar atual (Rec 24h):',
+                              controller: _atualController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Ingestão hídrica',
+                              controller: _ingestaoHidricaController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Evacuação',
+                              controller: _evacuacaoController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Diurese',
+                              controller: _diureseController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RelatorioProfessorRequerimentosNutricionaisPage(
+                                          atendimentoId: widget.atendimentoId,
+                                          isHospital: widget.isHospital,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        // Adiciona o componente de observações
+        ObservacaoRelatorio(
+          pageKey: 'consumo_alimentar',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: false,
+        ),
+      ],
     );
   }
 }

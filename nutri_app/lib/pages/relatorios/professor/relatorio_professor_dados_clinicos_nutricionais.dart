@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_dados_antropometricos.dart';
 
 class RelatorioProfessorDadosClinicosNutricionaisPage extends StatefulWidget {
@@ -29,20 +30,15 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
   // Controllers para campos de texto
   final TextEditingController _diagnosticoController = TextEditingController();
   final TextEditingController _prescricaoController = TextEditingController();
-  final TextEditingController _alimentacaoHabitualController =
-      TextEditingController();
-  final TextEditingController _doencaAnteriorController =
-      TextEditingController();
+  final TextEditingController _alimentacaoHabitualController = TextEditingController();
+  final TextEditingController _doencaAnteriorController = TextEditingController();
   final TextEditingController _cirurgiaController = TextEditingController();
   final TextEditingController _quantoPesoController = TextEditingController();
   final TextEditingController _qualDietaController = TextEditingController();
-  final TextEditingController _tipoSuplementacaoController =
-      TextEditingController();
-  final TextEditingController _especificarCondicaoController =
-      TextEditingController();
+  final TextEditingController _tipoSuplementacaoController = TextEditingController();
+  final TextEditingController _especificarCondicaoController = TextEditingController();
   final TextEditingController _medicamentosController = TextEditingController();
-  final TextEditingController _examesLaboratoriaisController =
-      TextEditingController();
+  final TextEditingController _examesLaboratoriaisController = TextEditingController();
   final TextEditingController _exameFisicoController = TextEditingController();
 
   // Estados para dropdowns
@@ -176,257 +172,256 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
       );
     }
 
-    return BasePage(
-      title: 'Dados Clínicos e Nutricionais',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Column(
-              children: [
-                const CustomStepper(
-                  currentStep: 5,
-                  totalSteps: 9,
-                ),
-                SizedBox(height: espacamentoCards),
-                CustomCard(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomInput(
-                          label: 'Diagnóstico Clínico',
-                          controller: _diagnosticoController,
-                          keyboardType: TextInputType.text,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Prescrição Dietoterápica',
-                          controller: _prescricaoController,
-                          keyboardType: TextInputType.text,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomDropdown(
-                          label: 'Aceitação',
-                          value: selectedAceitacao,
-                          items: const [
-                            'Selecione',
-                            '0%',
-                            '25%',
-                            '50%',
-                            '75%',
-                            '100%'
-                          ],
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomDropdown(
-                          label: 'Alimentação Habitual',
-                          value: selectedAlimentacaoHabitual,
-                          items: const ['Selecione', 'Alterada', 'Inadequada'],
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (selectedAlimentacaoHabitual == 'Inadequada') ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Especificar',
-                            controller: _alimentacaoHabitualController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Doença Anterior',
-                          value: _doencaAnterior,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (_doencaAnterior) ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Qual',
-                            controller: _doencaAnteriorController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Cirurgia Recente',
-                          value: _cirurgiaRecente,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (_cirurgiaRecente) ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Qual',
-                            controller: _cirurgiaController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Febre',
-                          value: _febre,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Alterações de peso recentes',
-                          value: _alteracaoPeso,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (_alteracaoPeso) ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Quanto',
-                            controller: _quantoPesoController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Desconfortos Orais/Gastrointestinais',
-                          value: _desconforto,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Necessidade de dieta hospitalar',
-                          value: _necessidadeDieta,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (_necessidadeDieta) ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Qual',
-                            controller: _qualDietaController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Suplementação Nutricional',
-                          value: _suplementacao,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (_suplementacao) ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Tipo /razão',
-                            controller: _tipoSuplementacaoController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Tabagismo',
-                          value: _tabagismo,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Etilismo',
-                          value: _etilismo,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomDropdown(
-                          label: 'Condição funcional',
-                          value: selectedCondicaoFuncional,
-                          items: const [
-                            'Selecione',
-                            'Favorável',
-                            'Desfavorável'
-                          ],
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        if (selectedCondicaoFuncional == 'Desfavorável') ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Especificar',
-                            controller: _especificarCondicaoController,
-                            keyboardType: TextInputType.text,
-                            enabled: false,
-                          ),
-                        ],
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Medicamentos/vitaminas/minerais prescritos',
-                          controller: _medicamentosController,
-                          keyboardType: TextInputType.text,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Exames Laboratoriais',
-                          controller: _examesLaboratoriaisController,
-                          keyboardType: TextInputType.text,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Exame Físico',
-                          controller: _exameFisicoController,
-                          keyboardType: TextInputType.text,
-                          enabled: false,
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.red,
-                              boxShadowColor: Colors.black,
-                            ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RelatorioProfessorDadosAntropometricosPage(
-                                      atendimentoId: widget.atendimentoId,
-                                      isHospital: widget.isHospital,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Dados Clínicos e Nutricionais',
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Column(
+                  children: [
+                    const CustomStepper(
+                      currentStep: 5,
+                      totalSteps: 9,
                     ),
-                  ),
+                    SizedBox(height: espacamentoCards),
+                    CustomCard(
+                      width: cardWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomInput(
+                              label: 'Diagnóstico Clínico',
+                              controller: _diagnosticoController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Prescrição Dietoterápica',
+                              controller: _prescricaoController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomDropdown(
+                              label: 'Aceitação',
+                              value: selectedAceitacao,
+                              items: const [
+                                'Selecione',
+                                '0%',
+                                '25%',
+                                '50%',
+                                '75%',
+                                '100%'
+                              ],
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomDropdown(
+                              label: 'Alimentação Habitual',
+                              value: selectedAlimentacaoHabitual,
+                              items: const ['Selecione', 'Alterada', 'Inadequada'],
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (selectedAlimentacaoHabitual == 'Inadequada') ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Especificar',
+                                controller: _alimentacaoHabitualController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Doença Anterior',
+                              value: _doencaAnterior,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (_doencaAnterior) ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Qual',
+                                controller: _doencaAnteriorController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Cirurgia Recente',
+                              value: _cirurgiaRecente,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (_cirurgiaRecente) ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Qual',
+                                controller: _cirurgiaController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Febre',
+                              value: _febre,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Alterações de peso recentes',
+                              value: _alteracaoPeso,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (_alteracaoPeso) ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Quanto',
+                                controller: _quantoPesoController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Desconfortos Orais/Gastrointestinais',
+                              value: _desconforto,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Necessidade de dieta hospitalar',
+                              value: _necessidadeDieta,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (_necessidadeDieta) ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Qual',
+                                controller: _qualDietaController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Suplementação Nutricional',
+                              value: _suplementacao,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (_suplementacao) ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Tipo /razão',
+                                controller: _tipoSuplementacaoController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Tabagismo',
+                              value: _tabagismo,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Etilismo',
+                              value: _etilismo,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomDropdown(
+                              label: 'Condição funcional',
+                              value: selectedCondicaoFuncional,
+                              items: const [
+                                'Selecione',
+                                'Favorável',
+                                'Desfavorável'
+                              ],
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            if (selectedCondicaoFuncional == 'Desfavorável') ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Especificar',
+                                controller: _especificarCondicaoController,
+                                enabled: false,
+                              ),
+                            ],
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Medicamentos/vitaminas/minerais prescritos',
+                              controller: _medicamentosController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Exames Laboratoriais',
+                              controller: _examesLaboratoriaisController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Exame Físico',
+                              controller: _exameFisicoController,
+                              enabled: false,
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RelatorioProfessorDadosAntropometricosPage(
+                                          atendimentoId: widget.atendimentoId,
+                                          isHospital: widget.isHospital,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        // Adiciona o componente de observações
+        ObservacaoRelatorio(
+          pageKey: 'dados_clinicos_nutricionais',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: false,
+        ),
+      ],
     );
   }
 }

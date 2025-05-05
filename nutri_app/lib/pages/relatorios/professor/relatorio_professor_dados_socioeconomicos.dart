@@ -7,6 +7,8 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_pessoais.dart';
 
 class RelatorioProfessorDadosSocioeconomicosPage extends StatefulWidget {
   final String atendimentoId;
@@ -31,7 +33,6 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   bool _luzEletrica = false;
   String selectedHouseType = 'Selecione';
 
-  // Controllers para campos de texto
   final pessoasController = TextEditingController();
   final rendaFamiliarController = TextEditingController();
   final rendaPerCapitaController = TextEditingController();
@@ -128,138 +129,148 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
       );
     }
 
-    return BasePage(
-      title: 'Dados Socioeconômicos',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Column(
-              children: [
-                const CustomStepper(currentStep: 2, totalSteps: 9),
-                SizedBox(height: espacamentoCards),
-                CustomCard(
-                  width: MediaQuery.of(context).size.width * 0.95,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomSwitch(
-                          label: 'Água encanada',
-                          value: _aguaEncanada,
-                          onChanged: null, // Desabilita alteração
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Esgoto encanado',
-                          value: _esgotoEncanado,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Coleta de lixo',
-                          value: _coletaLixo,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomSwitch(
-                          label: 'Luz elétrica',
-                          value: _luzEletrica,
-                          onChanged: null,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomDropdown(
-                          label: 'Tipo de casa',
-                          value: selectedHouseType,
-                          items: const [
-                            'Selecione',
-                            'Alvenaria',
-                            'Madeira',
-                            'Mista',
-                            'Outro'
-                          ],
-                          onChanged: null, // Desabilita alteração
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Nº de pessoas na casa',
-                          controller: pessoasController,
-                          keyboardType: TextInputType.number,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Renda familiar',
-                          controller: rendaFamiliarController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Renda per capita',
-                          controller: rendaPerCapitaController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Escolaridade',
-                          controller: escolaridadeController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Profissão/Ocupação',
-                          controller: profissaoController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Produção doméstica de alimentos: Quais?',
-                          controller: producaoAlimentosController,
-                          enabled: false,
-                        ),
-                        const SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Dados Socioeconômicos',
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Column(
+                  children: [
+                    const CustomStepper(currentStep: 2, totalSteps: 9),
+                    SizedBox(height: espacamentoCards),
+                    CustomCard(
+                      width: MediaQuery.of(context).size.width * 0.95,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.red,
-                              boxShadowColor: Colors.black,
+                            CustomSwitch(
+                              label: 'Água encanada',
+                              value: _aguaEncanada,
+                              onChanged: null,
+                              enabled: false,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: () {
-                                // Navegar para a próxima página
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RelatorioProfessorAntecedentesPessoaisPage(
-                                      atendimentoId: widget.atendimentoId,
-                                      isHospital: widget.isHospital,
-                                    ),
-                                  ),
-                                );
-                              },
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Esgoto encanado',
+                              value: _esgotoEncanado,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Coleta de lixo',
+                              value: _coletaLixo,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Luz elétrica',
+                              value: _luzEletrica,
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomDropdown(
+                              label: 'Tipo de casa',
+                              value: selectedHouseType,
+                              items: const [
+                                'Selecione',
+                                'Alvenaria',
+                                'Madeira',
+                                'Mista',
+                                'Outro'
+                              ],
+                              onChanged: null,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Nº de pessoas na casa',
+                              controller: pessoasController,
+                              keyboardType: TextInputType.number,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Renda familiar',
+                              controller: rendaFamiliarController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Renda per capita',
+                              controller: rendaPerCapitaController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Escolaridade',
+                              controller: escolaridadeController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Profissão/Ocupação',
+                              controller: profissaoController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Produção doméstica de alimentos: Quais?',
+                              controller: producaoAlimentosController,
+                              enabled: false,
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RelatorioProfessorAntecedentesPessoaisPage(
+                                          atendimentoId: widget.atendimentoId,
+                                          isHospital: widget.isHospital,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        // Adiciona o componente de observações
+        ObservacaoRelatorio(
+          pageKey: 'dados_socioeconomicos',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: false,
+        ),
+      ],
     );
   }
 }

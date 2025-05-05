@@ -6,6 +6,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_familiares.dart';
 
 class RelatorioProfessorAntecedentesPessoaisPage extends StatefulWidget {
@@ -115,112 +116,123 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
       );
     }
 
-    return BasePage(
-      title: 'Antecedentes Pessoais',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Column(
-              children: [
-                const CustomStepper(
-                  currentStep: 3,
-                  totalSteps: 9,
-                ),
-                SizedBox(height: espacamentoCards),
-                CustomCard(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Antecedentes Pessoais',
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Column(
+                  children: [
+                    const CustomStepper(
+                      currentStep: 3,
+                      totalSteps: 9,
+                    ),
+                    SizedBox(height: espacamentoCards),
+                    CustomCard(
+                      width: cardWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CustomSwitch(
-                              label: 'Dislipidemias',
-                              value: _dislipidemias,
-                              onChanged: null, // Desabilita alteração
-                              enabled: false,
-                            ),
-                            CustomSwitch(
-                              label: 'HAS',
-                              value: _has,
-                              onChanged: null,
-                              enabled: false,
-                            ),
-                            CustomSwitch(
-                              label: 'Câncer',
-                              value: _cancer,
-                              onChanged: null,
-                              enabled: false,
-                            ),
-                            CustomSwitch(
-                              label: 'Excesso de peso',
-                              value: _excessoPeso,
-                              onChanged: null,
-                              enabled: false,
-                            ),
-                            CustomSwitch(
-                              label: 'Diabetes mellitus',
-                              value: _diabetes,
-                              onChanged: null,
-                              enabled: false,
-                            ),
-                            CustomSwitch(
-                              label: 'Outros',
-                              value: _outros,
-                              onChanged: null,
-                              enabled: false,
-                            ),
-                            if (_outros)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: CustomInput(
-                                  label: 'Especifique',
-                                  controller: _outrosController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: false, // Campo apenas leitura
+                            Column(
+                              children: [
+                                CustomSwitch(
+                                  label: 'Dislipidemias',
+                                  value: _dislipidemias,
+                                  onChanged: null,
+                                  enabled: false,
                                 ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.red,
-                              boxShadowColor: Colors.black,
-                            ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RelatorioProfessorAntecedentesFamiliaresPage(
-                                      atendimentoId: widget.atendimentoId,
-                                      isHospital: widget.isHospital,
+                                CustomSwitch(
+                                  label: 'HAS',
+                                  value: _has,
+                                  onChanged: null,
+                                  enabled: false,
+                                ),
+                                CustomSwitch(
+                                  label: 'Câncer',
+                                  value: _cancer,
+                                  onChanged: null,
+                                  enabled: false,
+                                ),
+                                CustomSwitch(
+                                  label: 'Excesso de peso',
+                                  value: _excessoPeso,
+                                  onChanged: null,
+                                  enabled: false,
+                                ),
+                                CustomSwitch(
+                                  label: 'Diabetes mellitus',
+                                  value: _diabetes,
+                                  onChanged: null,
+                                  enabled: false,
+                                ),
+                                CustomSwitch(
+                                  label: 'Outros',
+                                  value: _outros,
+                                  onChanged: null,
+                                  enabled: false,
+                                ),
+                                if (_outros)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: CustomInput(
+                                      label: 'Especifique',
+                                      controller: _outrosController,
+                                      keyboardType: TextInputType.text,
+                                      enabled: false,
                                     ),
                                   ),
-                                );
-                              },
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RelatorioProfessorAntecedentesFamiliaresPage(
+                                          atendimentoId: widget.atendimentoId,
+                                          isHospital: widget.isHospital,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        // Adiciona o componente de observações
+        ObservacaoRelatorio(
+          pageKey: 'antecedentes_pessoais',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: false,
+        ),
+      ],
     );
   }
 }

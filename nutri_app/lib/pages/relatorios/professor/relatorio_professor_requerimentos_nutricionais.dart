@@ -5,6 +5,7 @@ import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_conduta_nutricional.dart';
 
 class RelatorioProfessorRequerimentosNutricionaisPage extends StatefulWidget {
@@ -132,128 +133,138 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
       );
     }
 
-    return BasePage(
-      title: 'Requerimentos Nutricionais',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Column(
-              children: [
-                const CustomStepper(
-                  currentStep: 8,
-                  totalSteps: 9,
-                ),
-                const SizedBox(height: 10),
-                CustomCard(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomInput(
-                          label: 'Kcal / dia',
-                          controller: _kcalDiaController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Kcal / kg',
-                          controller: _kcalKgController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'CHO %',
-                          controller: _choController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Lip %',
-                          controller: _lipController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Ptn %',
-                          controller: _ptnPorcentagemController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Ptn g / kg',
-                          controller: _ptnKgController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Ptn g / dia',
-                          controller: _ptnDiaController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Líquido ml / kg',
-                          controller: _liquidoKgController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Líquido ml / dia',
-                          controller: _liquidoDiaController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Fibras g/dia',
-                          controller: _fibrasController,
-                          enabled: false,
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Outros',
-                          controller: _outrosController,
-                          enabled: false,
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Requerimentos Nutricionais',
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Column(
+                  children: [
+                    const CustomStepper(
+                      currentStep: 8,
+                      totalSteps: 9,
+                    ),
+                    const SizedBox(height: 10),
+                    CustomCard(
+                      width: cardWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.red,
-                              boxShadowColor: Colors.black,
+                            CustomInput(
+                              label: 'Kcal / dia',
+                              controller: _kcalDiaController,
+                              enabled: false,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: () {
-                                // Navegar para a próxima página
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RelatorioProfessorCondutaNutricionalPage(
-                                      atendimentoId: widget.atendimentoId,
-                                      isHospital: widget.isHospital,
-                                    ),
-                                  ),
-                                );
-                              },
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Kcal / kg',
+                              controller: _kcalKgController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'CHO %',
+                              controller: _choController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Lip %',
+                              controller: _lipController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Ptn %',
+                              controller: _ptnPorcentagemController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Ptn g / kg',
+                              controller: _ptnKgController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Ptn g / dia',
+                              controller: _ptnDiaController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Líquido ml / kg',
+                              controller: _liquidoKgController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Líquido ml / dia',
+                              controller: _liquidoDiaController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Fibras g/dia',
+                              controller: _fibrasController,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Outros',
+                              controller: _outrosController,
+                              enabled: false,
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RelatorioProfessorCondutaNutricionalPage(
+                                          atendimentoId: widget.atendimentoId,
+                                          isHospital: widget.isHospital,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        // Adiciona o componente de observações
+        ObservacaoRelatorio(
+          pageKey: 'requerimentos_nutricionais',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: false,
+        ),
+      ],
     );
   }
 }

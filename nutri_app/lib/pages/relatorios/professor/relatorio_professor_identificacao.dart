@@ -6,10 +6,11 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_dados_socioeconomicos.dart';
 
 class RelatorioProfessorIdentificacaoPage extends StatefulWidget {
-  final String atendimentoId; // Recebe o ID do atendimento como parâmetro
+  final String atendimentoId;
   final bool isHospital;
 
   const RelatorioProfessorIdentificacaoPage({
@@ -47,10 +48,7 @@ class _RelatorioProfessorIdentificacaoPageState
 
   Future<void> _carregarDadosAtendimento() async {
     try {
-      // Determina qual coleção usar baseado no tipo
-      final collection = widget.isHospital 
-        ? 'atendimento' 
-        : 'clinica';
+      final collection = widget.isHospital ? 'atendimento' : 'clinica';
       
       final doc = await FirebaseFirestore.instance
           .collection(collection)
@@ -60,7 +58,6 @@ class _RelatorioProfessorIdentificacaoPageState
       if (doc.exists) {
         final data = doc.data()!;
         
-        // Formata a data de nascimento
         String formattedDate = '';
         if (data['data_nascimento'] != null) {
           final date = (data['data_nascimento'] as Timestamp).toDate();
@@ -74,7 +71,6 @@ class _RelatorioProfessorIdentificacaoPageState
           selectedGender = data['sexo'] ?? 'Selecione';
           birthDateController.text = formattedDate;
           
-          // Preenche campos específicos
           if (widget.isHospital) {
             hospitalController.text = data['hospital'] ?? '';
             clinicController.text = data['clinica'] ?? '';
@@ -144,141 +140,149 @@ class _RelatorioProfessorIdentificacaoPageState
       );
     }
 
-    return BasePage(
-      title: 'Identificação',
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Column(
-              children: [
-                const CustomStepper(
-                  currentStep: 1,
-                  totalSteps: 9,
-                ),
-                SizedBox(height: espacamentoCards),
-                CustomCard(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        CustomInput(
-                          label: 'Nome',
-                          controller: nameController,
-                          keyboardType: TextInputType.text,
-                          obrigatorio: true,
-                          enabled: false, // Campo apenas para leitura
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomDropdown(
-                          label: 'Sexo',
-                          value: selectedGender,
-                          items: const ['Selecione', 'Masculino', 'Feminino'],
-                          onChanged: null, // Desabilita a mudança
-                          obrigatorio: true,
-                          enabled: false, // Desabilita o dropdown
-                        ),
-                        SizedBox(height: espacamentoCards),
-                        CustomInput(
-                          label: 'Data Nasc',
-                          controller: birthDateController,
-                          keyboardType: TextInputType.datetime,
-                          hintText: 'DD/MM/AAAA',
-                          obrigatorio: true,
-                          enabled: false,
-                        ),
-
-                        // Campos específicos para hospital
-                        if (isHospital) ...[
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Hospital',
-                            controller: hospitalController,
-                            keyboardType: TextInputType.text,
-                            obrigatorio: true,
-                            enabled: false,
-                          ),
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Clínica',
-                            controller: clinicController,
-                            keyboardType: TextInputType.text,
-                            obrigatorio: true,
-                            enabled: false,
-                          ),
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Quarto',
-                            controller: roomController,
-                            keyboardType: TextInputType.text,
-                            obrigatorio: true,
-                            enabled: false,
-                          ),
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Leito',
-                            controller: bedController,
-                            keyboardType: TextInputType.text,
-                            obrigatorio: true,
-                            enabled: false,
-                          ),
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Registro',
-                            controller: recordController,
-                            keyboardType: TextInputType.text,
-                            obrigatorio: true,
-                            enabled: false,
-                          ),
-                        ] else ...[
-                          // Campo específico para clínica
-                          SizedBox(height: espacamentoCards),
-                          CustomInput(
-                            label: 'Número de Prontuário',
-                            controller: prontuarioController,
-                            keyboardType: TextInputType.text,
-                            obrigatorio: true,
-                            enabled: false,
-                          ),
-                        ],
-
-                        const SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        BasePage(
+          title: 'Identificação',
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Column(
+                  children: [
+                    const CustomStepper(
+                      currentStep: 1,
+                      totalSteps: 9,
+                    ),
+                    SizedBox(height: espacamentoCards),
+                    CustomCard(
+                      width: cardWidth,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
                           children: [
-                            CustomButton(
-                              text: 'Voltar',
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                              textColor: Colors.red,
-                              boxShadowColor: Colors.black,
+                            CustomInput(
+                              label: 'Nome',
+                              controller: nameController,
+                              keyboardType: TextInputType.text,
+                              obrigatorio: true,
+                              enabled: false,
                             ),
-                            CustomButton(
-                              text: 'Próximo',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RelatorioProfessorDadosSocioeconomicosPage(
-                                      atendimentoId: widget.atendimentoId,
-                                      isHospital: widget.isHospital,
-                                    ),
-                                  ),
-                                );
-                              },
+                            SizedBox(height: espacamentoCards),
+                            CustomDropdown(
+                              label: 'Sexo',
+                              value: selectedGender,
+                              items: const ['Selecione', 'Masculino', 'Feminino'],
+                              onChanged: null,
+                              obrigatorio: true,
+                              enabled: false,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomInput(
+                              label: 'Data Nasc',
+                              controller: birthDateController,
+                              keyboardType: TextInputType.datetime,
+                              hintText: 'DD/MM/AAAA',
+                              obrigatorio: true,
+                              enabled: false,
+                            ),
+
+                            if (isHospital) ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Hospital',
+                                controller: hospitalController,
+                                keyboardType: TextInputType.text,
+                                obrigatorio: true,
+                                enabled: false,
+                              ),
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Clínica',
+                                controller: clinicController,
+                                keyboardType: TextInputType.text,
+                                obrigatorio: true,
+                                enabled: false,
+                              ),
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Quarto',
+                                controller: roomController,
+                                keyboardType: TextInputType.text,
+                                obrigatorio: true,
+                                enabled: false,
+                              ),
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Leito',
+                                controller: bedController,
+                                keyboardType: TextInputType.text,
+                                obrigatorio: true,
+                                enabled: false,
+                              ),
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Registro',
+                                controller: recordController,
+                                keyboardType: TextInputType.text,
+                                obrigatorio: true,
+                                enabled: false,
+                              ),
+                            ] else ...[
+                              SizedBox(height: espacamentoCards),
+                              CustomInput(
+                                label: 'Número de Prontuário',
+                                controller: prontuarioController,
+                                keyboardType: TextInputType.text,
+                                obrigatorio: true,
+                                enabled: false,
+                              ),
+                            ],
+
+                            const SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CustomButton(
+                                  text: 'Voltar',
+                                  onPressed: () => Navigator.pop(context),
+                                  color: Colors.white,
+                                  textColor: Colors.red,
+                                  boxShadowColor: Colors.black,
+                                ),
+                                CustomButton(
+                                  text: 'Próximo',
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => RelatorioProfessorDadosSocioeconomicosPage(
+                                          atendimentoId: widget.atendimentoId,
+                                          isHospital: widget.isHospital,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        ObservacaoRelatorio(
+          pageKey: 'identificacao',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: false,
+        ),
+      ],
     );
   }
 }

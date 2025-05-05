@@ -5,6 +5,7 @@ import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/toast_util.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 
 class RelatorioProfessorCondutaNutricionalPage extends StatefulWidget {
   final String atendimentoId;
@@ -210,6 +211,13 @@ class _RelatorioProfessorCondutaNutricionalPageState
               ),
             ),
           ),
+        ),
+        // Adiciona o componente de observações como página final
+        ObservacaoRelatorio(
+          pageKey: 'conduta_nutricional',
+          atendimentoId: widget.atendimentoId,
+          isHospital: widget.isHospital,
+          isFinalPage: true,
         ),
         if (isSaving)
           ModalBarrier(
