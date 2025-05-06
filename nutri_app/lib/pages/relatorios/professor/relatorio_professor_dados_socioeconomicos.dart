@@ -8,8 +8,8 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_switch.dart';
-import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_pessoais.dart';
+import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class RelatorioProfessorDadosSocioeconomicosPage extends StatefulWidget {
@@ -63,7 +63,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -76,7 +77,7 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   Future<void> _carregarDados() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
+
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -84,20 +85,24 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         setState(() {
           _aguaEncanada = data['agua_encanada'] ?? false;
           _esgotoEncanado = data['esgoto_encanado'] ?? false;
           _coletaLixo = data['coleta_lixo'] ?? false;
           _luzEletrica = data['luz_eletrica'] ?? false;
           selectedHouseType = data['tipo_casa'] ?? 'Selecione';
-          pessoasController.text = data['numero_pessoas_moram_junto']?.toString() ?? '';
-          rendaFamiliarController.text = data['renda_familiar']?.toString() ?? '';
-          rendaPerCapitaController.text = data['renda_per_capita']?.toString() ?? '';
+          pessoasController.text =
+              data['numero_pessoas_moram_junto']?.toString() ?? '';
+          rendaFamiliarController.text =
+              data['renda_familiar']?.toString() ?? '';
+          rendaPerCapitaController.text =
+              data['renda_per_capita']?.toString() ?? '';
           escolaridadeController.text = data['escolaridade'] ?? '';
           profissaoController.text = data['profissao'] ?? '';
-          producaoAlimentosController.text = data['producao_domestica_alimentos'] ?? '';
-          
+          producaoAlimentosController.text =
+              data['producao_domestica_alimentos'] ?? '';
+
           isLoading = false;
         });
 
@@ -127,12 +132,18 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
       _coletaLixo = dados['coleta_lixo'] ?? _coletaLixo;
       _luzEletrica = dados['luz_eletrica'] ?? _luzEletrica;
       selectedHouseType = dados['tipo_casa'] ?? selectedHouseType;
-      pessoasController.text = dados['numero_pessoas_moram_junto'] ?? pessoasController.text;
-      rendaFamiliarController.text = dados['renda_familiar'] ?? rendaFamiliarController.text;
-      rendaPerCapitaController.text = dados['renda_per_capita'] ?? rendaPerCapitaController.text;
-      escolaridadeController.text = dados['escolaridade'] ?? escolaridadeController.text;
+      pessoasController.text =
+          dados['numero_pessoas_moram_junto'] ?? pessoasController.text;
+      rendaFamiliarController.text =
+          dados['renda_familiar'] ?? rendaFamiliarController.text;
+      rendaPerCapitaController.text =
+          dados['renda_per_capita'] ?? rendaPerCapitaController.text;
+      escolaridadeController.text =
+          dados['escolaridade'] ?? escolaridadeController.text;
       profissaoController.text = dados['profissao'] ?? profissaoController.text;
-      producaoAlimentosController.text = dados['producao_domestica_alimentos'] ?? producaoAlimentosController.text;
+      producaoAlimentosController.text =
+          dados['producao_domestica_alimentos'] ??
+              producaoAlimentosController.text;
     });
   }
 
@@ -209,7 +220,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                           child: ElevatedButton(
                             onPressed: _toggleEditing,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isEditing ? Colors.green : Colors.blue,
+                              backgroundColor:
+                                  isEditing ? Colors.green : Colors.blue,
                             ),
                             child: Text(
                               isEditing ? 'Salvar' : 'Editar',
@@ -231,8 +243,9 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                             CustomSwitch(
                               label: 'Água encanada',
                               value: _aguaEncanada,
-                              onChanged: camposEditaveis 
-                                  ? (value) => setState(() => _aguaEncanada = value)
+                              onChanged: camposEditaveis
+                                  ? (value) =>
+                                      setState(() => _aguaEncanada = value)
                                   : null,
                               enabled: camposEditaveis,
                             ),
@@ -241,7 +254,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                               label: 'Esgoto encanado',
                               value: _esgotoEncanado,
                               onChanged: camposEditaveis
-                                  ? (value) => setState(() => _esgotoEncanado = value)
+                                  ? (value) =>
+                                      setState(() => _esgotoEncanado = value)
                                   : null,
                               enabled: camposEditaveis,
                             ),
@@ -250,7 +264,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                               label: 'Coleta de lixo',
                               value: _coletaLixo,
                               onChanged: camposEditaveis
-                                  ? (value) => setState(() => _coletaLixo = value)
+                                  ? (value) =>
+                                      setState(() => _coletaLixo = value)
                                   : null,
                               enabled: camposEditaveis,
                             ),
@@ -259,7 +274,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                               label: 'Luz elétrica',
                               value: _luzEletrica,
                               onChanged: camposEditaveis
-                                  ? (value) => setState(() => _luzEletrica = value)
+                                  ? (value) =>
+                                      setState(() => _luzEletrica = value)
                                   : null,
                               enabled: camposEditaveis,
                             ),
@@ -275,7 +291,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                 'Outro'
                               ],
                               onChanged: camposEditaveis
-                                  ? (value) => setState(() => selectedHouseType = value!)
+                                  ? (value) =>
+                                      setState(() => selectedHouseType = value!)
                                   : null,
                               enabled: camposEditaveis,
                             ),
@@ -336,7 +353,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RelatorioProfessorAntecedentesPessoaisPage(
+                                        builder: (context) =>
+                                            RelatorioProfessorAntecedentesPessoaisPage(
                                           atendimentoId: widget.atendimentoId,
                                           isHospital: widget.isHospital,
                                         ),

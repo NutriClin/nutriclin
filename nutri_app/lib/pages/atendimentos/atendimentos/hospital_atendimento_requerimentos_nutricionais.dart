@@ -7,7 +7,7 @@ import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_conduta_nutricional.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_conduta_nutricional.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoRequerimentosNutricionaisPage extends StatefulWidget {
@@ -79,7 +79,7 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
           _liquidoKgController.text = dados['liquido_kg'] ?? '';
           _liquidoDiaController.text = dados['liquido_dia'] ?? '';
           _fibrasController.text = dados['fibras'] ?? '';
-          _outrosController.text = dados['outros'] ?? '';
+          _outrosController.text = dados['outros_requerimentos_nutricionais'] ?? '';
         });
       }
     } catch (e) {

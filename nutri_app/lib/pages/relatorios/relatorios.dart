@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_input_search.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/components/custom_list_atendimento.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:nutri_app/services/preferences_service.dart';
 
 class RelatoriosPage extends StatefulWidget {
   const RelatoriosPage({super.key});
@@ -16,75 +17,116 @@ class RelatoriosPage extends StatefulWidget {
 class _RelatoriosPageState extends State<RelatoriosPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLastPage = false;
-  DocumentSnapshot? _lastDocument;
+  DocumentSnapshot? _lastAtendimentoDoc;
+  DocumentSnapshot? _lastClinicaDoc;
   bool _error = false;
   bool _initialLoading = true;
   bool _loadingMore = false;
   final int _limit = 100;
-  String? _userType;
-  bool _isUserTypeLoaded = false;
 
   List<Map<String, dynamic>> _atendimentos = [];
   List<Map<String, dynamic>> _atendimentosFiltrados = [];
+  String? _userType;
+  String? _userId;
+  String orderBy = 'data';
 
   @override
   void initState() {
     super.initState();
-    _fetchUserType().then((_) {
+    _getUserInfo().then((_) {
       _fetchInitialData();
     });
+    _scrollController.addListener(_scrollListener);
     _searchController.addListener(_filtrarAtendimentos);
   }
 
-  Future<void> _fetchUserType() async {
+  Future<void> _getUserInfo() async {
     try {
-      final user = _auth.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
-        if (userDoc.exists) {
-          setState(() {
-            _userType = userDoc.data()?['tipo_usuario'];
-            _isUserTypeLoaded = true;
-          });
-        }
+        final userType = await PreferencesService.getUserType();
+
+        setState(() {
+          _userType = userType;
+          _userId = user.uid;
+        });
       }
     } catch (e) {
-      print("Erro ao carregar tipo de usuário: $e");
+      _handleError(e);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.removeListener(_filtrarAtendimentos);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_scrollController.position.outOfRange) {
+      if (!_loadingMore && !_isLastPage) {
+        _fetchMoreData();
+      }
     }
   }
 
   Future<void> _fetchInitialData() async {
     try {
-      // Query para atendimentos hospitalares
-      Query atendimentoQuery = _firestore
-          .collection('atendimento')
-          .orderBy('nome')
-          .limit(_limit);
+      // Consulta para atendimentos
+      Query atendimentoQuery =
+          FirebaseFirestore.instance.collection('atendimento');
 
-      // Query para atendimentos clínicos
-      Query clinicaQuery = _firestore
-          .collection('clinica')
-          .orderBy('nome')
-          .limit(_limit);
-
-      // Aplicar filtros baseados no tipo de usuário
       if (_userType == 'Professor') {
-        atendimentoQuery = atendimentoQuery.where('status_atendimento', isEqualTo: 'enviado');
-        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'enviado');
+        atendimentoQuery = atendimentoQuery
+            .where('id_professor_supervisor', isEqualTo: _userId)
+            .orderBy('data', descending: true);
       } else if (_userType == 'Aluno') {
-        atendimentoQuery = atendimentoQuery.where('status_atendimento', isEqualTo: 'reprovado');
-        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'reprovado');
+        atendimentoQuery = atendimentoQuery
+            .where('id_aluno', isEqualTo: _userId)
+            .orderBy('data', descending: true);
+      } else {
+        atendimentoQuery = atendimentoQuery.orderBy('data', descending: true);
       }
 
-      final atendimentoSnapshot = await atendimentoQuery.get();
+      final atendimentoSnapshot = await atendimentoQuery.limit(_limit).get();
       _processQuerySnapshot(atendimentoSnapshot, 'atendimento');
+      _lastAtendimentoDoc = atendimentoSnapshot.docs.isNotEmpty
+          ? atendimentoSnapshot.docs.last
+          : null;
 
-      final clinicaSnapshot = await clinicaQuery.get();
+      // Consulta para clínicas
+      Query clinicaQuery = FirebaseFirestore.instance.collection('clinica');
+
+      if (_userType == 'Professor') {
+        clinicaQuery = clinicaQuery
+            .where('id_professor_supervisor', isEqualTo: _userId)
+            .orderBy('data', descending: true);
+      } else if (_userType == 'Aluno') {
+        clinicaQuery = clinicaQuery
+            .where('id_aluno', isEqualTo: _userId)
+            .orderBy('data', descending: true);
+      } else {
+        clinicaQuery = clinicaQuery.orderBy('data', descending: true);
+      }
+
+      final clinicaSnapshot = await clinicaQuery.limit(_limit).get();
       _processQuerySnapshot(clinicaSnapshot, 'clinica');
+      _lastClinicaDoc =
+          clinicaSnapshot.docs.isNotEmpty ? clinicaSnapshot.docs.last : null;
+
+      // Se ambas as consultas retornaram vazias, define _initialLoading como false
+      if (atendimentoSnapshot.docs.isEmpty && clinicaSnapshot.docs.isEmpty) {
+        setState(() {
+          _initialLoading = false;
+          _isLastPage = true;
+        });
+      }
     } catch (e) {
       _handleError(e);
     }
@@ -98,39 +140,63 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     });
 
     try {
-      Query query = _firestore
-          .collection('atendimento')
-          .orderBy('nome')
-          .limit(_limit);
+      if (_lastAtendimentoDoc != null) {
+        Query atendimentoQuery =
+            FirebaseFirestore.instance.collection('atendimento');
 
-      // Aplicar filtros para paginação
-      if (_userType == 'Professor') {
-        query = query.where('status_atendimento', isEqualTo: 'enviado');
-      } else if (_userType == 'Aluno') {
-        query = query.where('status_atendimento', isEqualTo: 'reprovado');
+        if (_userType == 'Professor') {
+          atendimentoQuery = atendimentoQuery
+              .where('id_professor_supervisor', isEqualTo: _userId)
+              .orderBy('data', descending: true);
+        } else if (_userType == 'Aluno') {
+          atendimentoQuery = atendimentoQuery
+              .where('id_aluno', isEqualTo: _userId)
+              .orderBy('data', descending: true);
+        } else {
+          atendimentoQuery = atendimentoQuery.orderBy('data', descending: true);
+        }
+
+        final atendimentoSnapshot = await atendimentoQuery
+            .startAfterDocument(_lastAtendimentoDoc!)
+            .limit(_limit)
+            .get();
+
+        _processQuerySnapshot(atendimentoSnapshot, 'atendimento');
+        _lastAtendimentoDoc = atendimentoSnapshot.docs.isNotEmpty
+            ? atendimentoSnapshot.docs.last
+            : null;
       }
 
-      if (_lastDocument != null) {
-        query = query.startAfterDocument(_lastDocument!);
+      // Carregar mais clínicas
+      if (_lastClinicaDoc != null) {
+        Query clinicaQuery = FirebaseFirestore.instance.collection('clinica');
+
+        if (_userType == 'Professor') {
+          clinicaQuery = clinicaQuery
+              .where('id_professor_supervisor  ', isEqualTo: _userId)
+              .orderBy('data', descending: true);
+        } else if (_userType == 'Aluno') {
+          clinicaQuery = clinicaQuery
+              .where('id_aluno', isEqualTo: _userId)
+              .orderBy('data', descending: true);
+        } else {
+          clinicaQuery = clinicaQuery.orderBy('data', descending: true);
+        }
+
+        final clinicaSnapshot = await clinicaQuery
+            .startAfterDocument(_lastClinicaDoc!)
+            .limit(_limit)
+            .get();
+
+        _processQuerySnapshot(clinicaSnapshot, 'clinica');
+        _lastClinicaDoc =
+            clinicaSnapshot.docs.isNotEmpty ? clinicaSnapshot.docs.last : null;
       }
 
-      final querySnapshot = await query.get();
-      _processQuerySnapshot(querySnapshot, 'atendimento');
-
-      // Repetir para clínica
-      Query clinicaQuery = _firestore
-          .collection('clinica')
-          .orderBy('nome')
-          .limit(_limit);
-
-      if (_userType == 'Professor') {
-        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'enviado');
-      } else if (_userType == 'Aluno') {
-        clinicaQuery = clinicaQuery.where('status_atendimento', isEqualTo: 'reprovado');
-      }
-
-      final clinicaSnapshot = await clinicaQuery.get();
-      _processQuerySnapshot(clinicaSnapshot, 'clinica');
+      // Verifica se chegou na última página
+      setState(() {
+        _isLastPage = (_lastAtendimentoDoc == null && _lastClinicaDoc == null);
+      });
     } catch (e) {
       _handleError(e);
     } finally {
@@ -149,13 +215,13 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     }
 
     List<Map<String, dynamic>> newAtendimentos = querySnapshot.docs.map((doc) {
-      Timestamp timestamp = doc['criado_em'] ?? Timestamp.now();
+      Timestamp timestamp = doc['data'] ?? doc['criado_em'] ?? Timestamp.now();
       DateTime data = timestamp.toDate();
 
       return {
         'id': doc.id,
-        'nome': doc['nome'],
-        'status_atendimento': doc['status_atendimento'],
+        'nome': doc['nome'] ?? 'Sem nome',
+        'status_atendimento': doc['status_atendimento'] ?? 'Desconhecido',
         'data': data,
         'origem': origem,
       };
@@ -163,7 +229,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
 
     setState(() {
       _initialLoading = false;
-      _lastDocument = querySnapshot.docs.last;
       _atendimentos.addAll(newAtendimentos);
       _atendimentosFiltrados = List.from(_atendimentos);
       _isLastPage = newAtendimentos.length < _limit;
@@ -174,7 +239,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     print("error --> $e");
     ToastUtil.showToast(
       context: context,
-      message: 'Erro ao carregar atendimentos: ${e.toString()}',
+      message: 'Erro ao carregar dados: ${e.toString()}',
       isError: true,
     );
     setState(() {
@@ -206,17 +271,6 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
                 const SizedBox(height: 10),
                 CustomInputSearch(controller: _searchController),
                 const SizedBox(height: 10),
-                if (_userType != null) ...[
-                  Text(
-                    'Visualizando: ${_getFilterDescription()}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
                 Expanded(
                   child: _buildAtendimentoList(),
                 ),
@@ -224,12 +278,12 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
             ),
           ),
         ),
-        if (_initialLoading || !_isUserTypeLoaded)
+        if (_initialLoading)
           ModalBarrier(
             dismissible: false,
             color: Colors.black.withOpacity(0.5),
           ),
-        if (_initialLoading || !_isUserTypeLoaded)
+        if (_initialLoading)
           const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -239,17 +293,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     );
   }
 
-  String _getFilterDescription() {
-    if (_userType == 'Professor') {
-      return 'Apenas relatórios enviados para correção';
-    } else if (_userType == 'Aluno') {
-      return 'Apenas relatórios reprovados para revisão';
-    }
-    return 'Todos os relatórios';
-  }
-
   Widget _buildAtendimentoList() {
-    if (_initialLoading || !_isUserTypeLoaded) {
+    if (_initialLoading) {
       return const SizedBox();
     }
 
@@ -259,7 +304,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              'Ocorreu um erro ao carregar os atendimentos.',
+              'Ocorreu um erro ao carregar os dados.',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -273,7 +318,8 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
                   _initialLoading = true;
                   _error = false;
                   _atendimentos.clear();
-                  _lastDocument = null;
+                  _lastAtendimentoDoc = null;
+                  _lastClinicaDoc = null;
                   _isLastPage = false;
                   _fetchInitialData();
                 });
@@ -286,26 +332,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
     }
 
     if (_atendimentosFiltrados.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.assignment, size: 50, color: Colors.grey),
-            const SizedBox(height: 10),
-            Text(
-              _userType == 'Professor'
-                  ? 'Nenhum relatório enviado para correção'
-                  : _userType == 'Aluno'
-                      ? 'Nenhum relatório reprovado para revisão'
-                      : 'Nenhum relatório encontrado',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
+      return const Center(child: Text("Nenhum registro encontrado."));
     }
 
     return ListView.builder(
@@ -334,7 +361,7 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
             ? Column(
                 children: [
                   const Text(
-                    'Erro ao carregar mais atendimentos',
+                    'Erro ao carregar mais registros',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.red,

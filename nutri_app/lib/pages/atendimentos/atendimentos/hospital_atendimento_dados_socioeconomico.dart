@@ -9,7 +9,7 @@ import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_antecedentes_pessoais.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_antecedentes_pessoais.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosSocioeconomicoPage extends StatefulWidget {

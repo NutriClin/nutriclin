@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import './firebase/firebase_options.dart';
 import 'pages/login.dart';
 import 'pages/home.dart';
+import 'package:nutri_app/services/preferences_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,8 +45,22 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/usuario': (context) => AuthGuard(child: const UsuarioPage()),
-        '/home': (context) =>
-            const AuthGuard(child: HomePage(tipoUsuario: 'Aluno')),
+        '/home': (context) => AuthGuard(
+              child: FutureBuilder<String?>(
+                future: PreferencesService.getUserType(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return HomePage(
+                    tipoUsuario: snapshot.data ??
+                        'Aluno', // Valor padrão caso não encontre
+                  );
+                },
+              ),
+            ),
         '/atendimento': (context) => AuthGuard(child: AtendimentoPage())
       },
     );

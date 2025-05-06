@@ -41,3 +41,8 @@ doc/api/
 **/android_build/
 **/web_build/
 **/macos/
+
+**/local.properties
+**/flutter_export_environment.sh
+**/Generated.xcconfig
+**/Flutter-Generated.xcconfig

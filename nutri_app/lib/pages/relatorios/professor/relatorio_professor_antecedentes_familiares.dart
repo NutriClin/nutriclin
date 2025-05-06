@@ -91,8 +91,8 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
           _cancer = data['cancer'] ?? false;
           _excessoPeso = data['excesso_peso'] ?? false;
           _diabetes = data['diabetes'] ?? false;
-          _outros = data['outros'] ?? false;
-          _outrosController.text = data['outros_descricao'] ?? '';
+          _outros = data['outros_antecedentes_familiares'] ?? false;
+          _outrosController.text = data['outros_antecedentes_familiares_descricao'] ?? '';
           
           isLoading = false;
         });
@@ -123,8 +123,8 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
       _cancer = dados['cancer'] ?? _cancer;
       _excessoPeso = dados['excesso_peso'] ?? _excessoPeso;
       _diabetes = dados['diabetes'] ?? _diabetes;
-      _outros = dados['outros'] ?? _outros;
-      _outrosController.text = dados['outros_descricao'] ?? _outrosController.text;
+      _outros = dados['outros_antecedentes_familiares'] ?? _outros;
+      _outrosController.text = dados['outros_antecedentes_familiares_descricao'] ?? _outrosController.text;
     });
   }
 

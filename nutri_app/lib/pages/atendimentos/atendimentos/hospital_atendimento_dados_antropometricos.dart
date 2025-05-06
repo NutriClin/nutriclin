@@ -8,7 +8,7 @@ import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_consumo_alimentar.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_consumo_alimentar.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoDadosAntropometricosPage extends StatefulWidget {
