@@ -50,13 +50,13 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
-  bool isEditing = false;
+  String statusAtendimento = '';
 
   @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDados();
+      _carregarDadosAtendimento();
     });
   }
 
@@ -74,7 +74,7 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
     }
   }
 
-  Future<void> _carregarDados() async {
+  Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
 
@@ -102,11 +102,12 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
           profissaoController.text = data['profissao'] ?? '';
           producaoAlimentosController.text =
               data['producao_domestica_alimentos'] ?? '';
+          statusAtendimento = data['status_atendimento'] ?? '';
 
           isLoading = false;
         });
 
-        if (isAluno) {
+        if (isAluno && statusAtendimento == 'rejeitado') {
           await _carregarDadosLocais();
         }
       } else {
@@ -163,20 +164,15 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
     );
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        _salvarDadosLocais();
-      }
-    });
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
-    final bool camposEditaveis = isAluno && isEditing;
-    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -187,17 +183,16 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
     if (hasError) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Erro ao carregar os dados socioeconômicos'),
-              ElevatedButton(
-                onPressed: _carregarDados,
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Erro ao carregar os dados socioeconômicos'),
+            ElevatedButton(
+              onPressed: _carregarDadosAtendimento,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        )),
       );
     }
 
@@ -207,34 +202,17 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
           title: 'Dados Socioeconômicos',
           body: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
               child: Center(
                 child: Column(
                   children: [
-                    const CustomStepper(currentStep: 2, totalSteps: 9),
-                    if (mostrarBotaoEditar) ...[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ElevatedButton(
-                            onPressed: _toggleEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  isEditing ? Colors.green : Colors.blue,
-                            ),
-                            child: Text(
-                              isEditing ? 'Salvar' : 'Editar',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
+                    const CustomStepper(
+                      currentStep: 2,
+                      totalSteps: 9,
+                    ),
                     SizedBox(height: espacamentoCards),
                     CustomCard(
-                      width: MediaQuery.of(context).size.width * 0.95,
+                      width: cardWidth,
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -243,41 +221,41 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                             CustomSwitch(
                               label: 'Água encanada',
                               value: _aguaEncanada,
-                              onChanged: camposEditaveis
+                              onChanged: podeEditar
                                   ? (value) =>
                                       setState(() => _aguaEncanada = value)
                                   : null,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomSwitch(
                               label: 'Esgoto encanado',
                               value: _esgotoEncanado,
-                              onChanged: camposEditaveis
+                              onChanged: podeEditar
                                   ? (value) =>
                                       setState(() => _esgotoEncanado = value)
                                   : null,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomSwitch(
                               label: 'Coleta de lixo',
                               value: _coletaLixo,
-                              onChanged: camposEditaveis
+                              onChanged: podeEditar
                                   ? (value) =>
                                       setState(() => _coletaLixo = value)
                                   : null,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomSwitch(
                               label: 'Luz elétrica',
                               value: _luzEletrica,
-                              onChanged: camposEditaveis
+                              onChanged: podeEditar
                                   ? (value) =>
                                       setState(() => _luzEletrica = value)
                                   : null,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomDropdown(
@@ -290,48 +268,48 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                 'Mista',
                                 'Outro'
                               ],
-                              onChanged: camposEditaveis
+                              onChanged: podeEditar
                                   ? (value) =>
                                       setState(() => selectedHouseType = value!)
                                   : null,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Nº de pessoas na casa',
                               controller: pessoasController,
                               keyboardType: TextInputType.number,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Renda familiar',
                               controller: rendaFamiliarController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Renda per capita',
                               controller: rendaPerCapitaController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Escolaridade',
                               controller: escolaridadeController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Profissão/Ocupação',
                               controller: profissaoController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Produção doméstica de alimentos: Quais?',
                               controller: producaoAlimentosController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             const SizedBox(height: 15),
                             Row(
@@ -341,14 +319,14 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                   text: 'Voltar',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
-                                  textColor: Colors.red,
+                                  textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
                                 CustomButton(
                                   text: 'Próximo',
-                                  onPressed: () {
-                                    if (isAluno && isEditing) {
-                                      _salvarDadosLocais();
+                                  onPressed: () async {
+                                    if (podeEditar) {
+                                      await _salvarDadosLocais();
                                     }
                                     Navigator.push(
                                       context,
@@ -377,7 +355,6 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
         ObservacaoRelatorio(
           modoLeitura: isAluno,
         ),
-        
       ],
     );
   }

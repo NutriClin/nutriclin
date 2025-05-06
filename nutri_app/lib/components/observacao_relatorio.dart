@@ -71,23 +71,21 @@ class _ObservacaoRelatorioState extends State<ObservacaoRelatorio> {
             CustomCard(
               width: MediaQuery.of(context).size.width * 0.9,
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.modoLeitura
-                          ? 'Observações do Professor'
-                          : 'Observações',
-                      style: const TextStyle(
-                        fontSize: 22,
+                    const Text(
+                      'Observações',
+                      style: TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Poppins',
                         color: Color(0xFF007AFF),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     _isLoadingObservacao
                         ? const Center(child: CircularProgressIndicator())
                         : widget.modoLeitura
@@ -101,10 +99,10 @@ class _ObservacaoRelatorioState extends State<ObservacaoRelatorio> {
                                 controller: _observacaoController,
                                 maxLines: 10,
                                 minLines: 5,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   hintText: 'Digite suas observações...',
-                                  border: const OutlineInputBorder(),
-                                  contentPadding: const EdgeInsets.all(12),
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.all(12),
                                 ),
                               ),
                     const SizedBox(height: 20),
@@ -139,10 +137,14 @@ class _ObservacaoRelatorioState extends State<ObservacaoRelatorio> {
       right: 20,
       child: FloatingActionButton(
         onPressed: _showCustomDialog,
-        child: const Icon(Icons.edit_note),
-        tooltip: widget.modoLeitura
-            ? 'Editar observações'
-            : 'Visualizar observações',
+        backgroundColor: const Color(0xFF007AFF),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.edit_note, size: 28),
+        tooltip: 'Observações',
       ),
     );
   }

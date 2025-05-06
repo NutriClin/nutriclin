@@ -27,51 +27,35 @@ class RelatorioProfessorRequerimentosNutricionaisPage extends StatefulWidget {
 
 class _RelatorioProfessorRequerimentosNutricionaisPageState
     extends State<RelatorioProfessorRequerimentosNutricionaisPage> {
-  final TextEditingController _kcalDiaController = TextEditingController();
-  final TextEditingController _kcalKgController = TextEditingController();
-  final TextEditingController _choController = TextEditingController();
-  final TextEditingController _lipController = TextEditingController();
-  final TextEditingController _ptnPorcentagemController =
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final TextEditingController kcalDiaController = TextEditingController();
+  final TextEditingController kcalKgController = TextEditingController();
+  final TextEditingController choController = TextEditingController();
+  final TextEditingController lipController = TextEditingController();
+  final TextEditingController ptnPorcentagemController =
       TextEditingController();
-  final TextEditingController _ptnKgController = TextEditingController();
-  final TextEditingController _ptnDiaController = TextEditingController();
-  final TextEditingController _liquidoKgController = TextEditingController();
-  final TextEditingController _liquidoDiaController = TextEditingController();
-  final TextEditingController _fibrasController = TextEditingController();
-  final TextEditingController _outrosController = TextEditingController();
+  final TextEditingController ptnKgController = TextEditingController();
+  final TextEditingController ptnDiaController = TextEditingController();
+  final TextEditingController liquidoKgController = TextEditingController();
+  final TextEditingController liquidoDiaController = TextEditingController();
+  final TextEditingController fibrasController = TextEditingController();
+  final TextEditingController outrosController = TextEditingController();
 
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
-  bool isEditing = false;
-
-  final AtendimentoService _atendimentoService = AtendimentoService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String statusAtendimento = '';
 
   @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDados();
+      _carregarDadosAtendimento();
     });
-  }
-
-  @override
-  void dispose() {
-    _kcalDiaController.dispose();
-    _kcalKgController.dispose();
-    _choController.dispose();
-    _lipController.dispose();
-    _ptnPorcentagemController.dispose();
-    _ptnKgController.dispose();
-    _ptnDiaController.dispose();
-    _liquidoKgController.dispose();
-    _liquidoDiaController.dispose();
-    _fibrasController.dispose();
-    _outrosController.dispose();
-    super.dispose();
   }
 
   Future<void> _checkUserType() async {
@@ -88,10 +72,9 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
     }
   }
 
-  Future<void> _carregarDados() async {
+  Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -101,23 +84,24 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
         final data = doc.data()!;
 
         setState(() {
-          _kcalDiaController.text = data['kcal_dia']?.toString() ?? '';
-          _kcalKgController.text = data['kcal_kg']?.toString() ?? '';
-          _choController.text = data['cho']?.toString() ?? '';
-          _lipController.text = data['lip']?.toString() ?? '';
-          _ptnPorcentagemController.text = data['Ptn']?.toString() ?? '';
-          _ptnKgController.text = data['ptn_kg']?.toString() ?? '';
-          _ptnDiaController.text = data['ptn_dia']?.toString() ?? '';
-          _liquidoKgController.text = data['liquido_kg']?.toString() ?? '';
-          _liquidoDiaController.text = data['liquido_dia']?.toString() ?? '';
-          _fibrasController.text = data['fibras']?.toString() ?? '';
-          _outrosController.text =
+          kcalDiaController.text = data['kcal_dia']?.toString() ?? '';
+          kcalKgController.text = data['kcal_kg']?.toString() ?? '';
+          choController.text = data['cho']?.toString() ?? '';
+          lipController.text = data['lip']?.toString() ?? '';
+          ptnPorcentagemController.text = data['Ptn']?.toString() ?? '';
+          ptnKgController.text = data['ptn_kg']?.toString() ?? '';
+          ptnDiaController.text = data['ptn_dia']?.toString() ?? '';
+          liquidoKgController.text = data['liquido_kg']?.toString() ?? '';
+          liquidoDiaController.text = data['liquido_dia']?.toString() ?? '';
+          fibrasController.text = data['fibras']?.toString() ?? '';
+          outrosController.text =
               data['outros_requerimentos_nutricionais']?.toString() ?? '';
+          statusAtendimento = data['status_atendimento'] ?? '';
 
           isLoading = false;
         });
 
-        if (isAluno) {
+        if (isAluno && statusAtendimento == 'rejeitado') {
           await _carregarDadosLocais();
         }
       } else {
@@ -131,53 +115,64 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
         hasError = true;
         isLoading = false;
       });
-      print("Erro ao carregar requerimentos nutricionais: $e");
+      print("Erro ao carregar dados: $e");
     }
   }
 
   Future<void> _carregarDadosLocais() async {
     final dados = await _atendimentoService.carregarRequerimentosNutricionais();
     setState(() {
-      _kcalDiaController.text = dados['kcal_dia'] ?? _kcalDiaController.text;
-      _kcalKgController.text = dados['kcal_kg'] ?? _kcalKgController.text;
-      _choController.text = dados['cho'] ?? _choController.text;
-      _lipController.text = dados['lip'] ?? _lipController.text;
-      _ptnPorcentagemController.text =
-          dados['Ptn'] ?? _ptnPorcentagemController.text;
-      _ptnKgController.text = dados['ptn_kg'] ?? _ptnKgController.text;
-      _ptnDiaController.text = dados['ptn_dia'] ?? _ptnDiaController.text;
-      _liquidoKgController.text =
-          dados['liquido_kg'] ?? _liquidoKgController.text;
-      _liquidoDiaController.text =
-          dados['liquido_dia'] ?? _liquidoDiaController.text;
-      _fibrasController.text = dados['fibras'] ?? _fibrasController.text;
-      _outrosController.text = dados['outros'] ?? _outrosController.text;
+      kcalDiaController.text = dados['kcal_dia'] ?? kcalDiaController.text;
+      kcalKgController.text = dados['kcal_kg'] ?? kcalKgController.text;
+      choController.text = dados['cho'] ?? choController.text;
+      lipController.text = dados['lip'] ?? lipController.text;
+      ptnPorcentagemController.text =
+          dados['Ptn'] ?? ptnPorcentagemController.text;
+      ptnKgController.text = dados['ptn_kg'] ?? ptnKgController.text;
+      ptnDiaController.text = dados['ptn_dia'] ?? ptnDiaController.text;
+      liquidoKgController.text =
+          dados['liquido_kg'] ?? liquidoKgController.text;
+      liquidoDiaController.text =
+          dados['liquido_dia'] ?? liquidoDiaController.text;
+      fibrasController.text = dados['fibras'] ?? fibrasController.text;
+      outrosController.text = dados['outros'] ?? outrosController.text;
     });
   }
 
   Future<void> _salvarDadosLocais() async {
     await _atendimentoService.salvarRequerimentosNutricionais(
-      kcalDia: _kcalDiaController.text,
-      kcalKg: _kcalKgController.text,
-      cho: _choController.text,
-      lip: _lipController.text,
-      ptnPorcentagem: _ptnPorcentagemController.text,
-      ptnKg: _ptnKgController.text,
-      ptnDia: _ptnDiaController.text,
-      liquidoKg: _liquidoKgController.text,
-      liquidoDia: _liquidoDiaController.text,
-      fibras: _fibrasController.text,
-      outros: _outrosController.text,
+      kcalDia: kcalDiaController.text,
+      kcalKg: kcalKgController.text,
+      cho: choController.text,
+      lip: lipController.text,
+      ptnPorcentagem: ptnPorcentagemController.text,
+      ptnKg: ptnKgController.text,
+      ptnDia: ptnDiaController.text,
+      liquidoKg: liquidoKgController.text,
+      liquidoDia: liquidoDiaController.text,
+      fibras: fibrasController.text,
+      outros: outrosController.text,
     );
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        _salvarDadosLocais();
-      }
-    });
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
+  }
+
+  @override
+  void dispose() {
+    kcalDiaController.dispose();
+    kcalKgController.dispose();
+    choController.dispose();
+    lipController.dispose();
+    ptnPorcentagemController.dispose();
+    ptnKgController.dispose();
+    ptnDiaController.dispose();
+    liquidoKgController.dispose();
+    liquidoDiaController.dispose();
+    fibrasController.dispose();
+    outrosController.dispose();
+    super.dispose();
   }
 
   @override
@@ -185,8 +180,6 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
-    final bool camposEditaveis = isAluno && isEditing;
-    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -197,17 +190,16 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
     if (hasError) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Erro ao carregar os requerimentos nutricionais'),
-              ElevatedButton(
-                onPressed: _carregarDados,
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Erro ao carregar o atendimento'),
+            ElevatedButton(
+              onPressed: _carregarDadosAtendimento,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        )),
       );
     }
 
@@ -217,7 +209,7 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
           title: 'Requerimentos Nutricionais',
           body: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
               child: Center(
                 child: Column(
                   children: [
@@ -225,100 +217,90 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                       currentStep: 8,
                       totalSteps: 9,
                     ),
-                    if (mostrarBotaoEditar) ...[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ElevatedButton(
-                            onPressed: _toggleEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  isEditing ? Colors.green : Colors.blue,
-                            ),
-                            child: Text(
-                              isEditing ? 'Salvar' : 'Editar',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: cardWidth,
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomInput(
                               label: 'Kcal / dia',
-                              controller: _kcalDiaController,
-                              enabled: camposEditaveis,
+                              controller: kcalDiaController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Kcal / kg',
-                              controller: _kcalKgController,
-                              enabled: camposEditaveis,
+                              controller: kcalKgController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CHO %',
-                              controller: _choController,
-                              enabled: camposEditaveis,
+                              controller: choController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Lip %',
-                              controller: _lipController,
-                              enabled: camposEditaveis,
+                              controller: lipController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ptn %',
-                              controller: _ptnPorcentagemController,
-                              enabled: camposEditaveis,
+                              controller: ptnPorcentagemController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ptn g / kg',
-                              controller: _ptnKgController,
-                              enabled: camposEditaveis,
+                              controller: ptnKgController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ptn g / dia',
-                              controller: _ptnDiaController,
-                              enabled: camposEditaveis,
+                              controller: ptnDiaController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Líquido ml / kg',
-                              controller: _liquidoKgController,
-                              enabled: camposEditaveis,
+                              controller: liquidoKgController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Líquido ml / dia',
-                              controller: _liquidoDiaController,
-                              enabled: camposEditaveis,
+                              controller: liquidoDiaController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Fibras g/dia',
-                              controller: _fibrasController,
-                              enabled: camposEditaveis,
+                              controller: fibrasController,
+                              keyboardType: TextInputType.number,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Outros',
-                              controller: _outrosController,
-                              enabled: camposEditaveis,
+                              controller: outrosController,
+                              keyboardType: TextInputType.text,
+                              enabled: podeEditar,
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -326,14 +308,14 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                                   text: 'Voltar',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
-                                  textColor: Colors.red,
+                                  textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
                                 CustomButton(
                                   text: 'Próximo',
-                                  onPressed: () {
-                                    if (isAluno && isEditing) {
-                                      _salvarDadosLocais();
+                                  onPressed: () async {
+                                    if (podeEditar) {
+                                      await _salvarDadosLocais();
                                     }
                                     Navigator.push(
                                       context,

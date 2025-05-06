@@ -44,20 +44,21 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
-  bool isEditing = false;
+  String statusAtendimento = '';
 
   @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDados();
+      _carregarDadosAtendimento();
     });
   }
 
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -67,10 +68,10 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
     }
   }
 
-  Future<void> _carregarDados() async {
+  Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
+
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -78,7 +79,7 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         setState(() {
           _dislipidemias = data['dislipidemias'] ?? false;
           _has = data['has'] ?? false;
@@ -86,12 +87,14 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
           _excessoPeso = data['excesso_peso'] ?? false;
           _diabetes = data['diabetes'] ?? false;
           _outros = data['outros_antecedentes_pessoais'] ?? false;
-          _outrosController.text = data['outros_antecedentes_pessoais_descricao'] ?? '';
-          
+          _outrosController.text =
+              data['outros_antecedentes_pessoais_descricao'] ?? '';
+          statusAtendimento = data['status_atendimento'] ?? '';
+
           isLoading = false;
         });
 
-        if (isAluno) {
+        if (isAluno && statusAtendimento == 'rejeitado') {
           await _carregarDadosLocais();
         }
       } else {
@@ -118,7 +121,9 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
       _excessoPeso = dados['excesso_peso'] ?? _excessoPeso;
       _diabetes = dados['diabetes'] ?? _diabetes;
       _outros = dados['outros_antecedentes_pessoais'] ?? _outros;
-      _outrosController.text = dados['outros_antecedentes_pessoais_descricao'] ?? _outrosController.text;
+      _outrosController.text =
+          dados['outros_antecedentes_pessoais_descricao'] ??
+              _outrosController.text;
     });
   }
 
@@ -134,13 +139,8 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
     );
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        _salvarDadosLocais();
-      }
-    });
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
   }
 
   @override
@@ -148,8 +148,6 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
-    final bool camposEditaveis = isAluno && isEditing;
-    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -160,17 +158,16 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
     if (hasError) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Erro ao carregar os antecedentes pessoais'),
-              ElevatedButton(
-                onPressed: _carregarDados,
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Erro ao carregar os antecedentes pessoais'),
+            ElevatedButton(
+              onPressed: _carregarDadosAtendimento,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        )),
       );
     }
 
@@ -180,7 +177,7 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
           title: 'Antecedentes Pessoais',
           body: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
               child: Center(
                 child: Column(
                   children: [
@@ -188,25 +185,6 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
                       currentStep: 3,
                       totalSteps: 9,
                     ),
-                    if (mostrarBotaoEditar) ...[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ElevatedButton(
-                            onPressed: _toggleEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isEditing ? Colors.green : Colors.blue,
-                            ),
-                            child: Text(
-                              isEditing ? 'Salvar' : 'Editar',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: cardWidth,
@@ -215,68 +193,71 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              children: [
-                                CustomSwitch(
-                                  label: 'Dislipidemias',
-                                  value: _dislipidemias,
-                                  onChanged: camposEditaveis
-                                      ? (value) => setState(() => _dislipidemias = value)
-                                      : null,
-                                  enabled: camposEditaveis,
-                                ),
-                                CustomSwitch(
-                                  label: 'HAS',
-                                  value: _has,
-                                  onChanged: camposEditaveis
-                                      ? (value) => setState(() => _has = value)
-                                      : null,
-                                  enabled: camposEditaveis,
-                                ),
-                                CustomSwitch(
-                                  label: 'Câncer',
-                                  value: _cancer,
-                                  onChanged: camposEditaveis
-                                      ? (value) => setState(() => _cancer = value)
-                                      : null,
-                                  enabled: camposEditaveis,
-                                ),
-                                CustomSwitch(
-                                  label: 'Excesso de peso',
-                                  value: _excessoPeso,
-                                  onChanged: camposEditaveis
-                                      ? (value) => setState(() => _excessoPeso = value)
-                                      : null,
-                                  enabled: camposEditaveis,
-                                ),
-                                CustomSwitch(
-                                  label: 'Diabetes mellitus',
-                                  value: _diabetes,
-                                  onChanged: camposEditaveis
-                                      ? (value) => setState(() => _diabetes = value)
-                                      : null,
-                                  enabled: camposEditaveis,
-                                ),
-                                CustomSwitch(
-                                  label: 'Outros',
-                                  value: _outros,
-                                  onChanged: camposEditaveis
-                                      ? (value) => setState(() => _outros = value)
-                                      : null,
-                                  enabled: camposEditaveis,
-                                ),
-                                if (_outros)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: CustomInput(
-                                      label: 'Especifique',
-                                      controller: _outrosController,
-                                      keyboardType: TextInputType.text,
-                                      enabled: camposEditaveis,
-                                    ),
-                                  ),
-                              ],
+                            CustomSwitch(
+                              label: 'Dislipidemias',
+                              value: _dislipidemias,
+                              onChanged: podeEditar
+                                  ? (value) =>
+                                      setState(() => _dislipidemias = value)
+                                  : null,
+                              enabled: podeEditar,
                             ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'HAS',
+                              value: _has,
+                              onChanged: podeEditar
+                                  ? (value) => setState(() => _has = value)
+                                  : null,
+                              enabled: podeEditar,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Câncer',
+                              value: _cancer,
+                              onChanged: podeEditar
+                                  ? (value) => setState(() => _cancer = value)
+                                  : null,
+                              enabled: podeEditar,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Excesso de peso',
+                              value: _excessoPeso,
+                              onChanged: podeEditar
+                                  ? (value) =>
+                                      setState(() => _excessoPeso = value)
+                                  : null,
+                              enabled: podeEditar,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Diabetes mellitus',
+                              value: _diabetes,
+                              onChanged: podeEditar
+                                  ? (value) => setState(() => _diabetes = value)
+                                  : null,
+                              enabled: podeEditar,
+                            ),
+                            SizedBox(height: espacamentoCards),
+                            CustomSwitch(
+                              label: 'Outros',
+                              value: _outros,
+                              onChanged: podeEditar
+                                  ? (value) => setState(() => _outros = value)
+                                  : null,
+                              enabled: podeEditar,
+                            ),
+                            if (_outros)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: CustomInput(
+                                  label: 'Especifique',
+                                  controller: _outrosController,
+                                  keyboardType: TextInputType.text,
+                                  enabled: podeEditar,
+                                ),
+                              ),
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -285,19 +266,20 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
                                   text: 'Voltar',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
-                                  textColor: Colors.red,
+                                  textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
                                 CustomButton(
                                   text: 'Próximo',
-                                  onPressed: () {
-                                    if (isAluno && isEditing) {
-                                      _salvarDadosLocais();
+                                  onPressed: () async {
+                                    if (podeEditar) {
+                                      await _salvarDadosLocais();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RelatorioProfessorAntecedentesFamiliaresPage(
+                                        builder: (context) =>
+                                            RelatorioProfessorAntecedentesFamiliaresPage(
                                           atendimentoId: widget.atendimentoId,
                                           isHospital: widget.isHospital,
                                         ),

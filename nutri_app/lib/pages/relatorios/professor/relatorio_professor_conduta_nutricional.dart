@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class RelatorioProfessorCondutaNutricionalPage extends StatefulWidget {
@@ -26,6 +27,10 @@ class RelatorioProfessorCondutaNutricionalPage extends StatefulWidget {
 
 class _RelatorioProfessorCondutaNutricionalPageState
     extends State<RelatorioProfessorCondutaNutricionalPage> {
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final TextEditingController _estagiarioNomeController =
       TextEditingController();
   final TextEditingController _proximaConsultaController =
@@ -37,16 +42,13 @@ class _RelatorioProfessorCondutaNutricionalPageState
   bool isSaving = false;
   bool isProfessor = false;
   bool isAluno = false;
-
-  final AtendimentoService _atendimentoService = AtendimentoService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String statusAtendimento = '';
 
   @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDados();
+      _carregarDadosAtendimento();
     });
   }
 
@@ -64,10 +66,9 @@ class _RelatorioProfessorCondutaNutricionalPageState
     }
   }
 
-  Future<void> _carregarDados() async {
+  Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -77,11 +78,12 @@ class _RelatorioProfessorCondutaNutricionalPageState
         final data = doc.data()!;
 
         setState(() {
-          _estagiarioNomeController.text = data['estagiario_nome'] ?? '';
-          _professorController.text = data['professor_nome'] ?? '';
+          _estagiarioNomeController.text = data['nome_aluno'] ?? '';
+          _professorController.text = data['nome_professor'] ?? '';
           if (widget.isHospital) {
             _proximaConsultaController.text = data['proxima_consulta'] ?? '';
           }
+          statusAtendimento = data['status_atendimento'] ?? '';
           isLoading = false;
         });
       } else {
@@ -95,7 +97,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
         hasError = true;
         isLoading = false;
       });
-      print("Erro ao carregar conduta nutricional: $e");
+      print("Erro ao carregar dados: $e");
     }
   }
 
@@ -103,13 +105,11 @@ class _RelatorioProfessorCondutaNutricionalPageState
     setState(() => isSaving = true);
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      await FirebaseFirestore.instance
-          .collection(collection)
-          .doc(widget.atendimentoId)
-          .update({
+      await _firestore.collection(collection).doc(widget.atendimentoId).update({
         'status_atendimento': status,
         'data_avaliacao': FieldValue.serverTimestamp(),
       });
+
       ToastUtil.showToast(
         context: context,
         message: 'Atendimento $status com sucesso!',
@@ -132,27 +132,19 @@ class _RelatorioProfessorCondutaNutricionalPageState
   Future<void> _enviarAtendimento() async {
     setState(() => isSaving = true);
     try {
-      // Carrega todos os dados salvos localmente
-      final dadosCompletos = await _atendimentoService.obterDadosCompletos();
-
-      // Atualiza o documento no Firestore
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      await _firestore
-          .collection(collection)
-          .doc(widget.atendimentoId)
-          .update(dadosCompletos);
+      await _firestore.collection(collection).doc(widget.atendimentoId).update({
+        'status_atendimento': 'enviado',
+      });
 
-      // Limpa os dados locais
       await _atendimentoService.limparTodosDados();
-
-      // Atualiza o status para 'enviado'
-      await _atualizarStatus('enviado');
 
       ToastUtil.showToast(
         context: context,
         message: 'Atendimento enviado com sucesso!',
         isError: false,
       );
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
       ToastUtil.showToast(
         context: context,
@@ -167,7 +159,17 @@ class _RelatorioProfessorCondutaNutricionalPageState
   }
 
   @override
+  void dispose() {
+    _estagiarioNomeController.dispose();
+    _proximaConsultaController.dispose();
+    _professorController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
 
     if (isLoading) {
@@ -182,9 +184,9 @@ class _RelatorioProfessorCondutaNutricionalPageState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Erro ao carregar a conduta nutricional'),
+              const Text('Erro ao carregar o atendimento'),
               ElevatedButton(
-                onPressed: _carregarDados,
+                onPressed: _carregarDadosAtendimento,
                 child: const Text('Tentar novamente'),
               ),
             ],
@@ -203,13 +205,16 @@ class _RelatorioProfessorCondutaNutricionalPageState
               child: Center(
                 child: Column(
                   children: [
-                    const SizedBox(height: 10),
+                    const CustomStepper(
+                      currentStep: 9,
+                      totalSteps: 9,
+                    ),
+                    SizedBox(height: espacamentoCards),
                     CustomCard(
-                      width: MediaQuery.of(context).size.width * 0.95,
+                      width: cardWidth,
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomInput(
                               label: 'Aluno Responsável',
@@ -230,7 +235,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                 enabled: false,
                               ),
                             ],
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -238,28 +243,30 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                   text: 'Voltar',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
-                                  textColor: Colors.red,
+                                  textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
                                 if (isProfessor)
                                   Row(
                                     children: [
                                       CustomButton(
-                                        text: 'Reprovado',
+                                        text: 'Rejeitar',
                                         onPressed: () =>
                                             _atualizarStatus('reprovado'),
                                         color: Colors.red,
                                         textColor: Colors.white,
                                       ),
                                       const SizedBox(width: 10),
-                                      CustomButton(
-                                        text: 'Aprovado',
-                                        onPressed: () =>
-                                            _atualizarStatus('aprovado'),
-                                      ),
+                                      if (statusAtendimento == 'reprovado' ||
+                                          statusAtendimento == 'rejeitado')
+                                        CustomButton(
+                                          text: 'Finalizar',
+                                          onPressed: () =>
+                                              _atualizarStatus('aprovado'),
+                                        ),
                                     ],
                                   ),
-                                if (isAluno)
+                                if (isAluno && statusAtendimento == 'rejeitado')
                                   CustomButton(
                                     text: 'Enviar',
                                     onPressed: _enviarAtendimento,
@@ -277,6 +284,9 @@ class _RelatorioProfessorCondutaNutricionalPageState
               ),
             ),
           ),
+        ),
+        ObservacaoRelatorio(
+          modoLeitura: !(isProfessor && statusAtendimento == 'enviado'),
         ),
         if (isSaving)
           ModalBarrier(

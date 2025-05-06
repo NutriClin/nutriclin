@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
                   }
                   return HomePage(
                     tipoUsuario: snapshot.data ??
-                        'Aluno', // Valor padrão caso não encontre
+                        'Professor',
                   );
                 },
               ),

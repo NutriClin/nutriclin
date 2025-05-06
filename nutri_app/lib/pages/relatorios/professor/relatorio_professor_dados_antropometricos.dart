@@ -27,6 +27,10 @@ class RelatorioProfessorDadosAntropometricosPage extends StatefulWidget {
 
 class _RelatorioProfessorDadosAntropometricosPageState
     extends State<RelatorioProfessorDadosAntropometricosPage> {
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   // Controllers para todos os campos
   final TextEditingController _pesoAtualController = TextEditingController();
   final TextEditingController _pesoUsualController = TextEditingController();
@@ -42,25 +46,23 @@ class _RelatorioProfessorDadosAntropometricosPageState
   final TextEditingController _caController = TextEditingController();
   final TextEditingController _cpController = TextEditingController();
   final TextEditingController _ajController = TextEditingController();
-  final TextEditingController _percentualGorduraController = TextEditingController();
+  final TextEditingController _percentualGorduraController =
+      TextEditingController();
   final TextEditingController _perdaPesoController = TextEditingController();
-  final TextEditingController _diagnosticoNutricionalController = TextEditingController();
+  final TextEditingController _diagnosticoNutricionalController =
+      TextEditingController();
 
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
-  bool isEditing = false;
-
-  final AtendimentoService _atendimentoService = AtendimentoService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String statusAtendimento = '';
 
   @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDados();
+      _carregarDadosAtendimento();
     });
   }
 
@@ -89,7 +91,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -99,10 +102,10 @@ class _RelatorioProfessorDadosAntropometricosPageState
     }
   }
 
-  Future<void> _carregarDados() async {
+  Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
+
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -110,7 +113,7 @@ class _RelatorioProfessorDadosAntropometricosPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         setState(() {
           _pesoAtualController.text = data['peso_atual']?.toString() ?? '';
           _pesoUsualController.text = data['peso_usual']?.toString() ?? '';
@@ -126,14 +129,18 @@ class _RelatorioProfessorDadosAntropometricosPageState
           _caController.text = data['ca']?.toString() ?? '';
           _cpController.text = data['cp']?.toString() ?? '';
           _ajController.text = data['aj']?.toString() ?? '';
-          _percentualGorduraController.text = data['porcentagem_gc']?.toString() ?? '';
-          _perdaPesoController.text = data['porcentagem_perca_peso_por_tempo']?.toString() ?? '';
-          _diagnosticoNutricionalController.text = data['diagnostico_nutricional']?.toString() ?? '';
-          
+          _percentualGorduraController.text =
+              data['porcentagem_gc']?.toString() ?? '';
+          _perdaPesoController.text =
+              data['porcentagem_perca_peso_por_tempo']?.toString() ?? '';
+          _diagnosticoNutricionalController.text =
+              data['diagnostico_nutricional']?.toString() ?? '';
+
+          statusAtendimento = data['status_atendimento'] ?? '';
           isLoading = false;
         });
 
-        if (isAluno) {
+        if (isAluno && statusAtendimento == 'rejeitado') {
           await _carregarDadosLocais();
         }
       } else {
@@ -154,9 +161,12 @@ class _RelatorioProfessorDadosAntropometricosPageState
   Future<void> _carregarDadosLocais() async {
     final dados = await _atendimentoService.carregarDadosAntropometricos();
     setState(() {
-      _pesoAtualController.text = dados['peso_atual'] ?? _pesoAtualController.text;
-      _pesoUsualController.text = dados['peso_usual'] ?? _pesoUsualController.text;
-      _estaturaController.text = dados['estatura'] ?? _estaturaController.text;
+      _pesoAtualController.text =
+          dados['peso_atual'] ?? _pesoAtualController.text;
+      _pesoUsualController.text =
+          dados['peso_usual'] ?? _pesoUsualController.text;
+      _estaturaController.text =
+          dados['estatura'] ?? _estaturaController.text;
       _imcController.text = dados['imc'] ?? _imcController.text;
       _piController.text = dados['pi'] ?? _piController.text;
       _cbController.text = dados['cb'] ?? _cbController.text;
@@ -168,9 +178,12 @@ class _RelatorioProfessorDadosAntropometricosPageState
       _caController.text = dados['ca'] ?? _caController.text;
       _cpController.text = dados['cp'] ?? _cpController.text;
       _ajController.text = dados['aj'] ?? _ajController.text;
-      _percentualGorduraController.text = dados['porcentagem_gc'] ?? _percentualGorduraController.text;
-      _perdaPesoController.text = dados['porcentagem_perca_peso_por_tempo'] ?? _perdaPesoController.text;
-      _diagnosticoNutricionalController.text = dados['diagnostico_nutricional'] ?? _diagnosticoNutricionalController.text;
+      _percentualGorduraController.text =
+          dados['porcentagem_gc'] ?? _percentualGorduraController.text;
+      _perdaPesoController.text =
+          dados['porcentagem_perca_peso_por_tempo'] ?? _perdaPesoController.text;
+      _diagnosticoNutricionalController.text =
+          dados['diagnostico_nutricional'] ?? _diagnosticoNutricionalController.text;
     });
   }
 
@@ -196,13 +209,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
     );
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        _salvarDadosLocais();
-      }
-    });
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
   }
 
   @override
@@ -210,8 +218,6 @@ class _RelatorioProfessorDadosAntropometricosPageState
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
-    final bool camposEditaveis = isAluno && isEditing;
-    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -227,7 +233,7 @@ class _RelatorioProfessorDadosAntropometricosPageState
             children: [
               const Text('Erro ao carregar os dados antropométricos'),
               ElevatedButton(
-                onPressed: _carregarDados,
+                onPressed: _carregarDadosAtendimento,
                 child: const Text('Tentar novamente'),
               ),
             ],
@@ -242,7 +248,7 @@ class _RelatorioProfessorDadosAntropometricosPageState
           title: 'Dados Antropométricos',
           body: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
               child: Center(
                 child: Column(
                   children: [
@@ -250,25 +256,6 @@ class _RelatorioProfessorDadosAntropometricosPageState
                       currentStep: 6,
                       totalSteps: 9,
                     ),
-                    if (mostrarBotaoEditar) ...[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ElevatedButton(
-                            onPressed: _toggleEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isEditing ? Colors.green : Colors.blue,
-                            ),
-                            child: Text(
-                              isEditing ? 'Salvar' : 'Editar',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: cardWidth,
@@ -280,105 +267,105 @@ class _RelatorioProfessorDadosAntropometricosPageState
                             CustomInput(
                               label: 'Peso atual (kg)',
                               controller: _pesoAtualController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Peso usual (kg)',
                               controller: _pesoUsualController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Estatura (cm)',
                               controller: _estaturaController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'IMC',
                               controller: _imcController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PI',
                               controller: _piController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CB (cm)',
                               controller: _cbController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCT (mm)',
                               controller: _pctController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCB (mm)',
                               controller: _pcbController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCSE (mm)',
                               controller: _pcseController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCSI (mm)',
                               controller: _pcsiController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CMB (cm)',
                               controller: _cmbController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CA (cm)',
                               controller: _caController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CP (cm)',
                               controller: _cpController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'AJ (cm)',
                               controller: _ajController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: '% de GC',
                               controller: _percentualGorduraController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: '% perda peso/tempo',
                               controller: _perdaPesoController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Diagnóstico Nutricional',
                               controller: _diagnosticoNutricionalController,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -386,19 +373,20 @@ class _RelatorioProfessorDadosAntropometricosPageState
                                   text: 'Voltar',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
-                                  textColor: Colors.red,
+                                  textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
                                 CustomButton(
                                   text: 'Próximo',
-                                  onPressed: () {
-                                    if (isAluno && isEditing) {
-                                      _salvarDadosLocais();
+                                  onPressed: () async {
+                                    if (podeEditar) {
+                                      await _salvarDadosLocais();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RelatorioProfessorConsumoAlimentarPage(
+                                        builder: (context) =>
+                                            RelatorioProfessorConsumoAlimentarPage(
                                           atendimentoId: widget.atendimentoId,
                                           isHospital: widget.isHospital,
                                         ),

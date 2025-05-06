@@ -42,7 +42,6 @@ class _RelatorioProfessorIdentificacaoPageState
   final TextEditingController recordController = TextEditingController();
   final TextEditingController prontuarioController = TextEditingController();
 
-  bool isHospital = true;
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
@@ -74,7 +73,6 @@ class _RelatorioProfessorIdentificacaoPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -110,8 +108,7 @@ class _RelatorioProfessorIdentificacaoPageState
           isLoading = false;
         });
 
-        // Se for aluno, carrega os dados locais para edição
-        if (isAluno) {
+        if (isAluno && statusAtendimento == 'rejeitado') {
           await _carregarDadosLocais();
         }
       } else {
@@ -257,7 +254,7 @@ class _RelatorioProfessorIdentificacaoPageState
                               obrigatorio: true,
                               enabled: podeEditar,
                             ),
-                            if (isHospital) ...[
+                            if (widget.isHospital) ...[
                               SizedBox(height: espacamentoCards),
                               CustomInput(
                                 label: 'Hospital',

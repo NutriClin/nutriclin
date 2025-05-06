@@ -27,44 +27,36 @@ class RelatorioProfessorConsumoAlimentarPage extends StatefulWidget {
 
 class _RelatorioProfessorConsumoAlimentarPageState
     extends State<RelatorioProfessorConsumoAlimentarPage> {
-  final TextEditingController _habitualController = TextEditingController();
-  final TextEditingController _atualController = TextEditingController();
-  final TextEditingController _ingestaoHidricaController = TextEditingController();
-  final TextEditingController _evacuacaoController = TextEditingController();
-  final TextEditingController _diureseController = TextEditingController();
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final TextEditingController habitualController = TextEditingController();
+  final TextEditingController atualController = TextEditingController();
+  final TextEditingController ingestaoHidricaController =
+      TextEditingController();
+  final TextEditingController evacuacaoController = TextEditingController();
+  final TextEditingController diureseController = TextEditingController();
 
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
-  bool isEditing = false;
-
-  final AtendimentoService _atendimentoService = AtendimentoService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String statusAtendimento = '';
 
   @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDados();
+      _carregarDadosAtendimento();
     });
-  }
-
-  @override
-  void dispose() {
-    _habitualController.dispose();
-    _atualController.dispose();
-    _ingestaoHidricaController.dispose();
-    _evacuacaoController.dispose();
-    _diureseController.dispose();
-    super.dispose();
   }
 
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -74,10 +66,9 @@ class _RelatorioProfessorConsumoAlimentarPageState
     }
   }
 
-  Future<void> _carregarDados() async {
+  Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -85,18 +76,20 @@ class _RelatorioProfessorConsumoAlimentarPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         setState(() {
-          _habitualController.text = data['dia_alimentar_habitual'] ?? '';
-          _atualController.text = data['dia_alimentar_atual'] ?? '';
-          _ingestaoHidricaController.text = data['ingestao_hidrica']?.toString() ?? '';
-          _evacuacaoController.text = data['evacuacao']?.toString() ?? '';
-          _diureseController.text = data['diurese']?.toString() ?? '';
-          
+          habitualController.text = data['dia_alimentar_habitual'] ?? '';
+          atualController.text = data['dia_alimentar_atual'] ?? '';
+          ingestaoHidricaController.text =
+              data['ingestao_hidrica']?.toString() ?? '';
+          evacuacaoController.text = data['evacuacao']?.toString() ?? '';
+          diureseController.text = data['diurese']?.toString() ?? '';
+          statusAtendimento = data['status_atendimento'] ?? '';
+
           isLoading = false;
         });
 
-        if (isAluno) {
+        if (isAluno && statusAtendimento == 'rejeitado') {
           await _carregarDadosLocais();
         }
       } else {
@@ -110,38 +103,44 @@ class _RelatorioProfessorConsumoAlimentarPageState
         hasError = true;
         isLoading = false;
       });
-      print("Erro ao carregar dados de consumo alimentar: $e");
+      print("Erro ao carregar dados: $e");
     }
   }
 
   Future<void> _carregarDadosLocais() async {
     final dados = await _atendimentoService.carregarConsumoAlimentar();
     setState(() {
-      _habitualController.text = dados['habitual'] ?? _habitualController.text;
-      _atualController.text = dados['atual'] ?? _atualController.text;
-      _ingestaoHidricaController.text = dados['ingestao_hidrica'] ?? _ingestaoHidricaController.text;
-      _evacuacaoController.text = dados['evacuacao'] ?? _evacuacaoController.text;
-      _diureseController.text = dados['diurese'] ?? _diureseController.text;
+      habitualController.text = dados['habitual'] ?? habitualController.text;
+      atualController.text = dados['atual'] ?? atualController.text;
+      ingestaoHidricaController.text =
+          dados['ingestao_hidrica'] ?? ingestaoHidricaController.text;
+      evacuacaoController.text = dados['evacuacao'] ?? evacuacaoController.text;
+      diureseController.text = dados['diurese'] ?? diureseController.text;
     });
   }
 
   Future<void> _salvarDadosLocais() async {
     await _atendimentoService.salvarConsumoAlimentar(
-      habitual: _habitualController.text,
-      atual: _atualController.text,
-      ingestaoHidrica: _ingestaoHidricaController.text,
-      evacuacao: _evacuacaoController.text,
-      diurese: _diureseController.text,
+      habitual: habitualController.text,
+      atual: atualController.text,
+      ingestaoHidrica: ingestaoHidricaController.text,
+      evacuacao: evacuacaoController.text,
+      diurese: diureseController.text,
     );
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        _salvarDadosLocais();
-      }
-    });
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
+  }
+
+  @override
+  void dispose() {
+    habitualController.dispose();
+    atualController.dispose();
+    ingestaoHidricaController.dispose();
+    evacuacaoController.dispose();
+    diureseController.dispose();
+    super.dispose();
   }
 
   @override
@@ -149,8 +148,6 @@ class _RelatorioProfessorConsumoAlimentarPageState
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.95;
     double espacamentoCards = 10;
-    final bool camposEditaveis = isAluno && isEditing;
-    final bool mostrarBotaoEditar = isAluno;
 
     if (isLoading) {
       return const Scaffold(
@@ -161,17 +158,16 @@ class _RelatorioProfessorConsumoAlimentarPageState
     if (hasError) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Erro ao carregar os dados de consumo alimentar'),
-              ElevatedButton(
-                onPressed: _carregarDados,
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Erro ao carregar o atendimento'),
+            ElevatedButton(
+              onPressed: _carregarDadosAtendimento,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        )),
       );
     }
 
@@ -189,63 +185,48 @@ class _RelatorioProfessorConsumoAlimentarPageState
                       currentStep: 7,
                       totalSteps: 9,
                     ),
-                    if (mostrarBotaoEditar) ...[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ElevatedButton(
-                            onPressed: _toggleEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isEditing ? Colors.green : Colors.blue,
-                            ),
-                            child: Text(
-                              isEditing ? 'Salvar' : 'Editar',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: cardWidth,
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomInput(
-                              label: 'Dia alimentar habitual:',
-                              controller: _habitualController,
-                              enabled: camposEditaveis,
+                              label: 'Dia alimentar habitual',
+                              controller: habitualController,
+                              keyboardType: TextInputType.multiline,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
-                              label: 'Dia alimentar atual (Rec 24h):',
-                              controller: _atualController,
-                              enabled: camposEditaveis,
+                              label: 'Dia alimentar atual (Rec 24h)',
+                              controller: atualController,
+                              keyboardType: TextInputType.multiline,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ingestão hídrica',
-                              controller: _ingestaoHidricaController,
-                              enabled: camposEditaveis,
+                              controller: ingestaoHidricaController,
+                              keyboardType: TextInputType.text,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Evacuação',
-                              controller: _evacuacaoController,
-                              enabled: camposEditaveis,
+                              controller: evacuacaoController,
+                              keyboardType: TextInputType.text,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Diurese',
-                              controller: _diureseController,
-                              enabled: camposEditaveis,
+                              controller: diureseController,
+                              keyboardType: TextInputType.text,
+                              enabled: podeEditar,
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -253,19 +234,20 @@ class _RelatorioProfessorConsumoAlimentarPageState
                                   text: 'Voltar',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
-                                  textColor: Colors.red,
+                                  textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
                                 CustomButton(
                                   text: 'Próximo',
-                                  onPressed: () {
-                                    if (isAluno && isEditing) {
-                                      _salvarDadosLocais();
+                                  onPressed: () async {
+                                    if (podeEditar) {
+                                      await _salvarDadosLocais();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RelatorioProfessorRequerimentosNutricionaisPage(
+                                        builder: (context) =>
+                                            RelatorioProfessorRequerimentosNutricionaisPage(
                                           atendimentoId: widget.atendimentoId,
                                           isHospital: widget.isHospital,
                                         ),
