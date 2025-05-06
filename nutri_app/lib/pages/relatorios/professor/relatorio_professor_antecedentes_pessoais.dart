@@ -318,10 +318,6 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'antecedentes_pessoais',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
           modoLeitura: isAluno,
         ),
       ],

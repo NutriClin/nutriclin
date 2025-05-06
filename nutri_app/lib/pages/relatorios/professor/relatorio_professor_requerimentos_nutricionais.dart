@@ -31,7 +31,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
   final TextEditingController _kcalKgController = TextEditingController();
   final TextEditingController _choController = TextEditingController();
   final TextEditingController _lipController = TextEditingController();
-  final TextEditingController _ptnPorcentagemController = TextEditingController();
+  final TextEditingController _ptnPorcentagemController =
+      TextEditingController();
   final TextEditingController _ptnKgController = TextEditingController();
   final TextEditingController _ptnDiaController = TextEditingController();
   final TextEditingController _liquidoKgController = TextEditingController();
@@ -76,7 +77,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -89,7 +91,7 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
   Future<void> _carregarDados() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
+
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -97,7 +99,7 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         setState(() {
           _kcalDiaController.text = data['kcal_dia']?.toString() ?? '';
           _kcalKgController.text = data['kcal_kg']?.toString() ?? '';
@@ -109,8 +111,9 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
           _liquidoKgController.text = data['liquido_kg']?.toString() ?? '';
           _liquidoDiaController.text = data['liquido_dia']?.toString() ?? '';
           _fibrasController.text = data['fibras']?.toString() ?? '';
-          _outrosController.text = data['outros_requerimentos_nutricionais']?.toString() ?? '';
-          
+          _outrosController.text =
+              data['outros_requerimentos_nutricionais']?.toString() ?? '';
+
           isLoading = false;
         });
 
@@ -139,11 +142,14 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
       _kcalKgController.text = dados['kcal_kg'] ?? _kcalKgController.text;
       _choController.text = dados['cho'] ?? _choController.text;
       _lipController.text = dados['lip'] ?? _lipController.text;
-      _ptnPorcentagemController.text = dados['Ptn'] ?? _ptnPorcentagemController.text;
+      _ptnPorcentagemController.text =
+          dados['Ptn'] ?? _ptnPorcentagemController.text;
       _ptnKgController.text = dados['ptn_kg'] ?? _ptnKgController.text;
       _ptnDiaController.text = dados['ptn_dia'] ?? _ptnDiaController.text;
-      _liquidoKgController.text = dados['liquido_kg'] ?? _liquidoKgController.text;
-      _liquidoDiaController.text = dados['liquido_dia'] ?? _liquidoDiaController.text;
+      _liquidoKgController.text =
+          dados['liquido_kg'] ?? _liquidoKgController.text;
+      _liquidoDiaController.text =
+          dados['liquido_dia'] ?? _liquidoDiaController.text;
       _fibrasController.text = dados['fibras'] ?? _fibrasController.text;
       _outrosController.text = dados['outros'] ?? _outrosController.text;
     });
@@ -227,7 +233,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                           child: ElevatedButton(
                             onPressed: _toggleEditing,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isEditing ? Colors.green : Colors.blue,
+                              backgroundColor:
+                                  isEditing ? Colors.green : Colors.blue,
                             ),
                             child: Text(
                               isEditing ? 'Salvar' : 'Editar',
@@ -331,7 +338,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RelatorioProfessorCondutaNutricionalPage(
+                                        builder: (context) =>
+                                            RelatorioProfessorCondutaNutricionalPage(
                                           atendimentoId: widget.atendimentoId,
                                           isHospital: widget.isHospital,
                                         ),
@@ -352,10 +360,6 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'requerimentos_nutricionais',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
           modoLeitura: isAluno,
         ),
       ],

@@ -375,12 +375,9 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'dados_socioeconomicos',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
           modoLeitura: isAluno,
         ),
+        
       ],
     );
   }

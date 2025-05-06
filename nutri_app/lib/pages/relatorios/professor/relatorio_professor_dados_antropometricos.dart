@@ -419,10 +419,6 @@ class _RelatorioProfessorDadosAntropometricosPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'dados_antropometricos',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
           modoLeitura: isAluno,
         ),
       ],

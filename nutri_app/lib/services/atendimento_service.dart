@@ -199,9 +199,11 @@ class AtendimentoService {
     await prefs.setBool(
         '$_prefsKeyAntecedentesPessoais.excesso_peso', excessoPeso);
     await prefs.setBool('$_prefsKeyAntecedentesPessoais.diabetes', diabetes);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais', outros);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais', outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao', outrosDescricao);
+        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao',
+        outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesPessoais() async {
@@ -217,10 +219,12 @@ class AtendimentoService {
           prefs.getBool('$_prefsKeyAntecedentesPessoais.excesso_peso') ?? false,
       'diabetes':
           prefs.getBool('$_prefsKeyAntecedentesPessoais.diabetes') ?? false,
-      'outros_antecedentes_pessoais': prefs.getBool('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais') ?? false,
-      'outros_antecedentes_pessoais_descricao':
-          prefs.getString('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao') ??
-              '',
+      'outros_antecedentes_pessoais': prefs.getBool(
+              '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais') ??
+          false,
+      'outros_antecedentes_pessoais_descricao': prefs.getString(
+              '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao') ??
+          '',
     };
   }
 
@@ -232,8 +236,10 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyAntecedentesPessoais.cancer');
     await prefs.remove('$_prefsKeyAntecedentesPessoais.excesso_peso');
     await prefs.remove('$_prefsKeyAntecedentesPessoais.diabetes');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao');
+    await prefs
+        .remove('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais');
+    await prefs.remove(
+        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao');
   }
 
 // Antecedentes familiares
@@ -258,9 +264,12 @@ class AtendimentoService {
     await prefs.setBool(
         '$_prefsKeyAntecedentesFamiliares.excesso_peso', excessoPeso);
     await prefs.setBool('$_prefsKeyAntecedentesFamiliares.diabetes', diabetes);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares', outros);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares',
+        outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao', outrosDescricao);
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao',
+        outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesFamiliares() async {
@@ -278,10 +287,11 @@ class AtendimentoService {
               false,
       'diabetes':
           prefs.getBool('$_prefsKeyAntecedentesFamiliares.diabetes') ?? false,
-      'outros_antecedentes_familiares':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares') ?? false,
-      'outros_antecedentes_familiares_descricao': prefs
-              .getString('$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao') ??
+      'outros_antecedentes_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares') ??
+          false,
+      'outros_antecedentes_familiares_descricao': prefs.getString(
+              '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao') ??
           '',
     };
   }
@@ -294,8 +304,10 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyAntecedentesFamiliares.cancer');
     await prefs.remove('$_prefsKeyAntecedentesFamiliares.excessoPeso');
     await prefs.remove('$_prefsKeyAntecedentesFamiliares.diabetes');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao');
+    await prefs.remove(
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares');
+    await prefs.remove(
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao');
   }
 
 // Dados clínicos e nutricionais
@@ -693,7 +705,8 @@ class AtendimentoService {
     await prefs.setString('$_prefsKeyRequerimentos.liquido_kg', liquidoKg);
     await prefs.setString('$_prefsKeyRequerimentos.liquido_dia', liquidoDia);
     await prefs.setString('$_prefsKeyRequerimentos.fibras', fibras);
-    await prefs.setString('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais', outros);
+    await prefs.setString(
+        '$_prefsKeyRequerimentos.outros_requerimentos_nutricionais', outros);
   }
 
   Future<Map<String, String>> carregarRequerimentosNutricionais() async {
@@ -711,7 +724,9 @@ class AtendimentoService {
       'liquido_dia':
           prefs.getString('$_prefsKeyRequerimentos.liquido_dia') ?? '',
       'fibras': prefs.getString('$_prefsKeyRequerimentos.fibras') ?? '',
-      'outros_requerimentos_nutricionais': prefs.getString('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais') ?? '',
+      'outros_requerimentos_nutricionais': prefs.getString(
+              '$_prefsKeyRequerimentos.outros_requerimentos_nutricionais') ??
+          '',
     };
   }
 
@@ -728,7 +743,8 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyRequerimentos.liquido_kg');
     await prefs.remove('$_prefsKeyRequerimentos.liquido_dia');
     await prefs.remove('$_prefsKeyRequerimentos.fibras');
-    await prefs.remove('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais');
+    await prefs
+        .remove('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais');
   }
 
 // Dados de conduta nutricional e finalização
@@ -760,10 +776,8 @@ class AtendimentoService {
       'estagiario': prefs.getString('$_prefsKeyConduta.estagiario') ?? '',
       'professor':
           prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
-      'idProfessor':
-          prefs.getString('$_prefsKeyConduta.idProfessor') ?? '', // Adicionado
-      'idEstagiario':
-          prefs.getString('$_prefsKeyConduta.idEstagiario') ?? '', // Adicionado
+      'idProfessor': prefs.getString('$_prefsKeyConduta.idProfessor') ?? '',
+      'idEstagiario': prefs.getString('$_prefsKeyConduta.idEstagiario') ?? '',
       'proxima_consulta':
           prefs.getString('$_prefsKeyConduta.proxima_consulta') ?? '',
     };

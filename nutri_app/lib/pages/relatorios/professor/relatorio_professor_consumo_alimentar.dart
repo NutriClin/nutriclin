@@ -286,10 +286,6 @@ class _RelatorioProfessorConsumoAlimentarPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'consumo_alimentar',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
           modoLeitura: isAluno,
         ),
       ],

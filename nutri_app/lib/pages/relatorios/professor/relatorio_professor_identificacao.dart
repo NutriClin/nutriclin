@@ -31,7 +31,7 @@ class _RelatorioProfessorIdentificacaoPageState
   final AtendimentoService _atendimentoService = AtendimentoService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   String selectedGender = 'Selecione';
   final TextEditingController nameController = TextEditingController();
   final TextEditingController birthDateController = TextEditingController();
@@ -47,7 +47,7 @@ class _RelatorioProfessorIdentificacaoPageState
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
-  bool isEditing = false;
+  String statusAtendimento = '';
 
   @override
   void initState() {
@@ -60,7 +60,8 @@ class _RelatorioProfessorIdentificacaoPageState
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -73,7 +74,7 @@ class _RelatorioProfessorIdentificacaoPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
+
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -81,7 +82,7 @@ class _RelatorioProfessorIdentificacaoPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         String formattedDate = '';
         if (data['data_nascimento'] != null) {
           final date = (data['data_nascimento'] as Timestamp).toDate();
@@ -94,7 +95,8 @@ class _RelatorioProfessorIdentificacaoPageState
           nameController.text = data['nome'] ?? '';
           selectedGender = data['sexo'] ?? 'Selecione';
           birthDateController.text = formattedDate;
-          
+          statusAtendimento = data['status_atendimento'] ?? '';
+
           if (widget.isHospital) {
             hospitalController.text = data['hospital'] ?? '';
             clinicController.text = data['clinica'] ?? '';
@@ -104,7 +106,7 @@ class _RelatorioProfessorIdentificacaoPageState
           } else {
             prontuarioController.text = data['prontuario'] ?? '';
           }
-          
+
           isLoading = false;
         });
 
@@ -143,7 +145,8 @@ class _RelatorioProfessorIdentificacaoPageState
       roomController.text = dados['quarto'] ?? roomController.text;
       bedController.text = dados['leito'] ?? bedController.text;
       recordController.text = dados['registro'] ?? recordController.text;
-      prontuarioController.text = dados['prontuario'] ?? prontuarioController.text;
+      prontuarioController.text =
+          dados['prontuario'] ?? prontuarioController.text;
     });
   }
 
@@ -168,13 +171,8 @@ class _RelatorioProfessorIdentificacaoPageState
     );
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-      if (!isEditing) {
-        _salvarDadosLocais();
-      }
-    });
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
   }
 
   @override
@@ -192,22 +190,18 @@ class _RelatorioProfessorIdentificacaoPageState
     if (hasError) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Erro ao carregar o atendimento'),
-              ElevatedButton(
-                onPressed: _carregarDadosAtendimento,
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Erro ao carregar o atendimento'),
+            ElevatedButton(
+              onPressed: _carregarDadosAtendimento,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        )),
       );
     }
-
-    final bool camposEditaveis = isAluno && isEditing;
-    final bool mostrarBotaoEditar = isAluno;
 
     return Stack(
       children: [
@@ -223,25 +217,6 @@ class _RelatorioProfessorIdentificacaoPageState
                       currentStep: 1,
                       totalSteps: 9,
                     ),
-                    if (mostrarBotaoEditar) ...[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ElevatedButton(
-                            onPressed: _toggleEditing,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isEditing ? Colors.green : Colors.blue,
-                            ),
-                            child: Text(
-                              isEditing ? 'Salvar' : 'Editar',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
                     SizedBox(height: espacamentoCards),
                     CustomCard(
                       width: cardWidth,
@@ -254,18 +229,24 @@ class _RelatorioProfessorIdentificacaoPageState
                               controller: nameController,
                               keyboardType: TextInputType.text,
                               obrigatorio: true,
-                              enabled: camposEditaveis,
+                              enabled:
+                                  podeEditar, // Habilita apenas se podeEditar for true
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomDropdown(
                               label: 'Sexo',
                               value: selectedGender,
-                              items: const ['Selecione', 'Masculino', 'Feminino'],
-                              onChanged: camposEditaveis 
-                                  ? (value) => setState(() => selectedGender = value!)
+                              items: const [
+                                'Selecione',
+                                'Masculino',
+                                'Feminino'
+                              ],
+                              onChanged: podeEditar
+                                  ? (value) =>
+                                      setState(() => selectedGender = value!)
                                   : null,
                               obrigatorio: true,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -274,9 +255,8 @@ class _RelatorioProfessorIdentificacaoPageState
                               keyboardType: TextInputType.datetime,
                               hintText: 'DD/MM/AAAA',
                               obrigatorio: true,
-                              enabled: camposEditaveis,
+                              enabled: podeEditar,
                             ),
-
                             if (isHospital) ...[
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -284,7 +264,7 @@ class _RelatorioProfessorIdentificacaoPageState
                                 controller: hospitalController,
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
-                                enabled: camposEditaveis,
+                                enabled: podeEditar,
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -292,7 +272,7 @@ class _RelatorioProfessorIdentificacaoPageState
                                 controller: clinicController,
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
-                                enabled: camposEditaveis,
+                                enabled: podeEditar,
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -300,7 +280,7 @@ class _RelatorioProfessorIdentificacaoPageState
                                 controller: roomController,
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
-                                enabled: camposEditaveis,
+                                enabled: podeEditar,
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -308,7 +288,7 @@ class _RelatorioProfessorIdentificacaoPageState
                                 controller: bedController,
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
-                                enabled: camposEditaveis,
+                                enabled: podeEditar,
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -316,7 +296,7 @@ class _RelatorioProfessorIdentificacaoPageState
                                 controller: recordController,
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
-                                enabled: camposEditaveis,
+                                enabled: podeEditar,
                               ),
                             ] else ...[
                               SizedBox(height: espacamentoCards),
@@ -325,16 +305,15 @@ class _RelatorioProfessorIdentificacaoPageState
                                 controller: prontuarioController,
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
-                                enabled: camposEditaveis,
+                                enabled: podeEditar,
                               ),
                             ],
-
                             const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomButton(
-                                  text: 'Voltar',
+                                  text: 'Sair',
                                   onPressed: () => Navigator.pop(context),
                                   color: Colors.white,
                                   textColor: Colors.red,
@@ -342,14 +321,15 @@ class _RelatorioProfessorIdentificacaoPageState
                                 ),
                                 CustomButton(
                                   text: 'Próximo',
-                                  onPressed: () {
-                                    if (isAluno && isEditing) {
-                                      _salvarDadosLocais();
+                                  onPressed: () async {
+                                    if (podeEditar) {
+                                      await _salvarDadosLocais();
                                     }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RelatorioProfessorDadosSocioeconomicosPage(
+                                        builder: (context) =>
+                                            RelatorioProfessorDadosSocioeconomicosPage(
                                           atendimentoId: widget.atendimentoId,
                                           isHospital: widget.isHospital,
                                         ),
@@ -370,11 +350,7 @@ class _RelatorioProfessorIdentificacaoPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'identificacao',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
-          modoLeitura: isAluno, // Novo parâmetro para modo leitura
+          modoLeitura: isAluno,
         ),
       ],
     );

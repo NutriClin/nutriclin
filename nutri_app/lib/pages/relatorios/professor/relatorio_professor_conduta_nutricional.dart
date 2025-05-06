@@ -26,8 +26,10 @@ class RelatorioProfessorCondutaNutricionalPage extends StatefulWidget {
 
 class _RelatorioProfessorCondutaNutricionalPageState
     extends State<RelatorioProfessorCondutaNutricionalPage> {
-  final TextEditingController _estagiarioNomeController = TextEditingController();
-  final TextEditingController _proximaConsultaController = TextEditingController();
+  final TextEditingController _estagiarioNomeController =
+      TextEditingController();
+  final TextEditingController _proximaConsultaController =
+      TextEditingController();
   final TextEditingController _professorController = TextEditingController();
 
   bool isLoading = true;
@@ -51,7 +53,8 @@ class _RelatorioProfessorCondutaNutricionalPageState
   Future<void> _checkUserType() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('usuarios').doc(user.uid).get();
+      final userDoc =
+          await _firestore.collection('usuarios').doc(user.uid).get();
       if (userDoc.exists) {
         setState(() {
           isProfessor = userDoc.data()?['tipo_usuario'] == 'Professor';
@@ -64,7 +67,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
   Future<void> _carregarDados() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      
+
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -72,7 +75,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
 
       if (doc.exists) {
         final data = doc.data()!;
-        
+
         setState(() {
           _estagiarioNomeController.text = data['estagiario_nome'] ?? '';
           _professorController.text = data['professor_nome'] ?? '';
@@ -131,20 +134,20 @@ class _RelatorioProfessorCondutaNutricionalPageState
     try {
       // Carrega todos os dados salvos localmente
       final dadosCompletos = await _atendimentoService.obterDadosCompletos();
-      
+
       // Atualiza o documento no Firestore
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
       await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
           .update(dadosCompletos);
-      
+
       // Limpa os dados locais
       await _atendimentoService.limparTodosDados();
-      
+
       // Atualiza o status para 'enviado'
       await _atualizarStatus('enviado');
-      
+
       ToastUtil.showToast(
         context: context,
         message: 'Atendimento enviado com sucesso!',
@@ -243,14 +246,16 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                     children: [
                                       CustomButton(
                                         text: 'Reprovado',
-                                        onPressed: () => _atualizarStatus('reprovado'),
+                                        onPressed: () =>
+                                            _atualizarStatus('reprovado'),
                                         color: Colors.red,
                                         textColor: Colors.white,
                                       ),
                                       const SizedBox(width: 10),
                                       CustomButton(
                                         text: 'Aprovado',
-                                        onPressed: () => _atualizarStatus('aprovado'),
+                                        onPressed: () =>
+                                            _atualizarStatus('aprovado'),
                                       ),
                                     ],
                                   ),
@@ -272,12 +277,6 @@ class _RelatorioProfessorCondutaNutricionalPageState
               ),
             ),
           ),
-        ),
-        ObservacaoRelatorio(
-          pageKey: 'conduta_nutricional',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: true,
         ),
         if (isSaving)
           ModalBarrier(

@@ -547,10 +547,6 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
           ),
         ),
         ObservacaoRelatorio(
-          pageKey: 'dados_clinicos_nutricionais',
-          atendimentoId: widget.atendimentoId,
-          isHospital: widget.isHospital,
-          isFinalPage: false,
           modoLeitura: isAluno,
         ),
       ],
