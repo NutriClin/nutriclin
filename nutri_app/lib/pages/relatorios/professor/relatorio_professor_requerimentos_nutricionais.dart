@@ -54,7 +54,11 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -101,8 +105,9 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -115,28 +120,55 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
         hasError = true;
         isLoading = false;
       });
-      print("Erro ao carregar dados: $e");
+      print("Erro ao carregar requerimentos nutricionais: $e");
+    }
+  }
+
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarRequerimentosNutricionais(
+        kcalDia: data['kcal_dia']?.toString() ?? '',
+        kcalKg: data['kcal_kg']?.toString() ?? '',
+        cho: data['cho']?.toString() ?? '',
+        lip: data['lip']?.toString() ?? '',
+        ptnPorcentagem: data['Ptn']?.toString() ?? '',
+        ptnKg: data['ptn_kg']?.toString() ?? '',
+        ptnDia: data['ptn_dia']?.toString() ?? '',
+        liquidoKg: data['liquido_kg']?.toString() ?? '',
+        liquidoDia: data['liquido_dia']?.toString() ?? '',
+        fibras: data['fibras']?.toString() ?? '',
+        outros: data['outros_requerimentos_nutricionais']?.toString() ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
     }
   }
 
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarRequerimentosNutricionais();
-    setState(() {
-      kcalDiaController.text = dados['kcal_dia'] ?? kcalDiaController.text;
-      kcalKgController.text = dados['kcal_kg'] ?? kcalKgController.text;
-      choController.text = dados['cho'] ?? choController.text;
-      lipController.text = dados['lip'] ?? lipController.text;
-      ptnPorcentagemController.text =
-          dados['Ptn'] ?? ptnPorcentagemController.text;
-      ptnKgController.text = dados['ptn_kg'] ?? ptnKgController.text;
-      ptnDiaController.text = dados['ptn_dia'] ?? ptnDiaController.text;
-      liquidoKgController.text =
-          dados['liquido_kg'] ?? liquidoKgController.text;
-      liquidoDiaController.text =
-          dados['liquido_dia'] ?? liquidoDiaController.text;
-      fibrasController.text = dados['fibras'] ?? fibrasController.text;
-      outrosController.text = dados['outros'] ?? outrosController.text;
-    });
+    try {
+      final dados =
+          await _atendimentoService.carregarRequerimentosNutricionais();
+      if (dados.isNotEmpty) {
+        setState(() {
+          kcalDiaController.text = dados['kcal_dia'] ?? kcalDiaController.text;
+          kcalKgController.text = dados['kcal_kg'] ?? kcalKgController.text;
+          choController.text = dados['cho'] ?? choController.text;
+          lipController.text = dados['lip'] ?? lipController.text;
+          ptnPorcentagemController.text =
+              dados['Ptn'] ?? ptnPorcentagemController.text;
+          ptnKgController.text = dados['ptn_kg'] ?? ptnKgController.text;
+          ptnDiaController.text = dados['ptn_dia'] ?? ptnDiaController.text;
+          liquidoKgController.text =
+              dados['liquido_kg'] ?? liquidoKgController.text;
+          liquidoDiaController.text =
+              dados['liquido_dia'] ?? liquidoDiaController.text;
+          fibrasController.text = dados['fibras'] ?? fibrasController.text;
+          outrosController.text = dados['outros'] ?? outrosController.text;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
@@ -193,7 +225,7 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Erro ao carregar o atendimento'),
+            const Text('Erro ao carregar os requerimentos nutricionais'),
             ElevatedButton(
               onPressed: _carregarDadosAtendimento,
               child: const Text('Tentar novamente'),

@@ -78,7 +78,11 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -116,7 +120,6 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -171,8 +174,9 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -189,62 +193,105 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
     }
   }
 
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarDadosClinicosNutricionais(
+        diagnostico: data['diagnostico_clinico'] ?? '',
+        prescricao: data['prescricao_dietoterapica'] ?? '',
+        aceitacao: data['aceitacao'] ?? 'Selecione',
+        alimentacaoHabitual: data['alimentacao_habitual'] ?? 'Selecione',
+        especificarAlimentacao: data['resumo_alimentacao_habitual'] ?? '',
+        doencaAnterior: data['possui_doenca_anterior'] ?? false,
+        doencaAnteriorDesc: data['resumo_doenca_anterior'] ?? '',
+        cirurgiaRecente: data['possui_cirurgia_recente'] ?? false,
+        cirurgiaDesc: data['resumo_cirurgia_recente'] ?? '',
+        febre: data['possui_febre'] ?? false,
+        alteracaoPeso: data['possui_alteracao_peso_recente'] ?? false,
+        quantoPeso: data['quantidade_perca_peso_recente'] ?? '',
+        desconfortos: data['possui_desconforto_oral_gastrointestinal'] ?? false,
+        necessidadeDieta: data['possui_necessidade_dieta_hospitalar'] ?? false,
+        qualDieta: data['resumo_necessidade_dieta_hospitalar'] ?? '',
+        suplementacao: data['possui_suplementacao_nutricional'] ?? false,
+        tipoSuplementacao: data['resumo_suplemento_nutricional'] ?? '',
+        tabagismo: data['possui_tabagismo'] ?? false,
+        etilismo: data['possui_etilismo'] ?? false,
+        condicaoFuncional: data['possui_condicao_funcional'] ?? 'Selecione',
+        especificarCondicao: data['resumo_condicao_funcional'] ?? '',
+        medicamentos:
+            data['resumo_medicamentos_vitaminas_minerais_prescritos'] ?? '',
+        examesLaboratoriais: data['resumo_exames_laboratoriais'] ?? '',
+        exameFisico: data['resumo_exame_fisico'] ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
+    }
+  }
+
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarDadosClinicosNutricionais();
-    setState(() {
-      // Text controllers
-      _diagnosticoController.text =
-          dados['diagnostico_clinico'] ?? _diagnosticoController.text;
-      _prescricaoController.text =
-          dados['prescricao_dietoterapica'] ?? _prescricaoController.text;
-      _alimentacaoHabitualController.text =
-          dados['resumo_alimentacao_habitual'] ??
-              _alimentacaoHabitualController.text;
-      _doencaAnteriorController.text =
-          dados['resumo_doenca_anterior'] ?? _doencaAnteriorController.text;
-      _cirurgiaController.text =
-          dados['resumo_cirurgia_recente'] ?? _cirurgiaController.text;
-      _quantoPesoController.text =
-          dados['quantidade_perca_peso_recente'] ?? _quantoPesoController.text;
-      _qualDietaController.text =
-          dados['resumo_necessidade_dieta_hospitalar'] ??
-              _qualDietaController.text;
-      _tipoSuplementacaoController.text =
-          dados['resumo_suplemento_nutricional'] ??
-              _tipoSuplementacaoController.text;
-      _especificarCondicaoController.text =
-          dados['resumo_condicao_funcional'] ??
-              _especificarCondicaoController.text;
-      _medicamentosController.text =
-          dados['resumo_medicamentos_vitaminas_minerais_prescritos'] ??
-              _medicamentosController.text;
-      _examesLaboratoriaisController.text =
-          dados['resumo_exames_laboratoriais'] ??
-              _examesLaboratoriaisController.text;
-      _exameFisicoController.text =
-          dados['resumo_exame_fisico'] ?? _exameFisicoController.text;
+    try {
+      final dados =
+          await _atendimentoService.carregarDadosClinicosNutricionais();
+      if (dados.isNotEmpty) {
+        setState(() {
+          // Text controllers
+          _diagnosticoController.text =
+              dados['diagnostico_clinico'] ?? _diagnosticoController.text;
+          _prescricaoController.text =
+              dados['prescricao_dietoterapica'] ?? _prescricaoController.text;
+          _alimentacaoHabitualController.text =
+              dados['resumo_alimentacao_habitual'] ??
+                  _alimentacaoHabitualController.text;
+          _doencaAnteriorController.text =
+              dados['resumo_doenca_anterior'] ?? _doencaAnteriorController.text;
+          _cirurgiaController.text =
+              dados['resumo_cirurgia_recente'] ?? _cirurgiaController.text;
+          _quantoPesoController.text = dados['quantidade_perca_peso_recente'] ??
+              _quantoPesoController.text;
+          _qualDietaController.text =
+              dados['resumo_necessidade_dieta_hospitalar'] ??
+                  _qualDietaController.text;
+          _tipoSuplementacaoController.text =
+              dados['resumo_suplemento_nutricional'] ??
+                  _tipoSuplementacaoController.text;
+          _especificarCondicaoController.text =
+              dados['resumo_condicao_funcional'] ??
+                  _especificarCondicaoController.text;
+          _medicamentosController.text =
+              dados['resumo_medicamentos_vitaminas_minerais_prescritos'] ??
+                  _medicamentosController.text;
+          _examesLaboratoriaisController.text =
+              dados['resumo_exames_laboratoriais'] ??
+                  _examesLaboratoriaisController.text;
+          _exameFisicoController.text =
+              dados['resumo_exame_fisico'] ?? _exameFisicoController.text;
 
-      // Dropdowns
-      selectedAceitacao = dados['aceitacao'] ?? selectedAceitacao;
-      selectedAlimentacaoHabitual =
-          dados['alimentacao_habitual'] ?? selectedAlimentacaoHabitual;
-      selectedCondicaoFuncional =
-          dados['possui_condicao_funcional'] ?? selectedCondicaoFuncional;
+          // Dropdowns
+          selectedAceitacao = dados['aceitacao'] ?? selectedAceitacao;
+          selectedAlimentacaoHabitual =
+              dados['alimentacao_habitual'] ?? selectedAlimentacaoHabitual;
+          selectedCondicaoFuncional =
+              dados['possui_condicao_funcional'] ?? selectedCondicaoFuncional;
 
-      // Switches
-      _doencaAnterior = dados['possui_doenca_anterior'] ?? _doencaAnterior;
-      _cirurgiaRecente = dados['possui_cirurgia_recente'] ?? _cirurgiaRecente;
-      _febre = dados['possui_febre'] ?? _febre;
-      _alteracaoPeso = dados['possui_alteracao_peso_recente'] ?? _alteracaoPeso;
-      _desconforto =
-          dados['possui_desconforto_oral_gastrointestinal'] ?? _desconforto;
-      _necessidadeDieta =
-          dados['possui_necessidade_dieta_hospitalar'] ?? _necessidadeDieta;
-      _suplementacao =
-          dados['possui_suplementacao_nutricional'] ?? _suplementacao;
-      _tabagismo = dados['possui_tabagismo'] ?? _tabagismo;
-      _etilismo = dados['possui_etilismo'] ?? _etilismo;
-    });
+          // Switches
+          _doencaAnterior = dados['possui_doenca_anterior'] ?? _doencaAnterior;
+          _cirurgiaRecente =
+              dados['possui_cirurgia_recente'] ?? _cirurgiaRecente;
+          _febre = dados['possui_febre'] ?? _febre;
+          _alteracaoPeso =
+              dados['possui_alteracao_peso_recente'] ?? _alteracaoPeso;
+          _desconforto =
+              dados['possui_desconforto_oral_gastrointestinal'] ?? _desconforto;
+          _necessidadeDieta =
+              dados['possui_necessidade_dieta_hospitalar'] ?? _necessidadeDieta;
+          _suplementacao =
+              dados['possui_suplementacao_nutricional'] ?? _suplementacao;
+          _tabagismo = dados['possui_tabagismo'] ?? _tabagismo;
+          _etilismo = dados['possui_etilismo'] ?? _etilismo;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {

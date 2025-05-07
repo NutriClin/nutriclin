@@ -50,7 +50,11 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -77,7 +81,6 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -100,8 +103,9 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -118,19 +122,41 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
     }
   }
 
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarAntecedentesFamiliares(
+        dislipidemias: data['dislipidemias_familiares'] ?? false,
+        has: data['has_familiares'] ?? false,
+        cancer: data['cancer_familiares'] ?? false,
+        excessoPeso: data['excesso_peso_familiares'] ?? false,
+        diabetes: data['diabetes_familiares'] ?? false,
+        outros: data['outros_antecedentes_familiares'] ?? false,
+        outrosDescricao: data['outros_antecedentes_familiares_descricao'] ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
+    }
+  }
+
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarAntecedentesFamiliares();
-    setState(() {
-      _dislipidemias = dados['dislipidemias_familiares'] ?? _dislipidemias;
-      _has = dados['has_familiares'] ?? _has;
-      _cancer = dados['cancer_familiares'] ?? _cancer;
-      _excessoPeso = dados['excesso_peso_familiares'] ?? _excessoPeso;
-      _diabetes = dados['diabetes_familiares'] ?? _diabetes;
-      _outros = dados['outros_antecedentes_familiares'] ?? _outros;
-      _outrosController.text =
-          dados['outros_antecedentes_familiares_descricao'] ??
-              _outrosController.text;
-    });
+    try {
+      final dados = await _atendimentoService.carregarAntecedentesFamiliares();
+      if (dados.isNotEmpty) {
+        setState(() {
+          _dislipidemias = dados['dislipidemias_familiares'] ?? _dislipidemias;
+          _has = dados['has_familiares'] ?? _has;
+          _cancer = dados['cancer_familiares'] ?? _cancer;
+          _excessoPeso = dados['excesso_peso_familiares'] ?? _excessoPeso;
+          _diabetes = dados['diabetes_familiares'] ?? _diabetes;
+          _outros = dados['outros_antecedentes_familiares'] ?? _outros;
+          _outrosController.text =
+              dados['outros_antecedentes_familiares_descricao'] ??
+                  _outrosController.text;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
@@ -164,17 +190,16 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
     if (hasError) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Erro ao carregar os antecedentes familiares'),
-              ElevatedButton(
-                onPressed: _carregarDadosAtendimento,
-                child: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Erro ao carregar os antecedentes familiares'),
+            ElevatedButton(
+              onPressed: _carregarDadosAtendimento,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        )),
       );
     }
 

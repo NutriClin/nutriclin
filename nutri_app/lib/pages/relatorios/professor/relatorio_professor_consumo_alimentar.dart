@@ -48,7 +48,11 @@ class _RelatorioProfessorConsumoAlimentarPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -89,8 +93,9 @@ class _RelatorioProfessorConsumoAlimentarPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -103,20 +108,42 @@ class _RelatorioProfessorConsumoAlimentarPageState
         hasError = true;
         isLoading = false;
       });
-      print("Erro ao carregar dados: $e");
+      print("Erro ao carregar consumo alimentar: $e");
+    }
+  }
+
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarConsumoAlimentar(
+        habitual: data['habitual'] ?? '',
+        atual: data['atual'] ?? '',
+        ingestaoHidrica: data['ingestao_hidrica']?.toString() ?? '',
+        evacuacao: data['evacuacao']?.toString() ?? '',
+        diurese: data['diurese']?.toString() ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
     }
   }
 
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarConsumoAlimentar();
-    setState(() {
-      habitualController.text = dados['habitual'] ?? habitualController.text;
-      atualController.text = dados['atual'] ?? atualController.text;
-      ingestaoHidricaController.text =
-          dados['ingestao_hidrica'] ?? ingestaoHidricaController.text;
-      evacuacaoController.text = dados['evacuacao'] ?? evacuacaoController.text;
-      diureseController.text = dados['diurese'] ?? diureseController.text;
-    });
+    try {
+      final dados = await _atendimentoService.carregarConsumoAlimentar();
+      if (dados.isNotEmpty) {
+        setState(() {
+          habitualController.text =
+              dados['habitual'] ?? habitualController.text;
+          atualController.text = dados['atual'] ?? atualController.text;
+          ingestaoHidricaController.text =
+              dados['ingestao_hidrica'] ?? ingestaoHidricaController.text;
+          evacuacaoController.text =
+              dados['evacuacao'] ?? evacuacaoController.text;
+          diureseController.text = dados['diurese'] ?? diureseController.text;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
@@ -161,7 +188,7 @@ class _RelatorioProfessorConsumoAlimentarPageState
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Erro ao carregar o atendimento'),
+            const Text('Erro ao carregar o consumo alimentar'),
             ElevatedButton(
               onPressed: _carregarDadosAtendimento,
               child: const Text('Tentar novamente'),
@@ -177,7 +204,7 @@ class _RelatorioProfessorConsumoAlimentarPageState
           title: 'Consumo Alimentar',
           body: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 80),
               child: Center(
                 child: Column(
                   children: [
@@ -226,7 +253,7 @@ class _RelatorioProfessorConsumoAlimentarPageState
                               keyboardType: TextInputType.text,
                               enabled: podeEditar,
                             ),
-                            const SizedBox(height: 15),
+                            const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

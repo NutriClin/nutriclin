@@ -62,7 +62,11 @@ class _RelatorioProfessorDadosAntropometricosPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -105,7 +109,6 @@ class _RelatorioProfessorDadosAntropometricosPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -140,8 +143,9 @@ class _RelatorioProfessorDadosAntropometricosPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -158,33 +162,67 @@ class _RelatorioProfessorDadosAntropometricosPageState
     }
   }
 
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarDadosAntropometricos(
+          pesoAtual: data['peso_atual']?.toString() ?? '',
+          pesoUsual: data['peso_usual']?.toString() ?? '',
+          estatura: data['estatura']?.toString() ?? '',
+          imc: data['imc']?.toString() ?? '',
+          pi: data['pi']?.toString() ?? '',
+          cb: data['cb']?.toString() ?? '',
+          pct: data['pct']?.toString() ?? '',
+          pcb: data['pcb']?.toString() ?? '',
+          pcse: data['pcse']?.toString() ?? '',
+          pcsi: data['pcsi']?.toString() ?? '',
+          cmb: data['cmb']?.toString() ?? '',
+          ca: data['ca']?.toString() ?? '',
+          cp: data['cp']?.toString() ?? '',
+          aj: data['aj']?.toString() ?? '',
+          percentualGordura: data['porcentagem_gc']?.toString() ?? '',
+          perdaPeso: data['porcentagem_perca_peso_por_tempo']?.toString() ?? '',
+          diagnosticoNutricional:
+              data['diagnostico_nutricional']?.toString() ?? '');
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
+    }
+  }
+
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarDadosAntropometricos();
-    setState(() {
-      _pesoAtualController.text =
-          dados['peso_atual'] ?? _pesoAtualController.text;
-      _pesoUsualController.text =
-          dados['peso_usual'] ?? _pesoUsualController.text;
-      _estaturaController.text = dados['estatura'] ?? _estaturaController.text;
-      _imcController.text = dados['imc'] ?? _imcController.text;
-      _piController.text = dados['pi'] ?? _piController.text;
-      _cbController.text = dados['cb'] ?? _cbController.text;
-      _pctController.text = dados['pct'] ?? _pctController.text;
-      _pcbController.text = dados['pcb'] ?? _pcbController.text;
-      _pcseController.text = dados['pcse'] ?? _pcseController.text;
-      _pcsiController.text = dados['pcsi'] ?? _pcsiController.text;
-      _cmbController.text = dados['cmb'] ?? _cmbController.text;
-      _caController.text = dados['ca'] ?? _caController.text;
-      _cpController.text = dados['cp'] ?? _cpController.text;
-      _ajController.text = dados['aj'] ?? _ajController.text;
-      _percentualGorduraController.text =
-          dados['porcentagem_gc'] ?? _percentualGorduraController.text;
-      _perdaPesoController.text = dados['porcentagem_perca_peso_por_tempo'] ??
-          _perdaPesoController.text;
-      _diagnosticoNutricionalController.text =
-          dados['diagnostico_nutricional'] ??
-              _diagnosticoNutricionalController.text;
-    });
+    try {
+      final dados = await _atendimentoService.carregarDadosAntropometricos();
+      if (dados.isNotEmpty) {
+        setState(() {
+          _pesoAtualController.text =
+              dados['peso_atual'] ?? _pesoAtualController.text;
+          _pesoUsualController.text =
+              dados['peso_usual'] ?? _pesoUsualController.text;
+          _estaturaController.text =
+              dados['estatura'] ?? _estaturaController.text;
+          _imcController.text = dados['imc'] ?? _imcController.text;
+          _piController.text = dados['pi'] ?? _piController.text;
+          _cbController.text = dados['cb'] ?? _cbController.text;
+          _pctController.text = dados['pct'] ?? _pctController.text;
+          _pcbController.text = dados['pcb'] ?? _pcbController.text;
+          _pcseController.text = dados['pcse'] ?? _pcseController.text;
+          _pcsiController.text = dados['pcsi'] ?? _pcsiController.text;
+          _cmbController.text = dados['cmb'] ?? _cmbController.text;
+          _caController.text = dados['ca'] ?? _caController.text;
+          _cpController.text = dados['cp'] ?? _cpController.text;
+          _ajController.text = dados['aj'] ?? _ajController.text;
+          _percentualGorduraController.text =
+              dados['porcentagem_gc'] ?? _percentualGorduraController.text;
+          _perdaPesoController.text =
+              dados['porcentagem_perca_peso_por_tempo'] ??
+                  _perdaPesoController.text;
+          _diagnosticoNutricionalController.text =
+              dados['diagnostico_nutricional'] ??
+                  _diagnosticoNutricionalController.text;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
