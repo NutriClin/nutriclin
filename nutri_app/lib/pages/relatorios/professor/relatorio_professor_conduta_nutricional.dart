@@ -43,6 +43,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
   bool isProfessor = false;
   bool isAluno = false;
   String statusAtendimento = '';
+  bool modoEdicao = false;
 
   @override
   void initState() {
@@ -84,6 +85,9 @@ class _RelatorioProfessorCondutaNutricionalPageState
             _proximaConsultaController.text = data['proxima_consulta'] ?? '';
           }
           statusAtendimento = data['status_atendimento'] ?? '';
+
+          // Verifica se o aluno pode editar
+          modoEdicao = isAluno && statusAtendimento == 'rejeitado';
           isLoading = false;
         });
       } else {
@@ -132,16 +136,35 @@ class _RelatorioProfessorCondutaNutricionalPageState
   Future<void> _enviarAtendimento() async {
     setState(() => isSaving = true);
     try {
-      final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      await _firestore.collection(collection).doc(widget.atendimentoId).update({
-        'status_atendimento': 'enviado',
-      });
+      // Obter dados completos exceto os campos especificados
+      final dadosCompletos = await _atendimentoService.obterDadosCompletos();
 
-      await _atendimentoService.limparTodosDados();
+      // Remover os campos que não queremos atualizar
+      dadosCompletos.remove('id_professor_supervisor');
+      dadosCompletos.remove('id_aluno');
+      dadosCompletos.remove('nome_professor');
+      dadosCompletos.remove('nome_aluno');
+      dadosCompletos.remove('status_atendimento');
+      dadosCompletos.remove('criado_em');
+      dadosCompletos.remove('data');
+
+      // Adicionar a próxima consulta se for hospital
+      if (widget.isHospital) {
+        dadosCompletos['proxima_consulta'] = _proximaConsultaController.text;
+      }
+
+      // Atualizar status para "pendente"
+      dadosCompletos['status_atendimento'] = 'enviado';
+
+      final collection = widget.isHospital ? 'atendimento' : 'clinica';
+      await _firestore
+          .collection(collection)
+          .doc(widget.atendimentoId)
+          .update(dadosCompletos);
 
       ToastUtil.showToast(
         context: context,
-        message: 'Atendimento enviado com sucesso!',
+        message: 'Atendimento enviado com sucesso para revisão!',
         isError: false,
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
@@ -232,7 +255,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
                               CustomInput(
                                 label: 'Programação próxima consulta',
                                 controller: _proximaConsultaController,
-                                enabled: false,
+                                enabled: modoEdicao,
                               ),
                             ],
                             const SizedBox(height: 15),
@@ -252,23 +275,21 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                       CustomButton(
                                         text: 'Rejeitar',
                                         onPressed: () =>
-                                            _atualizarStatus('reprovado'),
+                                            _atualizarStatus('rejeitado'),
                                         color: Colors.red,
                                         textColor: Colors.white,
                                       ),
                                       const SizedBox(width: 10),
-                                      if (statusAtendimento == 'reprovado' ||
-                                          statusAtendimento == 'rejeitado')
-                                        CustomButton(
-                                          text: 'Finalizar',
-                                          onPressed: () =>
-                                              _atualizarStatus('aprovado'),
-                                        ),
+                                      CustomButton(
+                                        text: 'Aprovar',
+                                        onPressed: () =>
+                                            _atualizarStatus('aprovado'),
+                                      ),
                                     ],
                                   ),
-                                if (isAluno && statusAtendimento == 'rejeitado')
+                                if (modoEdicao)
                                   CustomButton(
-                                    text: 'Enviar',
+                                    text: 'Enviar para Revisão',
                                     onPressed: _enviarAtendimento,
                                     color: Colors.blue,
                                     textColor: Colors.white,
@@ -286,7 +307,8 @@ class _RelatorioProfessorCondutaNutricionalPageState
           ),
         ),
         ObservacaoRelatorio(
-          modoLeitura: !(isProfessor && statusAtendimento == 'enviado'),
+          modoLeitura:
+              !modoEdicao, // Habilita edição de observações apenas no modo edição
         ),
         if (isSaving)
           ModalBarrier(

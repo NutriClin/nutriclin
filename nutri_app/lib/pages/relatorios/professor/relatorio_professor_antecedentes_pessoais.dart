@@ -81,11 +81,11 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
         final data = doc.data()!;
 
         setState(() {
-          _dislipidemias = data['dislipidemias'] ?? false;
-          _has = data['has'] ?? false;
-          _cancer = data['cancer'] ?? false;
-          _excessoPeso = data['excesso_peso'] ?? false;
-          _diabetes = data['diabetes'] ?? false;
+          _dislipidemias = data['dislipidemias_pessoais'] ?? false;
+          _has = data['has_pessoais'] ?? false;
+          _cancer = data['cancer_pessoais'] ?? false;
+          _excessoPeso = data['excesso_peso_pessoais'] ?? false;
+          _diabetes = data['diabetes_pessoais'] ?? false;
           _outros = data['outros_antecedentes_pessoais'] ?? false;
           _outrosController.text =
               data['outros_antecedentes_pessoais_descricao'] ?? '';
@@ -115,11 +115,11 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
   Future<void> _carregarDadosLocais() async {
     final dados = await _atendimentoService.carregarAntecedentesPessoais();
     setState(() {
-      _dislipidemias = dados['dislipidemias'] ?? _dislipidemias;
-      _has = dados['has'] ?? _has;
-      _cancer = dados['cancer'] ?? _cancer;
-      _excessoPeso = dados['excesso_peso'] ?? _excessoPeso;
-      _diabetes = dados['diabetes'] ?? _diabetes;
+      _dislipidemias = dados['dislipidemias_pessoais'] ?? _dislipidemias;
+      _has = dados['has_pessoais'] ?? _has;
+      _cancer = dados['cancer_pessoais'] ?? _cancer;
+      _excessoPeso = dados['excesso_peso_pessoais'] ?? _excessoPeso;
+      _diabetes = dados['diabetes_pessoais'] ?? _diabetes;
       _outros = dados['outros_antecedentes_pessoais'] ?? _outros;
       _outrosController.text =
           dados['outros_antecedentes_pessoais_descricao'] ??

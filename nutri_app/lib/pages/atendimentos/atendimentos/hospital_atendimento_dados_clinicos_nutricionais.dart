@@ -107,7 +107,7 @@ class _HospitalAtendimentoDadosClinicosNutricionaisPageState
       _alimentacaoHabitualController.text =
           dados['resumo_alimentacao_habitual'] ?? '';
       _doencaAnteriorController.text = dados['resumo_doenca_anterior'] ?? '';
-      _cirurgiaController.text = dados['cirurgiaDesc'] ?? '';
+      _cirurgiaController.text = dados['resumo_cirurgia_recente'] ?? '';
       _quantoPesoController.text = dados['quantidade_perca_peso_recente'] ?? '';
       _qualDietaController.text =
           dados['resumo_necessidade_dieta_hospitalar'] ?? '';

@@ -78,8 +78,8 @@ class _RelatorioProfessorConsumoAlimentarPageState
         final data = doc.data()!;
 
         setState(() {
-          habitualController.text = data['dia_alimentar_habitual'] ?? '';
-          atualController.text = data['dia_alimentar_atual'] ?? '';
+          habitualController.text = data['habitual'] ?? '';
+          atualController.text = data['atual'] ?? '';
           ingestaoHidricaController.text =
               data['ingestao_hidrica']?.toString() ?? '';
           evacuacaoController.text = data['evacuacao']?.toString() ?? '';

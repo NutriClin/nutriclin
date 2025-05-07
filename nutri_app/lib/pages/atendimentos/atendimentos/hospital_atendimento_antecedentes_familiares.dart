@@ -47,11 +47,11 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
     final dados = await _atendimentoService.carregarAntecedentesFamiliares();
 
     setState(() {
-      _dislipidemias = dados['dislipidemias'] ?? false;
-      _has = dados['has'] ?? false;
-      _cancer = dados['cancer'] ?? false;
-      _excessoPeso = dados['excesso_peso'] ?? false;
-      _diabetes = dados['diabetes'] ?? false;
+      _dislipidemias = dados['dislipidemias_familiares'] ?? false;
+      _has = dados['has_familiares'] ?? false;
+      _cancer = dados['cancer_familiares'] ?? false;
+      _excessoPeso = dados['excesso_peso_familiares'] ?? false;
+      _diabetes = dados['diabetes_familiares'] ?? false;
       _outros = dados['outros_antecedentes_familiares'] ?? false;
       _outrosController.text = dados['outros_antecedentes_familiares_descricao'] ?? '';
     });

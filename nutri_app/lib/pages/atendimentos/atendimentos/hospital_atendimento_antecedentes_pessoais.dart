@@ -48,11 +48,11 @@ class _HospitalAtendimentoAntecedentesPessoaisPageState
     final dados = await _atendimentoService.carregarAntecedentesPessoais();
 
     setState(() {
-      _dislipidemias = dados['dislipidemias'] ?? false;
-      _has = dados['has'] ?? false;
-      _cancer = dados['cancer'] ?? false;
-      _excessoPeso = dados['excesso_peso'] ?? false;
-      _diabetes = dados['diabetes'] ?? false;
+      _dislipidemias = dados['dislipidemias_pessoais'] ?? false;
+      _has = dados['has_pessoais'] ?? false;
+      _cancer = dados['cancer_pessoais'] ?? false;
+      _excessoPeso = dados['excesso_peso_pessoais'] ?? false;
+      _diabetes = dados['diabetes_pessoais'] ?? false;
       _outros = dados['outros_antecedentes_pessoais'] ?? false;
       _outrosController.text = dados['outros_antecedentes_pessoais_descricao'] ?? '';
     });

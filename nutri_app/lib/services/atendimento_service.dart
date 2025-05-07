@@ -193,12 +193,14 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setBool(
-        '$_prefsKeyAntecedentesPessoais.dislipidemias', dislipidemias);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.has', has);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.cancer', cancer);
+        '$_prefsKeyAntecedentesPessoais.dislipidemias_pessoais', dislipidemias);
+    await prefs.setBool('$_prefsKeyAntecedentesPessoais.has_pessoais', has);
     await prefs.setBool(
-        '$_prefsKeyAntecedentesPessoais.excesso_peso', excessoPeso);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.diabetes', diabetes);
+        '$_prefsKeyAntecedentesPessoais.cancer_pessoais', cancer);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesPessoais.excesso_peso_pessoais', excessoPeso);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesPessoais.diabetes_pessoais', diabetes);
     await prefs.setBool(
         '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais', outros);
     await prefs.setString(
@@ -210,15 +212,20 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'dislipidemias':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.dislipidemias') ??
+      'dislipidemias_pessoais': prefs.getBool(
+              '$_prefsKeyAntecedentesPessoais.dislipidemias_pessoais') ??
+          false,
+      'has_pessoais':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.has_pessoais') ?? false,
+      'cancer_pessoais':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.cancer_pessoais') ??
               false,
-      'has': prefs.getBool('$_prefsKeyAntecedentesPessoais.has') ?? false,
-      'cancer': prefs.getBool('$_prefsKeyAntecedentesPessoais.cancer') ?? false,
-      'excesso_peso':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.excesso_peso') ?? false,
-      'diabetes':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.diabetes') ?? false,
+      'excesso_peso_pessoais': prefs.getBool(
+              '$_prefsKeyAntecedentesPessoais.excesso_peso_pessoais') ??
+          false,
+      'diabetes_pessoais':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.diabetes_pessoais') ??
+              false,
       'outros_antecedentes_pessoais': prefs.getBool(
               '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais') ??
           false,
@@ -231,11 +238,11 @@ class AtendimentoService {
   Future<void> limparAntecedentesPessoais() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.dislipidemias');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.has');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.cancer');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.excesso_peso');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.diabetes');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.dislipidemias_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.has_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.cancer_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.excesso_peso_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.diabetes_pessoais');
     await prefs
         .remove('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais');
     await prefs.remove(
@@ -258,12 +265,16 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setBool(
-        '$_prefsKeyAntecedentesFamiliares.dislipidemias', dislipidemias);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.has', has);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.cancer', cancer);
+        '$_prefsKeyAntecedentesFamiliares.dislipidemias_familiares',
+        dislipidemias);
+    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.has_familiares', has);
     await prefs.setBool(
-        '$_prefsKeyAntecedentesFamiliares.excesso_peso', excessoPeso);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.diabetes', diabetes);
+        '$_prefsKeyAntecedentesFamiliares.cancer_familiares', cancer);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesFamiliares.excesso_peso_familiares',
+        excessoPeso);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesFamiliares.diabetes_familiares', diabetes);
     await prefs.setBool(
         '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares',
         outros);
@@ -276,17 +287,21 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'dislipidemias':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.dislipidemias') ??
+      'dislipidemias_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.dislipidemias_familiares') ??
+          false,
+      'has_familiares':
+          prefs.getBool('$_prefsKeyAntecedentesFamiliares.has_familiares') ??
               false,
-      'has': prefs.getBool('$_prefsKeyAntecedentesFamiliares.has') ?? false,
-      'cancer':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.cancer') ?? false,
-      'excesso_peso':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.excesso_peso') ??
+      'cancer_familiares':
+          prefs.getBool('$_prefsKeyAntecedentesFamiliares.cancer_familiares') ??
               false,
-      'diabetes':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.diabetes') ?? false,
+      'excesso_peso_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.excesso_peso_familiares') ??
+          false,
+      'diabetes_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.diabetes_familiares') ??
+          false,
       'outros_antecedentes_familiares': prefs.getBool(
               '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares') ??
           false,
@@ -299,11 +314,13 @@ class AtendimentoService {
   Future<void> limparAntecedentesFamiliares() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.dislipidemias');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.has');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.cancer');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.excessoPeso');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.diabetes');
+    await prefs
+        .remove('$_prefsKeyAntecedentesFamiliares.dislipidemias_familiares');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.has_familiares');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.cancer_familiares');
+    await prefs
+        .remove('$_prefsKeyAntecedentesFamiliares.excessoPeso_familiares');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.diabetes_familiares');
     await prefs.remove(
         '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares');
     await prefs.remove(
@@ -441,6 +458,9 @@ class AtendimentoService {
       'possui_cirurgia_recente':
           prefs.getBool('$_prefsKeyDadosClinicos.possui_cirurgia_recente') ??
               false,
+      'resumo_cirurgia_recente':
+          prefs.getString('$_prefsKeyDadosClinicos.resumo_cirurgia_recente') ??
+              '',
       'resumo_medicamentos_vitaminas_minerais_prescritos': prefs.getString(
               '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos') ??
           '',
