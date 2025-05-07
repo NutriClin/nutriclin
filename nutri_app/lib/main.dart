@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nutri_app/auth_guard.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
+import 'package:nutri_app/pages/relatorios/relatorios.dart';
 import 'package:nutri_app/pages/usuarios/usuarios.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import './firebase/firebase_options.dart';
@@ -44,7 +45,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
-        '/usuario': (context) => AuthGuard(child: const UsuarioPage()),
+        '/usuario': (context) => const AuthGuard(child: UsuarioPage()),
+        '/relatorio': (context) => const AuthGuard(child: RelatoriosPage()),
         '/home': (context) => AuthGuard(
               child: FutureBuilder<String?>(
                 future: PreferencesService.getUserType(),
@@ -55,8 +57,7 @@ class MyApp extends StatelessWidget {
                     );
                   }
                   return HomePage(
-                    tipoUsuario: snapshot.data ??
-                        'Professor',
+                    tipoUsuario: snapshot.data ?? 'Professor',
                   );
                 },
               ),

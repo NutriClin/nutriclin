@@ -164,7 +164,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
         message: 'Atendimento $status com sucesso!',
         isError: false,
       );
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.pushReplacementNamed(context, '/relatorio');
     } catch (e) {
       ToastUtil.showToast(
         context: context,
@@ -209,7 +209,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
         message: 'Atendimento enviado com sucesso para revisão!',
         isError: false,
       );
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.pushReplacementNamed(context, '/relatorio');
     } catch (e) {
       ToastUtil.showToast(
         context: context,
@@ -305,59 +305,76 @@ class _RelatorioProfessorCondutaNutricionalPageState
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomButton(
-                                  text: 'Voltar',
-                                  onPressed: () => Navigator.pop(context),
+                                  text: 'Sair',
+                                  onPressed: () =>
+                                      Navigator.pushReplacementNamed(
+                                          context, '/relatorio'),
                                   color: Colors.white,
-                                  textColor: Colors.black,
+                                  textColor: Colors.red,
                                   boxShadowColor: Colors.black,
                                 ),
-                                if (isProfessor &&
-                                    statusAtendimento == 'enviado')
-                                  Row(
-                                    children: [
+                                Row(
+                                  children: [
+                                    CustomButton(
+                                      text: 'Voltar',
+                                      onPressed: () => Navigator.pop(context),
+                                      color: Colors.white,
+                                      textColor: Colors.black,
+                                      boxShadowColor: Colors.black,
+                                    ),
+                                    if (isProfessor &&
+                                        statusAtendimento == 'enviado')
+                                      Row(
+                                        children: [
+                                          const SizedBox(width: 10),
+                                          CustomButton(
+                                            text: 'Rejeitar',
+                                            onPressed: () =>
+                                                _showConfirmationDialog(
+                                              title: 'Confirmar Rejeição',
+                                              message:
+                                                  'Tem certeza que deseja rejeitar este atendimento?',
+                                              confirmText: 'Rejeitar',
+                                              confirmColor: Colors.red,
+                                              onConfirm: () =>
+                                                  _atualizarStatus('rejeitado'),
+                                            ),
+                                            color: Colors.red,
+                                            textColor: Colors.white,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          CustomButton(
+                                            text: 'Aprovar',
+                                            onPressed: () =>
+                                                _showConfirmationDialog(
+                                              title: 'Confirmar Aprovação',
+                                              message:
+                                                  'Tem certeza que deseja aprovar este atendimento?',
+                                              confirmText: 'Aprovar',
+                                              onConfirm: () =>
+                                                  _atualizarStatus('aprovado'),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    if (modoEdicao) 
+                                    const SizedBox(width: 10),
+                                    if (modoEdicao)
                                       CustomButton(
-                                        text: 'Rejeitar',
+                                        text: 'Enviar para Revisão',
                                         onPressed: () =>
                                             _showConfirmationDialog(
-                                          title: 'Confirmar Rejeição',
+                                          title: 'Confirmar Envio',
                                           message:
-                                              'Tem certeza que deseja rejeitar este atendimento?',
-                                          confirmText: 'Rejeitar',
-                                          confirmColor: Colors.red,
-                                          onConfirm: () =>
-                                              _atualizarStatus('rejeitado'),
+                                              'Tem certeza que deseja enviar este atendimento para revisão?',
+                                          confirmText: 'Enviar',
+                                          onConfirm: _enviarAtendimento,
                                         ),
-                                        color: Colors.red,
+                                        color: Colors.blue,
                                         textColor: Colors.white,
                                       ),
-                                      const SizedBox(width: 10),
-                                      CustomButton(
-                                        text: 'Aprovar',
-                                        onPressed: () =>
-                                            _showConfirmationDialog(
-                                          title: 'Confirmar Aprovação',
-                                          message:
-                                              'Tem certeza que deseja aprovar este atendimento?',
-                                          confirmText: 'Aprovar',
-                                          onConfirm: () =>
-                                              _atualizarStatus('aprovado'),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                if (modoEdicao)
-                                  CustomButton(
-                                    text: 'Enviar para Revisão',
-                                    onPressed: () => _showConfirmationDialog(
-                                      title: 'Confirmar Envio',
-                                      message:
-                                          'Tem certeza que deseja enviar este atendimento para revisão?',
-                                      confirmText: 'Enviar',
-                                      onConfirm: _enviarAtendimento,
-                                    ),
-                                    color: Colors.blue,
-                                    textColor: Colors.white,
-                                  ),
+                                  ],
+                                ),
                               ],
                             ),
                           ],

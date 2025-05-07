@@ -284,34 +284,49 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
                                   enabled: podeEditar,
                                 ),
                               ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomButton(
-                                  text: 'Voltar',
-                                  onPressed: () => Navigator.pop(context),
+                                  text: 'Sair',
+                                  onPressed: () =>
+                                      Navigator.pushReplacementNamed(
+                                          context, '/relatorio'),
                                   color: Colors.white,
-                                  textColor: Colors.black,
+                                  textColor: Colors.red,
                                   boxShadowColor: Colors.black,
                                 ),
-                                CustomButton(
-                                  text: 'Próximo',
-                                  onPressed: () async {
-                                    if (podeEditar) {
-                                      await _salvarDadosLocais();
-                                    }
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            RelatorioProfessorAntecedentesFamiliaresPage(
-                                          atendimentoId: widget.atendimentoId,
-                                          isHospital: widget.isHospital,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                Row(
+                                  children: [
+                                    CustomButton(
+                                      text: 'Voltar',
+                                      onPressed: () => Navigator.pop(context),
+                                      color: Colors.white,
+                                      textColor: Colors.black,
+                                      boxShadowColor: Colors.black,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    CustomButton(
+                                      text: 'Próximo',
+                                      onPressed: () async {
+                                        if (podeEditar) {
+                                          await _salvarDadosLocais();
+                                        }
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                RelatorioProfessorAntecedentesFamiliaresPage(
+                                              atendimentoId:
+                                                  widget.atendimentoId,
+                                              isHospital: widget.isHospital,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
