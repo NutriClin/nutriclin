@@ -38,6 +38,7 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
   bool _excessoPeso = false;
   bool _diabetes = false;
   bool _outros = false;
+  bool _outrosError = false; // Adicionado para controle de validação
   final TextEditingController _outrosController = TextEditingController();
 
   bool isLoading = true;
@@ -103,7 +104,6 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
           isLoading = false;
         });
 
-        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
           await _salvarDadosFirestoreNoLocal(data);
         }
@@ -159,7 +159,25 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
     }
   }
 
+  // Função de validação dos campos (adicionada)
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (_outros && _outrosController.text.trim().isEmpty) {
+      setState(() => _outrosError = true);
+      valido = false;
+    } else {
+      setState(() => _outrosError = false);
+    }
+
+    return valido;
+  }
+
   Future<void> _salvarDadosLocais() async {
+    if (!_validarCampos()) {
+      return;
+    }
+    
     await _atendimentoService.salvarAntecedentesFamiliares(
       dislipidemias: _dislipidemias,
       has: _has,
@@ -288,6 +306,14 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                                   controller: _outrosController,
                                   keyboardType: TextInputType.text,
                                   enabled: podeEditar,
+                                  obrigatorio: true, // Adicionado
+                                  error: _outrosError, // Adicionado
+                                  errorMessage: 'Campo obrigatório', // Adicionado
+                                  onChanged: (value) { // Adicionado
+                                    if (_outrosError && value.isNotEmpty) {
+                                      setState(() => _outrosError = false);
+                                    }
+                                  },
                                 ),
                               ),
                             const SizedBox(height: 15),
@@ -317,6 +343,15 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
                                       text: 'Próximo',
                                       onPressed: () async {
                                         if (podeEditar) {
+                                          if (!_validarCampos()) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Por favor, verifique o formulário!'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                            return;
+                                          }
                                           await _salvarDadosLocais();
                                         }
                                         Navigator.push(

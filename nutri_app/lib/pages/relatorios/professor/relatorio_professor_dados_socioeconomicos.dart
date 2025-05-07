@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nutri_app/components/base_page.dart';
@@ -11,6 +12,7 @@ import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_pessoais.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
+import 'package:nutri_app/components/toast_util.dart';
 
 class RelatorioProfessorDadosSocioeconomicosPage extends StatefulWidget {
   final String atendimentoId;
@@ -46,6 +48,15 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   final profissaoController = TextEditingController();
   final producaoAlimentosController = TextEditingController();
 
+  // Variáveis para controle de erros
+  bool _houseTypeError = false;
+  bool _pessoasError = false;
+  bool _rendaFamiliarError = false;
+  bool _rendaPerCapitaError = false;
+  bool _escolaridadeError = false;
+  bool _profissaoError = false;
+  bool _producaoAlimentosError = false;
+
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
@@ -62,6 +73,161 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
         }
       });
     });
+
+    // Adiciona listeners para as máscaras
+    pessoasController.addListener(_aplicarMascaraNumeroPessoas);
+    rendaFamiliarController.addListener(_aplicarMascaraMonetaria);
+    rendaPerCapitaController.addListener(_aplicarMascaraMonetaria);
+  }
+
+  void _aplicarMascaraNumeroPessoas() {
+    final text = pessoasController.text;
+    if (text.isNotEmpty) {
+      // Remove tudo que não é dígito
+      var newText = text.replaceAll(RegExp(r'[^0-9]'), '');
+
+      // Limita a 3 dígitos
+      if (newText.length > 3) {
+        newText = newText.substring(0, 3);
+      }
+
+      if (text != newText) {
+        pessoasController.value = pessoasController.value.copyWith(
+          text: newText,
+          selection: TextSelection.collapsed(offset: newText.length),
+        );
+      }
+    }
+  }
+
+  void _aplicarMascaraMonetaria() {
+    final controllers = [rendaFamiliarController, rendaPerCapitaController];
+
+    for (final controller in controllers) {
+      final text = controller.text;
+      if (text.isNotEmpty) {
+        // Remove tudo que não é dígito ou vírgula
+        var newText = text.replaceAll(RegExp(r'[^0-9,]'), '');
+
+        // Garante que há no máximo uma vírgula
+        final commaCount = newText.split(',').length - 1;
+        if (commaCount > 1) {
+          newText = newText.substring(0, newText.lastIndexOf(','));
+        }
+
+        // Limita a 2 dígitos após a vírgula
+        if (newText.contains(',')) {
+          final parts = newText.split(',');
+          if (parts[1].length > 2) {
+            newText = '${parts[0]},${parts[1].substring(0, 2)}';
+          }
+        }
+
+        // Formata como moeda (R$ 1.234,56)
+        if (newText.isNotEmpty) {
+          // Adiciona R$ no início
+          if (!newText.startsWith('R\$ ')) {
+            newText = 'R\$ $newText';
+          }
+
+          // Formata os milhares
+          final parts = newText.split(',');
+          if (parts.isNotEmpty) {
+            var integerPart = parts[0].replaceAll(RegExp(r'[^0-9]'), '');
+            if (integerPart.isNotEmpty) {
+              // Adiciona pontos como separadores de milhar
+              final reversed = integerPart.split('').reversed.join();
+              final reversedWithDots = reversed.replaceAllMapped(
+                RegExp(r'(\d{3})(?=\d)'),
+                (match) => '${match.group(0)}.',
+              );
+              integerPart = reversedWithDots.split('').reversed.join();
+
+              newText =
+                  'R\$ $integerPart${parts.length > 1 ? ',${parts[1]}' : ''}';
+            }
+          }
+        }
+
+        if (text != newText) {
+          controller.value = controller.value.copyWith(
+            text: newText,
+            selection: TextSelection.collapsed(offset: newText.length),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    pessoasController.removeListener(_aplicarMascaraNumeroPessoas);
+    rendaFamiliarController.removeListener(_aplicarMascaraMonetaria);
+    rendaPerCapitaController.removeListener(_aplicarMascaraMonetaria);
+
+    pessoasController.dispose();
+    rendaFamiliarController.dispose();
+    rendaPerCapitaController.dispose();
+    escolaridadeController.dispose();
+    profissaoController.dispose();
+    producaoAlimentosController.dispose();
+    super.dispose();
+  }
+
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (selectedHouseType == 'Selecione') {
+      _houseTypeError = true;
+      valido = false;
+    } else {
+      _houseTypeError = false;
+    }
+
+    if (pessoasController.text.trim().isEmpty) {
+      _pessoasError = true;
+      valido = false;
+    } else {
+      _pessoasError = false;
+    }
+
+    if (rendaFamiliarController.text.trim().isEmpty) {
+      _rendaFamiliarError = true;
+      valido = false;
+    } else {
+      _rendaFamiliarError = false;
+    }
+
+    if (rendaPerCapitaController.text.trim().isEmpty) {
+      _rendaPerCapitaError = true;
+      valido = false;
+    } else {
+      _rendaPerCapitaError = false;
+    }
+
+    if (escolaridadeController.text.trim().isEmpty) {
+      _escolaridadeError = true;
+      valido = false;
+    } else {
+      _escolaridadeError = false;
+    }
+
+    if (profissaoController.text.trim().isEmpty) {
+      _profissaoError = true;
+      valido = false;
+    } else {
+      _profissaoError = false;
+    }
+
+    if (producaoAlimentosController.text.trim().isEmpty) {
+      _producaoAlimentosError = true;
+      valido = false;
+    } else {
+      _producaoAlimentosError = false;
+    }
+
+    setState(() {});
+    return valido;
   }
 
   Future<void> _checkUserType() async {
@@ -109,6 +275,10 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
 
           isLoading = false;
         });
+
+        // Aplica as máscaras após carregar os dados
+        _aplicarMascaraNumeroPessoas();
+        _aplicarMascaraMonetaria();
 
         // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
@@ -173,6 +343,10 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
               dados['producao_domestica_alimentos'] ??
                   producaoAlimentosController.text;
         });
+
+        // Aplica as máscaras após carregar os dados locais
+        _aplicarMascaraNumeroPessoas();
+        _aplicarMascaraMonetaria();
       }
     } catch (e) {
       print("Erro ao carregar dados locais: $e");
@@ -180,6 +354,22 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   }
 
   Future<void> _salvarDadosLocais() async {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
+
+    // Remove a formatação antes de salvar
+    final rendaFamiliar =
+        rendaFamiliarController.text.replaceAll('R\$ ', '').replaceAll('.', '');
+    final rendaPerCapita = rendaPerCapitaController.text
+        .replaceAll('R\$ ', '')
+        .replaceAll('.', '');
+
     await _atendimentoService.salvarDadosSocioeconomicos(
       aguaEncanada: _aguaEncanada,
       esgotoEncanado: _esgotoEncanado,
@@ -187,8 +377,8 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
       luzEletrica: _luzEletrica,
       tipoCasa: selectedHouseType,
       numPessoas: pessoasController.text,
-      rendaFamiliar: rendaFamiliarController.text,
-      rendaPerCapita: rendaPerCapitaController.text,
+      rendaFamiliar: rendaFamiliar,
+      rendaPerCapita: rendaPerCapita,
       escolaridade: escolaridadeController.text,
       profissao: profissaoController.text,
       producaoAlimentos: producaoAlimentosController.text,
@@ -300,10 +490,19 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                 'Outro'
                               ],
                               onChanged: podeEditar
-                                  ? (value) =>
-                                      setState(() => selectedHouseType = value!)
+                                  ? (value) {
+                                      setState(() {
+                                        selectedHouseType = value!;
+                                        if (_houseTypeError && value != 'Selecione') {
+                                          _houseTypeError = false;
+                                        }
+                                      });
+                                    }
                                   : null,
                               enabled: podeEditar,
+                              error: _houseTypeError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -311,36 +510,92 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                               controller: pessoasController,
                               keyboardType: TextInputType.number,
                               enabled: podeEditar,
+                              error: _pessoasError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(3),
+                              ],
+                              onChanged: (value) {
+                                if (_pessoasError && value.isNotEmpty) {
+                                  setState(() => _pessoasError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Renda familiar',
                               controller: rendaFamiliarController,
                               enabled: podeEditar,
+                              error: _rendaFamiliarError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                if (_rendaFamiliarError && value.isNotEmpty) {
+                                  setState(() => _rendaFamiliarError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Renda per capita',
                               controller: rendaPerCapitaController,
                               enabled: podeEditar,
+                              error: _rendaPerCapitaError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                if (_rendaPerCapitaError && value.isNotEmpty) {
+                                  setState(() => _rendaPerCapitaError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Escolaridade',
                               controller: escolaridadeController,
                               enabled: podeEditar,
+                              error: _escolaridadeError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_escolaridadeError && value.isNotEmpty) {
+                                  setState(() => _escolaridadeError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Profissão/Ocupação',
                               controller: profissaoController,
                               enabled: podeEditar,
+                              error: _profissaoError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_profissaoError && value.isNotEmpty) {
+                                  setState(() => _profissaoError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Produção doméstica de alimentos: Quais?',
                               controller: producaoAlimentosController,
                               enabled: podeEditar,
+                              error: _producaoAlimentosError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_producaoAlimentosError && value.isNotEmpty) {
+                                  setState(() => _producaoAlimentosError = false);
+                                }
+                              },
                             ),
                             const SizedBox(height: 15),
                             Row(
@@ -368,6 +623,15 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
                                     CustomButton(
                                       text: 'Próximo',
                                       onPressed: () async {
+                                        if (podeEditar && !_validarCampos()) {
+                                          ToastUtil.showToast(
+                                            context: context,
+                                            message: 'Por favor, verifique o formulário!',
+                                            isError: true,
+                                          );
+                                          return;
+                                        }
+                                        
                                         if (podeEditar) {
                                           await _salvarDadosLocais();
                                         }

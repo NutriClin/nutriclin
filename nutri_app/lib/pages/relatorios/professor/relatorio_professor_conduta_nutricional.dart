@@ -38,6 +38,9 @@ class _RelatorioProfessorCondutaNutricionalPageState
       TextEditingController();
   final TextEditingController _professorController = TextEditingController();
 
+  // Estados de validação
+  bool _proximaConsultaError = false;
+
   bool isLoading = true;
   bool hasError = false;
   bool isSaving = false;
@@ -104,6 +107,21 @@ class _RelatorioProfessorCondutaNutricionalPageState
       });
       print("Erro ao carregar dados: $e");
     }
+  }
+
+  // Função de validação dos campos
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (widget.isHospital && _proximaConsultaController.text.trim().isEmpty) {
+      _proximaConsultaError = true;
+      valido = false;
+    } else {
+      _proximaConsultaError = false;
+    }
+
+    setState(() {});
+    return valido;
   }
 
   bool get podeEditar {
@@ -179,6 +197,15 @@ class _RelatorioProfessorCondutaNutricionalPageState
   }
 
   Future<void> _enviarAtendimento() async {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, preencha todos os campos obrigatórios!',
+        isError: true,
+      );
+      return;
+    }
+
     setState(() => isSaving = true);
     try {
       final dadosCompletos = await _atendimentoService.obterDadosCompletos();
@@ -298,6 +325,14 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                 label: 'Programação próxima consulta',
                                 controller: _proximaConsultaController,
                                 enabled: modoEdicao,
+                                obrigatorio: true,
+                                error: _proximaConsultaError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_proximaConsultaError && value.isNotEmpty) {
+                                    setState(() => _proximaConsultaError = false);
+                                  }
+                                },
                               ),
                             ],
                             const SizedBox(height: 15),

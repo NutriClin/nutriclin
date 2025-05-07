@@ -8,6 +8,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_dados_socioeconomicos.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -42,13 +43,24 @@ class _RelatorioProfessorIdentificacaoPageState
   final TextEditingController recordController = TextEditingController();
   final TextEditingController prontuarioController = TextEditingController();
 
+  // Variáveis para controle de erros
+  bool _nameError = false;
+  bool _genderError = false;
+  bool _birthDateError = false;
+  bool _hospitalError = false;
+  bool _clinicError = false;
+  bool _roomError = false;
+  bool _bedError = false;
+  bool _recordError = false;
+  bool _prontuarioError = false;
+
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
   bool isAluno = false;
   String statusAtendimento = '';
 
-  @override
+    @override
   void initState() {
     super.initState();
     _checkUserType().then((_) {
@@ -58,6 +70,83 @@ class _RelatorioProfessorIdentificacaoPageState
         }
       });
     });
+  }
+
+  
+
+  bool _validarCampos() {
+    bool valido = true;
+
+    // Validações comuns a ambos os tipos
+    if (nameController.text.trim().isEmpty) {
+      _nameError = true;
+      valido = false;
+    } else {
+      _nameError = false;
+    }
+
+    if (selectedGender == 'Selecione') {
+      _genderError = true;
+      valido = false;
+    } else {
+      _genderError = false;
+    }
+
+    if (birthDateController.text.trim().isEmpty) {
+      _birthDateError = true;
+      valido = false;
+    } else {
+      _birthDateError = false;
+    }
+
+    // Validações específicas para hospital
+    if (widget.isHospital) {
+      if (hospitalController.text.trim().isEmpty) {
+        _hospitalError = true;
+        valido = false;
+      } else {
+        _hospitalError = false;
+      }
+
+      if (clinicController.text.trim().isEmpty) {
+        _clinicError = true;
+        valido = false;
+      } else {
+        _clinicError = false;
+      }
+
+      if (roomController.text.trim().isEmpty) {
+        _roomError = true;
+        valido = false;
+      } else {
+        _roomError = false;
+      }
+
+      if (bedController.text.trim().isEmpty) {
+        _bedError = true;
+        valido = false;
+      } else {
+        _bedError = false;
+      }
+
+      if (recordController.text.trim().isEmpty) {
+        _recordError = true;
+        valido = false;
+      } else {
+        _recordError = false;
+      }
+    } else {
+      // Validação específica para clínica
+      if (prontuarioController.text.trim().isEmpty) {
+        _prontuarioError = true;
+        valido = false;
+      } else {
+        _prontuarioError = false;
+      }
+    }
+
+    setState(() {});
+    return valido;
   }
 
   Future<void> _checkUserType() async {
@@ -178,29 +267,67 @@ class _RelatorioProfessorIdentificacaoPageState
   }
 
   Future<void> _salvarDadosLocais() async {
-    final dateParts = birthDateController.text.split('/');
-    final date = DateTime(
-      int.parse(dateParts[2]),
-      int.parse(dateParts[1]),
-      int.parse(dateParts[0]),
-    );
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
 
-    await _atendimentoService.salvarDadosIdentificacao(
-      nome: nameController.text,
-      sexo: selectedGender,
-      data_nascimento: Timestamp.fromDate(date),
-      hospital: hospitalController.text,
-      clinica: clinicController.text,
-      quarto: roomController.text,
-      leito: bedController.text,
-      registro: recordController.text,
-      prontuario: prontuarioController.text,
-    );
+    try {
+      final dateParts = birthDateController.text.split('/');
+      final date = DateTime(
+        int.parse(dateParts[2]),
+        int.parse(dateParts[1]),
+        int.parse(dateParts[0]),
+      );
+
+      await _atendimentoService.salvarDadosIdentificacao(
+        nome: nameController.text,
+        sexo: selectedGender,
+        data_nascimento: Timestamp.fromDate(date),
+        hospital: hospitalController.text,
+        clinica: clinicController.text,
+        quarto: roomController.text,
+        leito: bedController.text,
+        registro: recordController.text,
+        prontuario: prontuarioController.text,
+      );
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Data de nascimento inválida!',
+        isError: true,
+      );
+      return;
+    }
   }
 
   bool get podeEditar {
     return isAluno && statusAtendimento == 'rejeitado';
   }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      locale: const Locale('pt', 'BR'),
+    );
+
+    if (picked != null) {
+      final formattedDate =
+          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+      setState(() {
+        birthDateController.text = formattedDate;
+        _birthDateError = false;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +356,7 @@ class _RelatorioProfessorIdentificacaoPageState
         )),
       );
     }
-
+    
     return Stack(
       children: [
         BasePage(
@@ -256,8 +383,14 @@ class _RelatorioProfessorIdentificacaoPageState
                               controller: nameController,
                               keyboardType: TextInputType.text,
                               obrigatorio: true,
-                              enabled:
-                                  podeEditar, // Habilita apenas se podeEditar for true
+                              enabled: podeEditar,
+                              error: _nameError,
+                              errorMessage: 'Campo obrigatório',
+                              onChanged: (value) {
+                                if (_nameError && value.isNotEmpty) {
+                                  setState(() => _nameError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomDropdown(
@@ -269,20 +402,40 @@ class _RelatorioProfessorIdentificacaoPageState
                                 'Feminino'
                               ],
                               onChanged: podeEditar
-                                  ? (value) =>
-                                      setState(() => selectedGender = value!)
+                                  ? (value) {
+                                      setState(() {
+                                        selectedGender = value!;
+                                        if (_genderError && value != 'Selecione') {
+                                          _genderError = false;
+                                        }
+                                      });
+                                    }
                                   : null,
                               obrigatorio: true,
                               enabled: podeEditar,
+                              error: _genderError,
+                              errorMessage: 'Campo obrigatório',
                             ),
                             SizedBox(height: espacamentoCards),
-                            CustomInput(
-                              label: 'Data Nasc',
-                              controller: birthDateController,
-                              keyboardType: TextInputType.datetime,
-                              hintText: 'DD/MM/AAAA',
-                              obrigatorio: true,
-                              enabled: podeEditar,
+                            GestureDetector(
+                              onTap: () => _selectDate(context),
+                              child: AbsorbPointer(
+                                child: CustomInput(
+                                  label: 'Data Nasc',
+                                  controller: birthDateController,
+                                  keyboardType: TextInputType.datetime,
+                                  hintText: 'DD/MM/AAAA',
+                                  error: _birthDateError,
+                                  errorMessage: 'Campo obrigatório',
+                                  obrigatorio: true,
+                                  enabled: podeEditar,
+                                  onChanged: (value) {
+                                    if (_birthDateError && value.isNotEmpty) {
+                                      setState(() => _birthDateError = false);
+                                    }
+                                  },
+                                ),
+                              ),
                             ),
                             if (widget.isHospital) ...[
                               SizedBox(height: espacamentoCards),
@@ -292,6 +445,13 @@ class _RelatorioProfessorIdentificacaoPageState
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
                                 enabled: podeEditar,
+                                error: _hospitalError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_hospitalError && value.isNotEmpty) {
+                                    setState(() => _hospitalError = false);
+                                  }
+                                },
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -300,6 +460,13 @@ class _RelatorioProfessorIdentificacaoPageState
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
                                 enabled: podeEditar,
+                                error: _clinicError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_clinicError && value.isNotEmpty) {
+                                    setState(() => _clinicError = false);
+                                  }
+                                },
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -308,6 +475,13 @@ class _RelatorioProfessorIdentificacaoPageState
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
                                 enabled: podeEditar,
+                                error: _roomError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_roomError && value.isNotEmpty) {
+                                    setState(() => _roomError = false);
+                                  }
+                                },
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -316,6 +490,13 @@ class _RelatorioProfessorIdentificacaoPageState
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
                                 enabled: podeEditar,
+                                error: _bedError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_bedError && value.isNotEmpty) {
+                                    setState(() => _bedError = false);
+                                  }
+                                },
                               ),
                               SizedBox(height: espacamentoCards),
                               CustomInput(
@@ -324,6 +505,13 @@ class _RelatorioProfessorIdentificacaoPageState
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
                                 enabled: podeEditar,
+                                error: _recordError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_recordError && value.isNotEmpty) {
+                                    setState(() => _recordError = false);
+                                  }
+                                },
                               ),
                             ] else ...[
                               SizedBox(height: espacamentoCards),
@@ -333,6 +521,13 @@ class _RelatorioProfessorIdentificacaoPageState
                                 keyboardType: TextInputType.text,
                                 obrigatorio: true,
                                 enabled: podeEditar,
+                                error: _prontuarioError,
+                                errorMessage: 'Campo obrigatório',
+                                onChanged: (value) {
+                                  if (_prontuarioError && value.isNotEmpty) {
+                                    setState(() => _prontuarioError = false);
+                                  }
+                                },
                               ),
                             ],
                             const SizedBox(height: 15),
@@ -349,6 +544,15 @@ class _RelatorioProfessorIdentificacaoPageState
                                 CustomButton(
                                   text: 'Próximo',
                                   onPressed: () async {
+                                    if (podeEditar && !_validarCampos()) {
+                                      ToastUtil.showToast(
+                                        context: context,
+                                        message: 'Por favor, verifique o formulário!',
+                                        isError: true,
+                                      );
+                                      return;
+                                    }
+                                    
                                     if (podeEditar) {
                                       await _salvarDadosLocais();
                                     }
@@ -376,7 +580,7 @@ class _RelatorioProfessorIdentificacaoPageState
             ),
           ),
         ),
-       if ((isAluno && statusAtendimento == 'rejeitado') ||
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
             (isProfessor && statusAtendimento == 'enviado'))
           ObservacaoRelatorio(
             modoLeitura: podeEditar,

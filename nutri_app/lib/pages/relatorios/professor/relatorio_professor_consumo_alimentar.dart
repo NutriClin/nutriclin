@@ -38,6 +38,13 @@ class _RelatorioProfessorConsumoAlimentarPageState
   final TextEditingController evacuacaoController = TextEditingController();
   final TextEditingController diureseController = TextEditingController();
 
+  // Estados de validação
+  bool _habitualError = false;
+  bool _atualError = false;
+  bool _ingestaoHidricaError = false;
+  bool _evacuacaoError = false;
+  bool _diureseError = false;
+
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
@@ -93,7 +100,6 @@ class _RelatorioProfessorConsumoAlimentarPageState
           isLoading = false;
         });
 
-        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
           await _salvarDadosFirestoreNoLocal(data);
         }
@@ -146,7 +152,54 @@ class _RelatorioProfessorConsumoAlimentarPageState
     }
   }
 
+  // Função de validação dos campos
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (habitualController.text.trim().isEmpty) {
+      _habitualError = true;
+      valido = false;
+    } else {
+      _habitualError = false;
+    }
+
+    if (atualController.text.trim().isEmpty) {
+      _atualError = true;
+      valido = false;
+    } else {
+      _atualError = false;
+    }
+
+    if (ingestaoHidricaController.text.trim().isEmpty) {
+      _ingestaoHidricaError = true;
+      valido = false;
+    } else {
+      _ingestaoHidricaError = false;
+    }
+
+    if (evacuacaoController.text.trim().isEmpty) {
+      _evacuacaoError = true;
+      valido = false;
+    } else {
+      _evacuacaoError = false;
+    }
+
+    if (diureseController.text.trim().isEmpty) {
+      _diureseError = true;
+      valido = false;
+    } else {
+      _diureseError = false;
+    }
+
+    setState(() {});
+    return valido;
+  }
+
   Future<void> _salvarDadosLocais() async {
+    if (!_validarCampos()) {
+      return;
+    }
+    
     await _atendimentoService.salvarConsumoAlimentar(
       habitual: habitualController.text,
       atual: atualController.text,
@@ -224,6 +277,14 @@ class _RelatorioProfessorConsumoAlimentarPageState
                               controller: habitualController,
                               keyboardType: TextInputType.multiline,
                               enabled: podeEditar,
+                              obrigatorio: true,
+                              error: _habitualError,
+                              errorMessage: 'Campo obrigatório',
+                              onChanged: (value) {
+                                if (_habitualError && value.isNotEmpty) {
+                                  setState(() => _habitualError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -231,6 +292,14 @@ class _RelatorioProfessorConsumoAlimentarPageState
                               controller: atualController,
                               keyboardType: TextInputType.multiline,
                               enabled: podeEditar,
+                              obrigatorio: true,
+                              error: _atualError,
+                              errorMessage: 'Campo obrigatório',
+                              onChanged: (value) {
+                                if (_atualError && value.isNotEmpty) {
+                                  setState(() => _atualError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -238,6 +307,14 @@ class _RelatorioProfessorConsumoAlimentarPageState
                               controller: ingestaoHidricaController,
                               keyboardType: TextInputType.text,
                               enabled: podeEditar,
+                              obrigatorio: true,
+                              error: _ingestaoHidricaError,
+                              errorMessage: 'Campo obrigatório',
+                              onChanged: (value) {
+                                if (_ingestaoHidricaError && value.isNotEmpty) {
+                                  setState(() => _ingestaoHidricaError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -245,6 +322,14 @@ class _RelatorioProfessorConsumoAlimentarPageState
                               controller: evacuacaoController,
                               keyboardType: TextInputType.text,
                               enabled: podeEditar,
+                              obrigatorio: true,
+                              error: _evacuacaoError,
+                              errorMessage: 'Campo obrigatório',
+                              onChanged: (value) {
+                                if (_evacuacaoError && value.isNotEmpty) {
+                                  setState(() => _evacuacaoError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -252,6 +337,14 @@ class _RelatorioProfessorConsumoAlimentarPageState
                               controller: diureseController,
                               keyboardType: TextInputType.text,
                               enabled: podeEditar,
+                              obrigatorio: true,
+                              error: _diureseError,
+                              errorMessage: 'Campo obrigatório',
+                              onChanged: (value) {
+                                if (_diureseError && value.isNotEmpty) {
+                                  setState(() => _diureseError = false);
+                                }
+                              },
                             ),
                             const SizedBox(height: 15),
                             Row(
@@ -280,6 +373,15 @@ class _RelatorioProfessorConsumoAlimentarPageState
                                       text: 'Próximo',
                                       onPressed: () async {
                                         if (podeEditar) {
+                                          if (!_validarCampos()) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Por favor, preencha todos os campos obrigatórios!'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                            return;
+                                          }
                                           await _salvarDadosLocais();
                                         }
                                         Navigator.push(

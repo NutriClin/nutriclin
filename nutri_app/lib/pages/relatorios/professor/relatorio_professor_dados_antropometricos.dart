@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nutri_app/components/base_page.dart';
@@ -7,6 +8,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_consumo_alimentar.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -52,6 +54,15 @@ class _RelatorioProfessorDadosAntropometricosPageState
   final TextEditingController _diagnosticoNutricionalController =
       TextEditingController();
 
+  // Validação dos campos
+  bool _pesoAtualError = false;
+  bool _pesoUsualError = false;
+  bool _estaturaError = false;
+
+  // Formatador para campos numéricos
+  final FilteringTextInputFormatter _numerosFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'));
+
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
@@ -90,6 +101,34 @@ class _RelatorioProfessorDadosAntropometricosPageState
     _perdaPesoController.dispose();
     _diagnosticoNutricionalController.dispose();
     super.dispose();
+  }
+
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (_pesoAtualController.text.trim().isEmpty) {
+      _pesoAtualError = true;
+      valido = false;
+    } else {
+      _pesoAtualError = false;
+    }
+
+    if (_pesoUsualController.text.trim().isEmpty) {
+      _pesoUsualError = true;
+      valido = false;
+    } else {
+      _pesoUsualError = false;
+    }
+
+    if (_estaturaController.text.trim().isEmpty) {
+      _estaturaError = true;
+      valido = false;
+    } else {
+      _estaturaError = false;
+    }
+
+    setState(() {});
+    return valido;
   }
 
   Future<void> _checkUserType() async {
@@ -226,6 +265,15 @@ class _RelatorioProfessorDadosAntropometricosPageState
   }
 
   Future<void> _salvarDadosLocais() async {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
+
     await _atendimentoService.salvarDadosAntropometricos(
       pesoAtual: _pesoAtualController.text,
       pesoUsual: _pesoUsualController.text,
@@ -306,96 +354,168 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'Peso atual (kg)',
                               controller: _pesoAtualController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
+                              error: _pesoAtualError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_pesoAtualError && value.isNotEmpty) {
+                                  setState(() => _pesoAtualError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Peso usual (kg)',
                               controller: _pesoUsualController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
+                              error: _pesoUsualError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_pesoUsualError && value.isNotEmpty) {
+                                  setState(() => _pesoUsualError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Estatura (cm)',
                               controller: _estaturaController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
+                              error: _estaturaError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_estaturaError && value.isNotEmpty) {
+                                  setState(() => _estaturaError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'IMC',
                               controller: _imcController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PI',
                               controller: _piController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CB (cm)',
                               controller: _cbController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCT (mm)',
                               controller: _pctController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCB (mm)',
                               controller: _pcbController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCSE (mm)',
                               controller: _pcseController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'PCSI (mm)',
                               controller: _pcsiController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CMB (cm)',
                               controller: _cmbController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CA (cm)',
                               controller: _caController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CP (cm)',
                               controller: _cpController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'AJ (cm)',
                               controller: _ajController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: '% de GC',
                               controller: _percentualGorduraController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: '% perda peso/tempo',
                               controller: _perdaPesoController,
                               enabled: podeEditar,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
@@ -429,6 +549,10 @@ class _RelatorioProfessorDadosAntropometricosPageState
                                     CustomButton(
                                       text: 'Próximo',
                                       onPressed: () async {
+                                        if (podeEditar && !_validarCampos()) {
+                                          return;
+                                        }
+                                        
                                         if (podeEditar) {
                                           await _salvarDadosLocais();
                                         }

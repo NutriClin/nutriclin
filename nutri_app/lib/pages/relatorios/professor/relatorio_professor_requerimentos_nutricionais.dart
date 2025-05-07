@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nutri_app/components/base_page.dart';
@@ -7,6 +8,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_conduta_nutricional.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -44,6 +46,17 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
   final TextEditingController fibrasController = TextEditingController();
   final TextEditingController outrosController = TextEditingController();
 
+  // Validação dos campos
+  bool _kcalDiaError = false;
+  bool _kcalKgError = false;
+  bool _choError = false;
+  bool _lipError = false;
+  bool _ptnPorcentagemError = false;
+
+  // Formatter para campos numéricos
+  final FilteringTextInputFormatter _numerosFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'));
+
   bool isLoading = true;
   bool hasError = false;
   bool isProfessor = false;
@@ -60,6 +73,48 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
         }
       });
     });
+  }
+
+  bool _validarCampos() {
+    bool valido = true;
+
+    if (kcalDiaController.text.trim().isEmpty) {
+      _kcalDiaError = true;
+      valido = false;
+    } else {
+      _kcalDiaError = false;
+    }
+
+    if (kcalKgController.text.trim().isEmpty) {
+      _kcalKgError = true;
+      valido = false;
+    } else {
+      _kcalKgError = false;
+    }
+
+    if (choController.text.trim().isEmpty) {
+      _choError = true;
+      valido = false;
+    } else {
+      _choError = false;
+    }
+
+    if (lipController.text.trim().isEmpty) {
+      _lipError = true;
+      valido = false;
+    } else {
+      _lipError = false;
+    }
+
+    if (ptnPorcentagemController.text.trim().isEmpty) {
+      _ptnPorcentagemError = true;
+      valido = false;
+    } else {
+      _ptnPorcentagemError = false;
+    }
+
+    setState(() {});
+    return valido;
   }
 
   Future<void> _checkUserType() async {
@@ -172,6 +227,15 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
   }
 
   Future<void> _salvarDadosLocais() async {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, preencha os campos obrigatórios!',
+        isError: true,
+      );
+      return;
+    }
+
     await _atendimentoService.salvarRequerimentosNutricionais(
       kcalDia: kcalDiaController.text,
       kcalKg: kcalKgController.text,
@@ -259,70 +323,130 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Kcal / dia',
                               controller: kcalDiaController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
+                              error: _kcalDiaError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_kcalDiaError && value.isNotEmpty) {
+                                  setState(() => _kcalDiaError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Kcal / kg',
                               controller: kcalKgController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
+                              error: _kcalKgError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_kcalKgError && value.isNotEmpty) {
+                                  setState(() => _kcalKgError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'CHO %',
                               controller: choController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
+                              error: _choError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_choError && value.isNotEmpty) {
+                                  setState(() => _choError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Lip %',
                               controller: lipController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
+                              error: _lipError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_lipError && value.isNotEmpty) {
+                                  setState(() => _lipError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ptn %',
                               controller: ptnPorcentagemController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
+                              error: _ptnPorcentagemError,
+                              errorMessage: 'Campo obrigatório',
+                              obrigatorio: true,
+                              onChanged: (value) {
+                                if (_ptnPorcentagemError && value.isNotEmpty) {
+                                  setState(() => _ptnPorcentagemError = false);
+                                }
+                              },
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ptn g / kg',
                               controller: ptnKgController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Ptn g / dia',
                               controller: ptnDiaController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Líquido ml / kg',
                               controller: liquidoKgController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Líquido ml / dia',
                               controller: liquidoDiaController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
                             CustomInput(
                               label: 'Fibras g/dia',
                               controller: fibrasController,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
                             SizedBox(height: espacamentoCards),
@@ -358,6 +482,10 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                                     CustomButton(
                                       text: 'Próximo',
                                       onPressed: () async {
+                                        if (podeEditar && !_validarCampos()) {
+                                          return;
+                                        }
+                                        
                                         if (podeEditar) {
                                           await _salvarDadosLocais();
                                         }
