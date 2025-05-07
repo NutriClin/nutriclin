@@ -915,5 +915,14 @@ class AtendimentoService {
     return prefs.getString('hospital_atendimento.professor_selecionado');
   }
 
-  obterAtendimentoAtual() {}
+  Future<String?> carregarObservacao() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('hospital_atendimento.observacao_geral');
+  }
+
+  Future<void> salvarObservacaoLocal(String observacao) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        'hospital_atendimento.observacao_geral', observacao);
+  }
 }

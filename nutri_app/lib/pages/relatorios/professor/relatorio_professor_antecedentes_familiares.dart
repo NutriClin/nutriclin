@@ -121,11 +121,11 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
   Future<void> _carregarDadosLocais() async {
     final dados = await _atendimentoService.carregarAntecedentesFamiliares();
     setState(() {
-      _dislipidemias = dados['dislipidemias'] ?? _dislipidemias;
-      _has = dados['has'] ?? _has;
-      _cancer = dados['cancer'] ?? _cancer;
-      _excessoPeso = dados['excesso_peso'] ?? _excessoPeso;
-      _diabetes = dados['diabetes'] ?? _diabetes;
+      _dislipidemias = dados['dislipidemias_familiares'] ?? _dislipidemias;
+      _has = dados['has_familiares'] ?? _has;
+      _cancer = dados['cancer_familiares'] ?? _cancer;
+      _excessoPeso = dados['excesso_peso_familiares'] ?? _excessoPeso;
+      _diabetes = dados['diabetes_familiares'] ?? _diabetes;
       _outros = dados['outros_antecedentes_familiares'] ?? _outros;
       _outrosController.text =
           dados['outros_antecedentes_familiares_descricao'] ??
@@ -306,9 +306,13 @@ class _RelatorioProfessorAntecedentesFamiliaresPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura: isAluno,
-        ),
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: podeEditar,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
       ],
     );
   }

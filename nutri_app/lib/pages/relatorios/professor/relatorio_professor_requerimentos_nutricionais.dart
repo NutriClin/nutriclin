@@ -341,9 +341,13 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura: isAluno,
-        ),
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: podeEditar,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
       ],
     );
   }

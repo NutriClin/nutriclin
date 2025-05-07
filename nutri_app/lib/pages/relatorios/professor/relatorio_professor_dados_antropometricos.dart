@@ -165,8 +165,7 @@ class _RelatorioProfessorDadosAntropometricosPageState
           dados['peso_atual'] ?? _pesoAtualController.text;
       _pesoUsualController.text =
           dados['peso_usual'] ?? _pesoUsualController.text;
-      _estaturaController.text =
-          dados['estatura'] ?? _estaturaController.text;
+      _estaturaController.text = dados['estatura'] ?? _estaturaController.text;
       _imcController.text = dados['imc'] ?? _imcController.text;
       _piController.text = dados['pi'] ?? _piController.text;
       _cbController.text = dados['cb'] ?? _cbController.text;
@@ -180,10 +179,11 @@ class _RelatorioProfessorDadosAntropometricosPageState
       _ajController.text = dados['aj'] ?? _ajController.text;
       _percentualGorduraController.text =
           dados['porcentagem_gc'] ?? _percentualGorduraController.text;
-      _perdaPesoController.text =
-          dados['porcentagem_perca_peso_por_tempo'] ?? _perdaPesoController.text;
+      _perdaPesoController.text = dados['porcentagem_perca_peso_por_tempo'] ??
+          _perdaPesoController.text;
       _diagnosticoNutricionalController.text =
-          dados['diagnostico_nutricional'] ?? _diagnosticoNutricionalController.text;
+          dados['diagnostico_nutricional'] ??
+              _diagnosticoNutricionalController.text;
     });
   }
 
@@ -406,9 +406,13 @@ class _RelatorioProfessorDadosAntropometricosPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura: isAluno,
-        ),
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: podeEditar,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
       ],
     );
   }

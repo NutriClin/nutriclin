@@ -56,7 +56,11 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -77,7 +81,6 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -107,8 +110,9 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -125,27 +129,54 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
     }
   }
 
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarDadosSocioeconomicos(
+        aguaEncanada: data['agua_encanada'] ?? false,
+        esgotoEncanado: data['esgoto_encanado'] ?? false,
+        coletaLixo: data['coleta_lixo'] ?? false,
+        luzEletrica: data['luz_eletrica'] ?? false,
+        tipoCasa: data['tipo_casa'] ?? 'Selecione',
+        numPessoas: data['numero_pessoas_moram_junto']?.toString() ?? '',
+        rendaFamiliar: data['renda_familiar']?.toString() ?? '',
+        rendaPerCapita: data['renda_per_capita']?.toString() ?? '',
+        escolaridade: data['escolaridade'] ?? '',
+        profissao: data['profissao'] ?? '',
+        producaoAlimentos: data['producao_domestica_alimentos'] ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
+    }
+  }
+
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarDadosSocioeconomicos();
-    setState(() {
-      _aguaEncanada = dados['agua_encanada'] ?? _aguaEncanada;
-      _esgotoEncanado = dados['esgoto_encanado'] ?? _esgotoEncanado;
-      _coletaLixo = dados['coleta_lixo'] ?? _coletaLixo;
-      _luzEletrica = dados['luz_eletrica'] ?? _luzEletrica;
-      selectedHouseType = dados['tipo_casa'] ?? selectedHouseType;
-      pessoasController.text =
-          dados['numero_pessoas_moram_junto'] ?? pessoasController.text;
-      rendaFamiliarController.text =
-          dados['renda_familiar'] ?? rendaFamiliarController.text;
-      rendaPerCapitaController.text =
-          dados['renda_per_capita'] ?? rendaPerCapitaController.text;
-      escolaridadeController.text =
-          dados['escolaridade'] ?? escolaridadeController.text;
-      profissaoController.text = dados['profissao'] ?? profissaoController.text;
-      producaoAlimentosController.text =
-          dados['producao_domestica_alimentos'] ??
-              producaoAlimentosController.text;
-    });
+    try {
+      final dados = await _atendimentoService.carregarDadosSocioeconomicos();
+      if (dados.isNotEmpty) {
+        setState(() {
+          _aguaEncanada = dados['agua_encanada'] ?? _aguaEncanada;
+          _esgotoEncanado = dados['esgoto_encanado'] ?? _esgotoEncanado;
+          _coletaLixo = dados['coleta_lixo'] ?? _coletaLixo;
+          _luzEletrica = dados['luz_eletrica'] ?? _luzEletrica;
+          selectedHouseType = dados['tipo_casa'] ?? selectedHouseType;
+          pessoasController.text =
+              dados['numero_pessoas_moram_junto'] ?? pessoasController.text;
+          rendaFamiliarController.text =
+              dados['renda_familiar'] ?? rendaFamiliarController.text;
+          rendaPerCapitaController.text =
+              dados['renda_per_capita'] ?? rendaPerCapitaController.text;
+          escolaridadeController.text =
+              dados['escolaridade'] ?? escolaridadeController.text;
+          profissaoController.text =
+              dados['profissao'] ?? profissaoController.text;
+          producaoAlimentosController.text =
+              dados['producao_domestica_alimentos'] ??
+                  producaoAlimentosController.text;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
@@ -352,9 +383,13 @@ class _RelatorioProfessorDadosSocioeconomicosPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura: isAluno,
-        ),
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: podeEditar,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
       ],
     );
   }

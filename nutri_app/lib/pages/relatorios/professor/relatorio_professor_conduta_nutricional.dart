@@ -105,14 +105,34 @@ class _RelatorioProfessorCondutaNutricionalPageState
     }
   }
 
+  bool get podeEditar {
+    return isAluno && statusAtendimento == 'rejeitado';
+  }
+
   Future<void> _atualizarStatus(String status) async {
     setState(() => isSaving = true);
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-      await _firestore.collection(collection).doc(widget.atendimentoId).update({
+
+      final doc = await _firestore
+          .collection(collection)
+          .doc(widget.atendimentoId)
+          .get();
+      final dadosAtuais = doc.data() ?? {};
+
+      final observacao = await _atendimentoService.carregarObservacao();
+
+      final dadosAtualizados = {
+        ...dadosAtuais,
         'status_atendimento': status,
         'data_avaliacao': FieldValue.serverTimestamp(),
-      });
+        'observacao_geral': observacao ?? '',
+      };
+
+      await _firestore
+          .collection(collection)
+          .doc(widget.atendimentoId)
+          .update(dadosAtualizados);
 
       ToastUtil.showToast(
         context: context,
@@ -136,10 +156,8 @@ class _RelatorioProfessorCondutaNutricionalPageState
   Future<void> _enviarAtendimento() async {
     setState(() => isSaving = true);
     try {
-      // Obter dados completos exceto os campos especificados
       final dadosCompletos = await _atendimentoService.obterDadosCompletos();
 
-      // Remover os campos que não queremos atualizar
       dadosCompletos.remove('id_professor_supervisor');
       dadosCompletos.remove('id_aluno');
       dadosCompletos.remove('nome_professor');
@@ -148,12 +166,10 @@ class _RelatorioProfessorCondutaNutricionalPageState
       dadosCompletos.remove('criado_em');
       dadosCompletos.remove('data');
 
-      // Adicionar a próxima consulta se for hospital
       if (widget.isHospital) {
         dadosCompletos['proxima_consulta'] = _proximaConsultaController.text;
       }
 
-      // Atualizar status para "pendente"
       dadosCompletos['status_atendimento'] = 'enviado';
 
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
@@ -306,10 +322,13 @@ class _RelatorioProfessorCondutaNutricionalPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura:
-              !modoEdicao, // Habilita edição de observações apenas no modo edição
-        ),
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: modoEdicao,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
         if (isSaving)
           ModalBarrier(
             dismissible: false,

@@ -13,7 +13,7 @@ class CustomListAtendimento extends StatelessWidget {
       case 'aprovado':
         statusColor = Colors.green;
         break;
-      case 'reprovado':
+      case 'rejeitado':
         statusColor = Colors.red;
         break;
       default:

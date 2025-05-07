@@ -52,7 +52,11 @@ class _RelatorioProfessorIdentificacaoPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -108,8 +112,9 @@ class _RelatorioProfessorIdentificacaoPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -126,25 +131,50 @@ class _RelatorioProfessorIdentificacaoPageState
     }
   }
 
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarDadosIdentificacao(
+        nome: data['nome'] ?? '',
+        sexo: data['sexo'] ?? 'Selecione',
+        data_nascimento: data['data_nascimento'] as Timestamp,
+        hospital: data['hospital'] ?? '',
+        clinica: data['clinica'] ?? '',
+        quarto: data['quarto'] ?? '',
+        leito: data['leito'] ?? '',
+        registro: data['registro'] ?? '',
+        prontuario: data['prontuario'] ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
+    }
+  }
+
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarDadosIdentificacao();
-    setState(() {
-      nameController.text = dados['nome'] ?? nameController.text;
-      selectedGender = dados['sexo'] ?? selectedGender;
-      if (dados['data_nascimento'] != null) {
-        final date = (dados['data_nascimento'] as Timestamp).toDate();
-        birthDateController.text = "${date.day.toString().padLeft(2, '0')}/"
-            "${date.month.toString().padLeft(2, '0')}/"
-            "${date.year}";
+    try {
+      final dados = await _atendimentoService.carregarDadosIdentificacao();
+      if (dados.isNotEmpty) {
+        setState(() {
+          nameController.text = dados['nome'] ?? nameController.text;
+          selectedGender = dados['sexo'] ?? selectedGender;
+          if (dados['data_nascimento'] != null) {
+            final date = (dados['data_nascimento'] as Timestamp).toDate();
+            birthDateController.text = "${date.day.toString().padLeft(2, '0')}/"
+                "${date.month.toString().padLeft(2, '0')}/"
+                "${date.year}";
+          }
+          hospitalController.text =
+              dados['hospital'] ?? hospitalController.text;
+          clinicController.text = dados['clinica'] ?? clinicController.text;
+          roomController.text = dados['quarto'] ?? roomController.text;
+          bedController.text = dados['leito'] ?? bedController.text;
+          recordController.text = dados['registro'] ?? recordController.text;
+          prontuarioController.text =
+              dados['prontuario'] ?? prontuarioController.text;
+        });
       }
-      hospitalController.text = dados['hospital'] ?? hospitalController.text;
-      clinicController.text = dados['clinica'] ?? clinicController.text;
-      roomController.text = dados['quarto'] ?? roomController.text;
-      bedController.text = dados['leito'] ?? bedController.text;
-      recordController.text = dados['registro'] ?? recordController.text;
-      prontuarioController.text =
-          dados['prontuario'] ?? prontuarioController.text;
-    });
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
@@ -346,9 +376,13 @@ class _RelatorioProfessorIdentificacaoPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura: isAluno,
-        ),
+       if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: podeEditar,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
       ],
     );
   }

@@ -50,7 +50,11 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
   void initState() {
     super.initState();
     _checkUserType().then((_) {
-      _carregarDadosAtendimento();
+      _carregarDadosAtendimento().then((_) {
+        if (podeEditar) {
+          _carregarDadosLocais();
+        }
+      });
     });
   }
 
@@ -71,7 +75,6 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
   Future<void> _carregarDadosAtendimento() async {
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -94,8 +97,9 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
           isLoading = false;
         });
 
+        // Se for aluno e status rejeitado, salva os dados no armazenamento local
         if (isAluno && statusAtendimento == 'rejeitado') {
-          await _carregarDadosLocais();
+          await _salvarDadosFirestoreNoLocal(data);
         }
       } else {
         setState(() {
@@ -112,19 +116,41 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
     }
   }
 
+  Future<void> _salvarDadosFirestoreNoLocal(Map<String, dynamic> data) async {
+    try {
+      await _atendimentoService.salvarAntecedentesPessoais(
+        dislipidemias: data['dislipidemias_pessoais'] ?? false,
+        has: data['has_pessoais'] ?? false,
+        cancer: data['cancer_pessoais'] ?? false,
+        excessoPeso: data['excesso_peso_pessoais'] ?? false,
+        diabetes: data['diabetes_pessoais'] ?? false,
+        outros: data['outros_antecedentes_pessoais'] ?? false,
+        outrosDescricao: data['outros_antecedentes_pessoais_descricao'] ?? '',
+      );
+    } catch (e) {
+      print("Erro ao salvar dados no local: $e");
+    }
+  }
+
   Future<void> _carregarDadosLocais() async {
-    final dados = await _atendimentoService.carregarAntecedentesPessoais();
-    setState(() {
-      _dislipidemias = dados['dislipidemias_pessoais'] ?? _dislipidemias;
-      _has = dados['has_pessoais'] ?? _has;
-      _cancer = dados['cancer_pessoais'] ?? _cancer;
-      _excessoPeso = dados['excesso_peso_pessoais'] ?? _excessoPeso;
-      _diabetes = dados['diabetes_pessoais'] ?? _diabetes;
-      _outros = dados['outros_antecedentes_pessoais'] ?? _outros;
-      _outrosController.text =
-          dados['outros_antecedentes_pessoais_descricao'] ??
-              _outrosController.text;
-    });
+    try {
+      final dados = await _atendimentoService.carregarAntecedentesPessoais();
+      if (dados.isNotEmpty) {
+        setState(() {
+          _dislipidemias = dados['dislipidemias_pessoais'] ?? _dislipidemias;
+          _has = dados['has_pessoais'] ?? _has;
+          _cancer = dados['cancer_pessoais'] ?? _cancer;
+          _excessoPeso = dados['excesso_peso_pessoais'] ?? _excessoPeso;
+          _diabetes = dados['diabetes_pessoais'] ?? _diabetes;
+          _outros = dados['outros_antecedentes_pessoais'] ?? _outros;
+          _outrosController.text =
+              dados['outros_antecedentes_pessoais_descricao'] ??
+                  _outrosController.text;
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar dados locais: $e");
+    }
   }
 
   Future<void> _salvarDadosLocais() async {
@@ -299,9 +325,13 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
             ),
           ),
         ),
-        ObservacaoRelatorio(
-          modoLeitura: isAluno,
-        ),
+        if ((isAluno && statusAtendimento == 'rejeitado') ||
+            (isProfessor && statusAtendimento == 'enviado'))
+          ObservacaoRelatorio(
+            modoLeitura: podeEditar,
+            atendimentoId: widget.atendimentoId,
+            isHospital: widget.isHospital,
+          ),
       ],
     );
   }

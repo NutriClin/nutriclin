@@ -1,14 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nutri_app/services/atendimento_service.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_card.dart';
 
 class ObservacaoRelatorio extends StatefulWidget {
   final bool modoLeitura;
+  final String atendimentoId;
+  final bool isHospital; // Adicione este parâmetro para determinar a coleção
 
   const ObservacaoRelatorio({
     super.key,
     this.modoLeitura = false,
+    required this.atendimentoId,
+    required this.isHospital,
   });
 
   @override
@@ -16,6 +21,8 @@ class ObservacaoRelatorio extends StatefulWidget {
 }
 
 class _ObservacaoRelatorioState extends State<ObservacaoRelatorio> {
+  final AtendimentoService _atendimentoService = AtendimentoService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _observacaoController = TextEditingController();
   bool _isLoading = false;
   bool _isLoadingObservacao = false;
@@ -23,37 +30,110 @@ class _ObservacaoRelatorioState extends State<ObservacaoRelatorio> {
   @override
   void initState() {
     super.initState();
-    _carregarObservacaoLocal();
+    _carregarObservacao();
   }
 
-  Future<void> _carregarObservacaoLocal() async {
-    setState(() => _isLoadingObservacao = true);
+  Future<Map<String, dynamic>?> carregarObservacaoFirestore(
+      String atendimentoId, bool isHospital) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final observacao = prefs.getString('observacao_geral');
-      if (observacao != null) {
-        _observacaoController.text = observacao;
+      final collection = isHospital ? 'atendimento' : 'clinica';
+      final doc =
+          await _firestore.collection(collection).doc(atendimentoId).get();
+      if (doc.exists) {
+        return doc.data();
       }
+      return null;
     } catch (e) {
-      print("Erro ao carregar observações locais: $e");
-    } finally {
-      setState(() => _isLoadingObservacao = false);
+      print("Erro ao carregar do Firestore: $e");
+      return null;
     }
   }
 
-  Future<void> _saveObservacaoLocally() async {
+  Future<void> salvarObservacaoFirestore(
+      String atendimentoId, bool isHospital, String observacao) async {
+    try {
+      final collection = isHospital ? 'atendimento' : 'clinica';
+      await _firestore.collection(collection).doc(atendimentoId).set({
+        'observacao_geral': observacao,
+        'ultima_atualizacao': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print("Erro ao salvar no Firestore: $e");
+      throw e;
+    }
+  }
+
+  Future<void> _carregarObservacao() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingObservacao = true);
+
+    try {
+      final dadosFirestore = await carregarObservacaoFirestore(
+        widget.atendimentoId,
+        widget.isHospital,
+      );
+
+      if (dadosFirestore != null && dadosFirestore.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _observacaoController.text =
+                dadosFirestore['observacao_geral'] ?? '';
+          });
+        }
+      } else {
+        await _carregarObservacaoLocal();
+      }
+    } catch (e) {
+      print("Erro ao carregar observações: $e");
+      await _carregarObservacaoLocal();
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingObservacao = false);
+      }
+    }
+  }
+
+  Future<void> _carregarObservacaoLocal() async {
+    try {
+      final dados = await _atendimentoService.carregarAntecedentesPessoais();
+      if (dados.isNotEmpty && mounted) {
+        setState(() {
+          _observacaoController.text = dados['observacao_geral'] ?? '';
+        });
+      }
+    } catch (e) {
+      print("Erro ao carregar observações locais: $e");
+      if (mounted) {
+        setState(() {
+          _observacaoController.text = '';
+        });
+      }
+    }
+  }
+
+  Future<void> _salvarObservacao() async {
     setState(() => _isLoading = true);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('observacao_geral', _observacaoController.text);
+      await _salvarObservacaoLocal();
+    } catch (e) {
+      print("Erro ao salvar observações: $e");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _salvarObservacaoLocal() async {
+    try {
+      await _atendimentoService.salvarObservacaoLocal(
+        _observacaoController.text,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao salvar observações: $e')),
         );
       }
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 
@@ -111,7 +191,7 @@ class _ObservacaoRelatorioState extends State<ObservacaoRelatorio> {
                         text: 'Fechar',
                         onPressed: () async {
                           if (!widget.modoLeitura) {
-                            await _saveObservacaoLocally();
+                            await _salvarObservacao();
                           }
                           if (mounted) Navigator.pop(context);
                         },
