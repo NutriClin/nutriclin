@@ -8,6 +8,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
+import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class RelatorioProfessorCondutaNutricionalPage extends StatefulWidget {
@@ -109,6 +110,30 @@ class _RelatorioProfessorCondutaNutricionalPageState
     return isAluno && statusAtendimento == 'rejeitado';
   }
 
+  void _showConfirmationDialog({
+    required String title,
+    required String message,
+    required String confirmText,
+    required Function() onConfirm,
+    String cancelText = 'Cancelar',
+    Color confirmColor = const Color(0xFF007AFF),
+    Color cancelColor = Colors.red,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationDialog(
+        title: title,
+        message: message,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        confirmColor: confirmColor,
+        cancelColor: cancelColor,
+        onConfirm: onConfirm,
+        onCancel: () => Navigator.pop(context),
+      ),
+    );
+  }
+
   Future<void> _atualizarStatus(String status) async {
     setState(() => isSaving = true);
     try {
@@ -171,6 +196,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
       }
 
       dadosCompletos['status_atendimento'] = 'enviado';
+      dadosCompletos['observacao_geral'] = '';
 
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
       await _firestore
@@ -285,13 +311,22 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                   textColor: Colors.black,
                                   boxShadowColor: Colors.black,
                                 ),
-                                if (isProfessor)
+                                if (isProfessor &&
+                                    statusAtendimento == 'enviado')
                                   Row(
                                     children: [
                                       CustomButton(
                                         text: 'Rejeitar',
                                         onPressed: () =>
-                                            _atualizarStatus('rejeitado'),
+                                            _showConfirmationDialog(
+                                          title: 'Confirmar Rejeição',
+                                          message:
+                                              'Tem certeza que deseja rejeitar este atendimento?',
+                                          confirmText: 'Rejeitar',
+                                          confirmColor: Colors.red,
+                                          onConfirm: () =>
+                                              _atualizarStatus('rejeitado'),
+                                        ),
                                         color: Colors.red,
                                         textColor: Colors.white,
                                       ),
@@ -299,14 +334,27 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                       CustomButton(
                                         text: 'Aprovar',
                                         onPressed: () =>
-                                            _atualizarStatus('aprovado'),
+                                            _showConfirmationDialog(
+                                          title: 'Confirmar Aprovação',
+                                          message:
+                                              'Tem certeza que deseja aprovar este atendimento?',
+                                          confirmText: 'Aprovar',
+                                          onConfirm: () =>
+                                              _atualizarStatus('aprovado'),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 if (modoEdicao)
                                   CustomButton(
                                     text: 'Enviar para Revisão',
-                                    onPressed: _enviarAtendimento,
+                                    onPressed: () => _showConfirmationDialog(
+                                      title: 'Confirmar Envio',
+                                      message:
+                                          'Tem certeza que deseja enviar este atendimento para revisão?',
+                                      confirmText: 'Enviar',
+                                      onConfirm: _enviarAtendimento,
+                                    ),
                                     color: Colors.blue,
                                     textColor: Colors.white,
                                   ),
