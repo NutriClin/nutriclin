@@ -36,19 +36,19 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-.env
+# /android/app/debug
+# /android/app/profile
+# /android/app/release
+# .env
 
 #build
 # Arquivos de cache e build
-/cache.dill
-.track.dill
-/nutri_app/build/
-/NOTICES
-/nutri_app/build/flutter_assets/
+# /cache.dill
+# .track.dill
+# /nutri_app/build/
+# /NOTICES
+# /nutri_app/build/flutter_assets/
 
 # Ignorar todas as pastas build
-**/build/
+# **/build/
 
