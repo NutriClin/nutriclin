@@ -6,9 +6,8 @@ Um aplicativo **mobile e web** desenvolvido em Flutter para auxiliar o curso de 
 
 ## 🌐 Acesse o aplicativo
 
-[![Netlify](https://img.shields.io/badge/Site-Netlify-00C7B7?logo=netlify&logoColor=white&style=for-the-badge)](https://seusite.netlify.app)  
-[![Flutter](https://img.shields.io/badge/Flutter-App-02569B?logo=flutter&logoColor=white&style=for-the-badge)](https://flutter.dev)  
-[![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=white&style=for-the-badge)](https://firebase.google.com/)
+[![Netlify](https://img.shields.io/badge/Site-Netlify-00C7B7?logo=netlify&logoColor=white&style=for-the-badge)](https://nutrilclin.netlify.app/#/login))
+[![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=white&style=for-the-badge)](https://console.firebase.google.com/project/nutriclin-f4e29/overview)
 
 ---
 
@@ -19,7 +18,7 @@ O sistema foi projetado com 3 tipos de usuários, cada um com permissões espec�
 ### 👨‍🏫 Coordenador
 - Gerencia todos os usuários.
 - Valida os relatórios enviados pelos professores.
-- Tem acesso administrativo completo.
+- Possui acesso completo ao sistema.
 
 ### 👩‍💼 Professor
 - Recebe os relatórios enviados pelos alunos.
@@ -33,21 +32,31 @@ O sistema foi projetado com 3 tipos de usuários, cada um com permissões espec�
 
 ## 📊 Funcionalidade de Cálculos Nutricionais
 
-Todos os usuários têm acesso a uma **tela de cálculos nutricionais**, que oferece ferramentas para:
+Todos os usuários têm acesso a uma **tela de cálculos**, que oferece ferramentas para:
 
-- Cálculo de IMC
-- Necessidades calóricas
-- Distribuição de macronutrientes
-- Entre outros recursos úteis à prática clínica
+- **IMC** (Índice de Massa Corporal)  
+- **TMB** (Taxa Metabólica Basal)  
+- **GET** (Gasto Energético Total)  
+- **Equação de Harris-Benedict**
 
 ---
 
 ## 🧰 Tecnologias Utilizadas
 
-- ✅ **Flutter** (mobile e web)
-- ✅ **Firebase** (auth, firestore)
-- ✅ **Netlify** (hospedagem da versão web)
-- ✅ **SharedPreferences** (cache local)
-- ✅ **Arquitetura Modularizada** com separação clara de camadas
+- 💙 **Flutter** — Interface responsiva para mobile e web  
+- 🔥 **Firebase** — Autenticação e banco de dados em tempo real (Firestore)  
+- 🌍 **Netlify** — Hospedagem da versão web  
+- 📦 **SharedPreferences** — Armazenamento local em cache  
+- 🧱 **Arquitetura modularizada** — Separação clara entre camadas de apresentação, lógica e dados
+
+---
+
+## 📄 [Licença](./LICENSE)
+## 🤝 [Como Contribuir](./CONTRIBUTING.md) ![contribute-icon](https://img.shields.io/badge/Contributing-Open-blue)
+
+---
+
+Desenvolvido com ❤️ pelos alunos de Engenharia de Software - Centro Universitário Campo Real
+📧 Contato: nutriclin@camporeal.edu.br
 
 ---
