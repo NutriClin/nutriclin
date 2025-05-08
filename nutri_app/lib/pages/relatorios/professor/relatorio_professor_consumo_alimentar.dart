@@ -7,6 +7,7 @@ import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_requerimentos_nutricionais.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -199,7 +200,7 @@ class _RelatorioProfessorConsumoAlimentarPageState
     if (!_validarCampos()) {
       return;
     }
-    
+
     await _atendimentoService.salvarConsumoAlimentar(
       habitual: habitualController.text,
       atual: atualController.text,
@@ -374,11 +375,11 @@ class _RelatorioProfessorConsumoAlimentarPageState
                                       onPressed: () async {
                                         if (podeEditar) {
                                           if (!_validarCampos()) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Por favor, preencha todos os campos obrigatórios!'),
-                                                backgroundColor: Colors.red,
-                                              ),
+                                            ToastUtil.showToast(
+                                              context: context,
+                                              message:
+                                                  'Por favor, verifique o formulário!',
+                                              isError: true,
                                             );
                                             return;
                                           }

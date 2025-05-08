@@ -323,8 +323,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Kcal / dia',
                               controller: kcalDiaController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                               error: _kcalDiaError,
@@ -340,8 +340,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Kcal / kg',
                               controller: kcalKgController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                               error: _kcalKgError,
@@ -357,8 +357,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'CHO %',
                               controller: choController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                               error: _choError,
@@ -374,8 +374,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Lip %',
                               controller: lipController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                               error: _lipError,
@@ -391,8 +391,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Ptn %',
                               controller: ptnPorcentagemController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                               error: _ptnPorcentagemError,
@@ -408,8 +408,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Ptn g / kg',
                               controller: ptnKgController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
@@ -417,8 +417,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Ptn g / dia',
                               controller: ptnDiaController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
@@ -426,8 +426,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Líquido ml / kg',
                               controller: liquidoKgController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
@@ -435,8 +435,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Líquido ml / dia',
                               controller: liquidoDiaController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
@@ -444,8 +444,8 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                             CustomInput(
                               label: 'Fibras g/dia',
                               controller: fibrasController,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               enabled: podeEditar,
                             ),
@@ -483,9 +483,15 @@ class _RelatorioProfessorRequerimentosNutricionaisPageState
                                       text: 'Próximo',
                                       onPressed: () async {
                                         if (podeEditar && !_validarCampos()) {
+                                          ToastUtil.showToast(
+                                            context: context,
+                                            message:
+                                                'Por favor, verifique o formulário!',
+                                            isError: true,
+                                          );
                                           return;
                                         }
-                                        
+
                                         if (podeEditar) {
                                           await _salvarDadosLocais();
                                         }

@@ -8,6 +8,7 @@ import 'package:nutri_app/components/custom_button.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_antecedentes_familiares.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -177,7 +178,7 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
     if (!_validarCampos()) {
       return;
     }
-    
+
     await _atendimentoService.salvarAntecedentesPessoais(
       dislipidemias: _dislipidemias,
       has: _has,
@@ -344,11 +345,11 @@ class _RelatorioProfessorAntecedentesPessoaisPageState
                                       onPressed: () async {
                                         if (podeEditar) {
                                           if (!_validarCampos()) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Por favor, verifique o formulário!'),
-                                                backgroundColor: Colors.red,
-                                              ),
+                                            ToastUtil.showToast(
+                                              context: context,
+                                              message:
+                                                  'Por favor, verifique o formulário!',
+                                              isError: true,
                                             );
                                             return;
                                           }

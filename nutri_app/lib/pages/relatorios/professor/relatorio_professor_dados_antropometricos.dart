@@ -354,8 +354,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'Peso atual (kg)',
                               controller: _pesoAtualController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               error: _pesoAtualError,
                               errorMessage: 'Campo obrigatório',
@@ -371,8 +371,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'Peso usual (kg)',
                               controller: _pesoUsualController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               error: _pesoUsualError,
                               errorMessage: 'Campo obrigatório',
@@ -388,8 +388,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'Estatura (cm)',
                               controller: _estaturaController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                               error: _estaturaError,
                               errorMessage: 'Campo obrigatório',
@@ -405,8 +405,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'IMC',
                               controller: _imcController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -414,8 +414,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'PI',
                               controller: _piController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -423,8 +423,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'CB (cm)',
                               controller: _cbController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -432,8 +432,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'PCT (mm)',
                               controller: _pctController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -441,8 +441,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'PCB (mm)',
                               controller: _pcbController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -450,8 +450,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'PCSE (mm)',
                               controller: _pcseController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -459,8 +459,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'PCSI (mm)',
                               controller: _pcsiController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -468,8 +468,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'CMB (cm)',
                               controller: _cmbController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -477,8 +477,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'CA (cm)',
                               controller: _caController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -486,8 +486,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'CP (cm)',
                               controller: _cpController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -495,8 +495,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: 'AJ (cm)',
                               controller: _ajController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -504,8 +504,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: '% de GC',
                               controller: _percentualGorduraController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -513,8 +513,8 @@ class _RelatorioProfessorDadosAntropometricosPageState
                               label: '% perda peso/tempo',
                               controller: _perdaPesoController,
                               enabled: podeEditar,
-                              keyboardType:
-                                  TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               inputFormatters: [_numerosFormatter],
                             ),
                             SizedBox(height: espacamentoCards),
@@ -550,9 +550,15 @@ class _RelatorioProfessorDadosAntropometricosPageState
                                       text: 'Próximo',
                                       onPressed: () async {
                                         if (podeEditar && !_validarCampos()) {
+                                          ToastUtil.showToast(
+                                            context: context,
+                                            message:
+                                                'Por favor, verifique o formulário!',
+                                            isError: true,
+                                          );
                                           return;
                                         }
-                                        
+
                                         if (podeEditar) {
                                           await _salvarDadosLocais();
                                         }
