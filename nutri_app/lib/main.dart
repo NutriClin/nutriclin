@@ -4,11 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nutri_app/auth_guard.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
+import 'package:nutri_app/pages/relatorios/relatorios.dart';
 import 'package:nutri_app/pages/usuarios/usuarios.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import './firebase/firebase_options.dart';
 import 'pages/login.dart';
 import 'pages/home.dart';
+import 'package:nutri_app/services/preferences_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,12 +42,26 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF5F5F5)),
         useMaterial3: true,
       ),
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
-        '/usuario': (context) => AuthGuard(child: const UsuarioPage()),
-        '/home': (context) =>
-            AuthGuard(child: const HomePage(tipoUsuario: 'Aluno')),
+        '/usuario': (context) => const AuthGuard(child: UsuarioPage()),
+        '/relatorio': (context) => const AuthGuard(child: RelatoriosPage()),
+        '/home': (context) => AuthGuard(
+              child: FutureBuilder<String?>(
+                future: PreferencesService.getUserType(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return HomePage(
+                    tipoUsuario: snapshot.data ?? 'Professor',
+                  );
+                },
+              ),
+            ),
         '/atendimento': (context) => AuthGuard(child: AtendimentoPage())
       },
     );

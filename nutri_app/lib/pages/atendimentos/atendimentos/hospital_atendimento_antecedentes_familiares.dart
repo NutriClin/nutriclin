@@ -6,8 +6,9 @@ import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/custom_input.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_dados_clinicos_nutricionais.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_dados_clinicos_nutricionais.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoAntecedentesFamiliaresPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
   bool _excessoPeso = false;
   bool _diabetes = false;
   bool _outros = false;
+  bool _outrosError = false; // Adicionado para controle de erro
   final TextEditingController _outrosController = TextEditingController();
   final AtendimentoService _atendimentoService = AtendimentoService();
 
@@ -45,13 +47,13 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
     final dados = await _atendimentoService.carregarAntecedentesFamiliares();
 
     setState(() {
-      _dislipidemias = dados['dislipidemias'] ?? false;
-      _has = dados['has'] ?? false;
-      _cancer = dados['cancer'] ?? false;
-      _excessoPeso = dados['excesso_peso'] ?? false;
-      _diabetes = dados['diabetes'] ?? false;
-      _outros = dados['outros'] ?? false;
-      _outrosController.text = dados['outros_descricao'] ?? '';
+      _dislipidemias = dados['dislipidemias_familiares'] ?? false;
+      _has = dados['has_familiares'] ?? false;
+      _cancer = dados['cancer_familiares'] ?? false;
+      _excessoPeso = dados['excesso_peso_familiares'] ?? false;
+      _diabetes = dados['diabetes_familiares'] ?? false;
+      _outros = dados['outros_antecedentes_familiares'] ?? false;
+      _outrosController.text = dados['outros_antecedentes_familiares_descricao'] ?? '';
     });
   }
 
@@ -67,7 +69,29 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
     );
   }
 
+  bool _validarCampos() {
+    bool valido = true;
+    
+    // Verifica se o campo "Outros" está marcado e a descrição está vazia
+    if (_outros && _outrosController.text.trim().isEmpty) {
+      setState(() => _outrosError = true);
+      valido = false;
+    } else {
+      setState(() => _outrosError = false);
+    }
+    
+    return valido;
+  }
+
   void _proceedToNext() {
+    if (!_validarCampos()) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Por favor, verifique o formulário!',
+        isError: true,
+      );
+      return;
+    }
     _salvarAntecedentesFamiliares();
     Navigator.push(
       context,
@@ -173,9 +197,17 @@ class _HospitalAtendimentoAntecedentesFamiliaresPageState
                               Padding(
                                 padding: const EdgeInsets.only(top: 10),
                                 child: CustomInput(
-                                  label: 'Especifique outros',
+                                  label: 'Especifique',
                                   controller: _outrosController,
                                   keyboardType: TextInputType.text,
+                                  obrigatorio: true,
+                                  error: _outrosError,
+                                  errorMessage: 'Campo obrigatório',
+                                  onChanged: (value) {
+                                    if (_outrosError && value.isNotEmpty) {
+                                      setState(() => _outrosError = false);
+                                    }
+                                  },
                                 ),
                               ),
                           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_card.dart';
 import 'package:nutri_app/components/custom_button.dart';
@@ -6,7 +7,7 @@ import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/components/custom_input.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/pages/atendimentos/atendimento_home.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_conduta_nutricional.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_conduta_nutricional.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
 class HospitalAtendimentoRequerimentosNutricionaisPage extends StatefulWidget {
@@ -31,6 +32,11 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
   final TextEditingController _liquidoDiaController = TextEditingController();
   final TextEditingController _fibrasController = TextEditingController();
   final TextEditingController _outrosController = TextEditingController();
+
+  // Formatter para campos numéricos
+  final FilteringTextInputFormatter _numerosFormatter =
+      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'));
+      
 
   // Services
   final AtendimentoService _atendimentoService = AtendimentoService();
@@ -73,7 +79,7 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
           _liquidoKgController.text = dados['liquido_kg'] ?? '';
           _liquidoDiaController.text = dados['liquido_dia'] ?? '';
           _fibrasController.text = dados['fibras'] ?? '';
-          _outrosController.text = dados['outros'] ?? '';
+          _outrosController.text = dados['outros_requerimentos_nutricionais'] ?? '';
         });
       }
     } catch (e) {
@@ -125,8 +131,7 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
           if (mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => AtendimentoPage()),
+                MaterialPageRoute(builder: (context) => AtendimentoPage()),
                 (route) => false,
               );
             });
@@ -163,44 +168,90 @@ class _HospitalAtendimentoRequerimentosNutricionaisPageState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomInput(
-                            label: 'Kcal / dia',
-                            controller: _kcalDiaController),
+                          label: 'Kcal / dia',
+                          controller: _kcalDiaController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Kcal / kg', controller: _kcalKgController),
+                          label: 'Kcal / kg',
+                          controller: _kcalKgController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'CHO %', controller: _choController),
+                          label: 'CHO %',
+                          controller: _choController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Lip %', controller: _lipController),
+                          label: 'Lip %',
+                          controller: _lipController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Ptn %',
-                            controller: _ptnPorcentagemController),
+                          label: 'Ptn %',
+                          controller: _ptnPorcentagemController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Ptn g / kg', controller: _ptnKgController),
+                          label: 'Ptn g / kg',
+                          controller: _ptnKgController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Ptn g / dia',
-                            controller: _ptnDiaController),
+                          label: 'Ptn g / dia',
+                          controller: _ptnDiaController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Líquido ml / kg',
-                            controller: _liquidoKgController),
+                          label: 'Líquido ml / kg',
+                          controller: _liquidoKgController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Líquido ml / dia',
-                            controller: _liquidoDiaController),
+                          label: 'Líquido ml / dia',
+                          controller: _liquidoDiaController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
                         CustomInput(
-                            label: 'Fibras g/dia',
-                            controller: _fibrasController),
+                          label: 'Fibras g/dia',
+                          controller: _fibrasController,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [_numerosFormatter],
+                        ),
                         SizedBox(height: espacamentoCards),
+                        // Único campo sem máscara numérica
                         CustomInput(
                           label: 'Outros',
                           controller: _outrosController,
+                          keyboardType: TextInputType.text,
                         ),
                         const SizedBox(height: 20),
                         Row(

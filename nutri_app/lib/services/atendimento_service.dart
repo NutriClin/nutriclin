@@ -16,10 +16,10 @@ class AtendimentoService {
     String? quarto,
     String? leito,
     String? registro,
+    String? prontuario,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Dados básicos (comuns a ambos os tipos)
     await prefs.setString('$_prefsKeyIdentificacao.nome', nome);
     await prefs.setString('$_prefsKeyIdentificacao.sexo', sexo);
     await prefs.setString(
@@ -43,16 +43,19 @@ class AtendimentoService {
     if (registro != null) {
       await prefs.setString('$_prefsKeyIdentificacao.registro', registro);
     }
+
+    // Novo campo de prontuário (opcional)
+    if (prontuario != null) {
+      await prefs.setString('$_prefsKeyIdentificacao.prontuario', prontuario);
+    }
   }
 
   Future<Map<String, dynamic>> carregarDadosIdentificacao() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Carrega a data como string
     final dataString =
         prefs.getString('$_prefsKeyIdentificacao.data_nascimento') ?? '';
 
-    // Converte para Timestamp se a string não estiver vazia
     Timestamp? dataTimestamp;
     if (dataString.isNotEmpty) {
       try {
@@ -66,12 +69,13 @@ class AtendimentoService {
     return {
       'nome': prefs.getString('$_prefsKeyIdentificacao.nome') ?? '',
       'sexo': prefs.getString('$_prefsKeyIdentificacao.sexo') ?? 'Selecione',
-      'data_nascimento': dataTimestamp, // Retorna como Timestamp ou null
+      'data_nascimento': dataTimestamp,
       'hospital': prefs.getString('$_prefsKeyIdentificacao.hospital') ?? '',
       'clinica': prefs.getString('$_prefsKeyIdentificacao.clinica') ?? '',
       'quarto': prefs.getString('$_prefsKeyIdentificacao.quarto') ?? '',
       'leito': prefs.getString('$_prefsKeyIdentificacao.leito') ?? '',
       'registro': prefs.getString('$_prefsKeyIdentificacao.registro') ?? '',
+      'prontuario': prefs.getString('$_prefsKeyIdentificacao.prontuario') ?? '',
     };
   }
 
@@ -85,6 +89,7 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyIdentificacao.quarto');
     await prefs.remove('$_prefsKeyIdentificacao.leito');
     await prefs.remove('$_prefsKeyIdentificacao.registro');
+    await prefs.remove('$_prefsKeyIdentificacao.prontuario');
   }
 
   // Dados socioeconômicos
@@ -188,47 +193,60 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setBool(
-        '$_prefsKeyAntecedentesPessoais.dislipidemias', dislipidemias);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.has', has);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.cancer', cancer);
+        '$_prefsKeyAntecedentesPessoais.dislipidemias_pessoais', dislipidemias);
+    await prefs.setBool('$_prefsKeyAntecedentesPessoais.has_pessoais', has);
     await prefs.setBool(
-        '$_prefsKeyAntecedentesPessoais.excesso_peso', excessoPeso);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.diabetes', diabetes);
-    await prefs.setBool('$_prefsKeyAntecedentesPessoais.outros', outros);
+        '$_prefsKeyAntecedentesPessoais.cancer_pessoais', cancer);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesPessoais.excesso_peso_pessoais', excessoPeso);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesPessoais.diabetes_pessoais', diabetes);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais', outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesPessoais.outros_descricao', outrosDescricao);
+        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao',
+        outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesPessoais() async {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'dislipidemias':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.dislipidemias') ??
+      'dislipidemias_pessoais': prefs.getBool(
+              '$_prefsKeyAntecedentesPessoais.dislipidemias_pessoais') ??
+          false,
+      'has_pessoais':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.has_pessoais') ?? false,
+      'cancer_pessoais':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.cancer_pessoais') ??
               false,
-      'has': prefs.getBool('$_prefsKeyAntecedentesPessoais.has') ?? false,
-      'cancer': prefs.getBool('$_prefsKeyAntecedentesPessoais.cancer') ?? false,
-      'excesso_peso':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.excesso_peso') ?? false,
-      'diabetes':
-          prefs.getBool('$_prefsKeyAntecedentesPessoais.diabetes') ?? false,
-      'outros': prefs.getBool('$_prefsKeyAntecedentesPessoais.outros') ?? false,
-      'outros_descricao':
-          prefs.getString('$_prefsKeyAntecedentesPessoais.outros_descricao') ??
-              '',
+      'excesso_peso_pessoais': prefs.getBool(
+              '$_prefsKeyAntecedentesPessoais.excesso_peso_pessoais') ??
+          false,
+      'diabetes_pessoais':
+          prefs.getBool('$_prefsKeyAntecedentesPessoais.diabetes_pessoais') ??
+              false,
+      'outros_antecedentes_pessoais': prefs.getBool(
+              '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais') ??
+          false,
+      'outros_antecedentes_pessoais_descricao': prefs.getString(
+              '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao') ??
+          '',
     };
   }
 
   Future<void> limparAntecedentesPessoais() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.dislipidemias');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.has');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.cancer');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.excesso_peso');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.diabetes');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.outros');
-    await prefs.remove('$_prefsKeyAntecedentesPessoais.outros_descricao');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.dislipidemias_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.has_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.cancer_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.excesso_peso_pessoais');
+    await prefs.remove('$_prefsKeyAntecedentesPessoais.diabetes_pessoais');
+    await prefs
+        .remove('$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais');
+    await prefs.remove(
+        '$_prefsKeyAntecedentesPessoais.outros_antecedentes_pessoais_descricao');
   }
 
 // Antecedentes familiares
@@ -247,36 +265,48 @@ class AtendimentoService {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setBool(
-        '$_prefsKeyAntecedentesFamiliares.dislipidemias', dislipidemias);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.has', has);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.cancer', cancer);
+        '$_prefsKeyAntecedentesFamiliares.dislipidemias_familiares',
+        dislipidemias);
+    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.has_familiares', has);
     await prefs.setBool(
-        '$_prefsKeyAntecedentesFamiliares.excesso_peso', excessoPeso);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.diabetes', diabetes);
-    await prefs.setBool('$_prefsKeyAntecedentesFamiliares.outros', outros);
+        '$_prefsKeyAntecedentesFamiliares.cancer_familiares', cancer);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesFamiliares.excesso_peso_familiares',
+        excessoPeso);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesFamiliares.diabetes_familiares', diabetes);
+    await prefs.setBool(
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares',
+        outros);
     await prefs.setString(
-        '$_prefsKeyAntecedentesFamiliares.outros_descricao', outrosDescricao);
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao',
+        outrosDescricao);
   }
 
   Future<Map<String, dynamic>> carregarAntecedentesFamiliares() async {
     final prefs = await SharedPreferences.getInstance();
 
     return {
-      'dislipidemias':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.dislipidemias') ??
+      'dislipidemias_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.dislipidemias_familiares') ??
+          false,
+      'has_familiares':
+          prefs.getBool('$_prefsKeyAntecedentesFamiliares.has_familiares') ??
               false,
-      'has': prefs.getBool('$_prefsKeyAntecedentesFamiliares.has') ?? false,
-      'cancer':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.cancer') ?? false,
-      'excesso_peso':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.excesso_peso') ??
+      'cancer_familiares':
+          prefs.getBool('$_prefsKeyAntecedentesFamiliares.cancer_familiares') ??
               false,
-      'diabetes':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.diabetes') ?? false,
-      'outros':
-          prefs.getBool('$_prefsKeyAntecedentesFamiliares.outros') ?? false,
-      'outros_descricao': prefs
-              .getString('$_prefsKeyAntecedentesFamiliares.outros_descricao') ??
+      'excesso_peso_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.excesso_peso_familiares') ??
+          false,
+      'diabetes_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.diabetes_familiares') ??
+          false,
+      'outros_antecedentes_familiares': prefs.getBool(
+              '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares') ??
+          false,
+      'outros_antecedentes_familiares_descricao': prefs.getString(
+              '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao') ??
           '',
     };
   }
@@ -284,13 +314,17 @@ class AtendimentoService {
   Future<void> limparAntecedentesFamiliares() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.dislipidemias');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.has');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.cancer');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.excessoPeso');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.diabetes');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.outros');
-    await prefs.remove('$_prefsKeyAntecedentesFamiliares.outros_descricao');
+    await prefs
+        .remove('$_prefsKeyAntecedentesFamiliares.dislipidemias_familiares');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.has_familiares');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.cancer_familiares');
+    await prefs
+        .remove('$_prefsKeyAntecedentesFamiliares.excessoPeso_familiares');
+    await prefs.remove('$_prefsKeyAntecedentesFamiliares.diabetes_familiares');
+    await prefs.remove(
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares');
+    await prefs.remove(
+        '$_prefsKeyAntecedentesFamiliares.outros_antecedentes_familiares_descricao');
   }
 
 // Dados clínicos e nutricionais
@@ -424,6 +458,9 @@ class AtendimentoService {
       'possui_cirurgia_recente':
           prefs.getBool('$_prefsKeyDadosClinicos.possui_cirurgia_recente') ??
               false,
+      'resumo_cirurgia_recente':
+          prefs.getString('$_prefsKeyDadosClinicos.resumo_cirurgia_recente') ??
+              '',
       'resumo_medicamentos_vitaminas_minerais_prescritos': prefs.getString(
               '$_prefsKeyDadosClinicos.resumo_medicamentos_vitaminas_minerais_prescritos') ??
           '',
@@ -688,7 +725,8 @@ class AtendimentoService {
     await prefs.setString('$_prefsKeyRequerimentos.liquido_kg', liquidoKg);
     await prefs.setString('$_prefsKeyRequerimentos.liquido_dia', liquidoDia);
     await prefs.setString('$_prefsKeyRequerimentos.fibras', fibras);
-    await prefs.setString('$_prefsKeyRequerimentos.outros', outros);
+    await prefs.setString(
+        '$_prefsKeyRequerimentos.outros_requerimentos_nutricionais', outros);
   }
 
   Future<Map<String, String>> carregarRequerimentosNutricionais() async {
@@ -706,7 +744,9 @@ class AtendimentoService {
       'liquido_dia':
           prefs.getString('$_prefsKeyRequerimentos.liquido_dia') ?? '',
       'fibras': prefs.getString('$_prefsKeyRequerimentos.fibras') ?? '',
-      'outros': prefs.getString('$_prefsKeyRequerimentos.outros') ?? '',
+      'outros_requerimentos_nutricionais': prefs.getString(
+              '$_prefsKeyRequerimentos.outros_requerimentos_nutricionais') ??
+          '',
     };
   }
 
@@ -723,7 +763,8 @@ class AtendimentoService {
     await prefs.remove('$_prefsKeyRequerimentos.liquido_kg');
     await prefs.remove('$_prefsKeyRequerimentos.liquido_dia');
     await prefs.remove('$_prefsKeyRequerimentos.fibras');
-    await prefs.remove('$_prefsKeyRequerimentos.outros');
+    await prefs
+        .remove('$_prefsKeyRequerimentos.outros_requerimentos_nutricionais');
   }
 
 // Dados de conduta nutricional e finalização
@@ -755,9 +796,10 @@ class AtendimentoService {
       'estagiario': prefs.getString('$_prefsKeyConduta.estagiario') ?? '',
       'professor':
           prefs.getString('$_prefsKeyConduta.professor') ?? 'Selecione',
+      'idProfessor': prefs.getString('$_prefsKeyConduta.idProfessor') ?? '',
+      'idEstagiario': prefs.getString('$_prefsKeyConduta.idEstagiario') ?? '',
       'proxima_consulta':
-          prefs.getString('$_prefsKeyConduta.proxima_consulta') ??
-              '', // Novo campo
+          prefs.getString('$_prefsKeyConduta.proxima_consulta') ?? '',
     };
   }
 
@@ -819,6 +861,12 @@ class AtendimentoService {
       ...consumoAlimentar,
       ...requerimentos,
       ...conduta,
+      'id_professor_supervisor': conduta['idProfessor'],
+      'id_aluno': conduta['idEstagiario'],
+      'nome_professor': conduta['professor'],
+      'nome_aluno': conduta['estagiario'],
+      'status_atendimento': 'pendente',
+      'criado_em': FieldValue.serverTimestamp(),
       'data': data,
     };
   }
@@ -839,7 +887,16 @@ class AtendimentoService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) throw Exception('Usuário não autenticado');
 
-    await FirebaseFirestore.instance.collection('atendimento').add({
+    final tipoAtendimento = await obterTipoAtendimento();
+    var tabelaBaseDados = '';
+
+    if (tipoAtendimento == 'hospital') {
+      tabelaBaseDados = 'atendimento';
+    } else {
+      tabelaBaseDados = 'clinica';
+    }
+
+    await FirebaseFirestore.instance.collection(tabelaBaseDados).add({
       ...dados,
       'criado_por': user.uid,
       'criado_em': FieldValue.serverTimestamp(),
@@ -858,5 +915,14 @@ class AtendimentoService {
     return prefs.getString('hospital_atendimento.professor_selecionado');
   }
 
-  obterAtendimentoAtual() {}
+  Future<String?> carregarObservacao() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('hospital_atendimento.observacao_geral');
+  }
+
+  Future<void> salvarObservacaoLocal(String observacao) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        'hospital_atendimento.observacao_geral', observacao);
+  }
 }

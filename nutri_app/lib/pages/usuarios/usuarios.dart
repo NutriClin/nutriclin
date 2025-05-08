@@ -269,13 +269,14 @@ class _UsuarioPageState extends State<UsuarioPage> {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => UsuarioDetalhe(idUsuario: ""),
                     ),
                   );
+                  _refreshData(); // Recarrega os dados após retornar
                 },
                 backgroundColor: const Color(0xFF007AFF),
                 shape: RoundedRectangleBorder(
@@ -299,6 +300,17 @@ class _UsuarioPageState extends State<UsuarioPage> {
           ),
       ],
     );
+  }
+
+  void _refreshData() {
+    setState(() {
+      _initialLoading = true;
+      _usuarios.clear();
+      _usuariosFiltrados.clear();
+      _lastDocument = null;
+      _isLastPage = false;
+    });
+    _fetchInitialData();
   }
 
   Widget _buildUsersList() {
@@ -348,7 +360,10 @@ class _UsuarioPageState extends State<UsuarioPage> {
       itemBuilder: (context, index) {
         if (index < _usuariosFiltrados.length) {
           final usuario = _usuariosFiltrados[index];
-          return CustomListUsuario(report: usuario);
+          return CustomListUsuario(
+            report: usuario,
+            onUsuarioUpdated: _refreshData, // Passe o callback aqui
+          );
         } else {
           if (_isLastPage) {
             return const SizedBox(height: 100);

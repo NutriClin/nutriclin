@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nutri_app/components/base_page.dart';
 import 'package:nutri_app/components/custom_box.dart';
 import 'package:nutri_app/components/custom_confirmation_dialog.dart';
-import 'package:nutri_app/pages/atendimentos/hospital/hospital_atendimento_identificacao.dart';
+import 'package:nutri_app/pages/atendimentos/atendimentos/hospital_atendimento_identificacao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -33,10 +33,14 @@ class AtendimentoPage extends StatelessWidget {
     String tipoAtendimento,
   ) async {
     final prefs = await SharedPreferences.getInstance();
+
     final keys = prefs.getKeys();
     final dadosExistentes = keys.where((key) => key.startsWith(prefKey));
 
-    if (dadosExistentes.isNotEmpty) {
+    final tipoAtendimentoSalvo =
+        await _atendimentoService.obterTipoAtendimento();
+
+    if (dadosExistentes.isNotEmpty || tipoAtendimentoSalvo != null) {
       _mostrarModalConfirmacao(context, prefKey, nextPage, tipoAtendimento);
     } else {
       await _atendimentoService.salvarTipoAtendimento(tipoAtendimento);
