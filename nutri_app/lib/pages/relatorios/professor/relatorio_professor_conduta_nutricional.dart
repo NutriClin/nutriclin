@@ -10,6 +10,9 @@ import 'package:nutri_app/components/observacao_relatorio.dart';
 import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_confirmation_dialog.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
+import 'package:excel/excel.dart';
+import 'package:universal_html/html.dart' show AnchorElement;
+import 'dart:convert';
 
 class RelatorioProfessorCondutaNutricionalPage extends StatefulWidget {
   final String atendimentoId;
@@ -38,9 +41,7 @@ class _RelatorioProfessorCondutaNutricionalPageState
       TextEditingController();
   final TextEditingController _professorController = TextEditingController();
 
-  // Estados de validação
   bool _proximaConsultaError = false;
-
   bool isLoading = true;
   bool hasError = false;
   bool isSaving = false;
@@ -89,8 +90,6 @@ class _RelatorioProfessorCondutaNutricionalPageState
             _proximaConsultaController.text = data['proxima_consulta'] ?? '';
           }
           statusAtendimento = data['status_atendimento'] ?? '';
-
-          // Verifica se o aluno pode editar
           modoEdicao = isAluno && statusAtendimento == 'rejeitado';
           isLoading = false;
         });
@@ -109,17 +108,14 @@ class _RelatorioProfessorCondutaNutricionalPageState
     }
   }
 
-  // Função de validação dos campos
   bool _validarCampos() {
     bool valido = true;
-
     if (widget.isHospital && _proximaConsultaController.text.trim().isEmpty) {
       _proximaConsultaError = true;
       valido = false;
     } else {
       _proximaConsultaError = false;
     }
-
     setState(() {});
     return valido;
   }
@@ -156,7 +152,6 @@ class _RelatorioProfessorCondutaNutricionalPageState
     setState(() => isSaving = true);
     try {
       final collection = widget.isHospital ? 'atendimento' : 'clinica';
-
       final doc = await _firestore
           .collection(collection)
           .doc(widget.atendimentoId)
@@ -248,6 +243,99 @@ class _RelatorioProfessorCondutaNutricionalPageState
         setState(() => isSaving = false);
       }
     }
+  }
+
+  Future<void> _exportToExcel() async {
+    try {
+      final collection = widget.isHospital ? 'atendimento' : 'clinica';
+      final docSnapshot = await _firestore
+          .collection(collection)
+          .doc(widget.atendimentoId)
+          .get();
+
+      if (!docSnapshot.exists) {
+        ToastUtil.showToast(
+          context: context,
+          message: 'Documento não encontrado',
+          isError: true,
+        );
+        return;
+      }
+
+      final dadosCompletos = docSnapshot.data() as Map<String, dynamic>;
+
+      // Criar Excel
+      final excel = Excel.createExcel();
+      final sheet = excel['Atendimento'];
+
+      // Função para formatar valores
+      String formatValue(dynamic value) {
+        if (value == null) return '';
+        if (value is Timestamp) return value.toDate().toString();
+        if (value is Map) return jsonEncode(value);
+        return value.toString();
+      }
+
+      // Adicionar cabeçalhos
+      sheet.appendRow([
+         TextCellValue('Campo'),
+         TextCellValue('Valor'),
+      ]);
+
+      // Adicionar todos os campos organizados
+      final sections = {
+        'Identificação': ['nome', 'sexo', 'data_nascimento', 'hospital', 'clinica', 'quarto', 'leito', 'registro', 'prontuario'],
+        'Dados Socioeconômicos': ['agua_encanada', 'esgoto_encanado', 'coleta_lixo', 'luz_eletrica', 'tipo_casa', 'numero_pessoas_moram_junto', 'renda_familiar', 'renda_per_capita', 'escolaridade', 'profissao', 'producao_domestica_alimentos'],
+        'Antecedentes Pessoais': ['dislipidemias_pessoais', 'has_pessoais', 'cancer_pessoais', 'excesso_peso_pessoais', 'diabetes_pessoais', 'outros_antecedentes_pessoais', 'outros_antecedentes_pessoais_descricao'],
+        'Antecedentes Familiares': ['dislipidemias_familiares', 'has_familiares', 'cancer_familiares', 'excesso_peso_familiares', 'diabetes_familiares', 'outros_antecedentes_familiares', 'outros_antecedentes_familiares_descricao'],
+        'Dados Clínicos': ['diagnostico_clinico', 'prescricao_dietoterapica', 'aceitacao', 'alimentacao_habitual', 'resumo_alimentacao_habitual', 'possui_doenca_anterior', 'resumo_doenca_anterior', 'possui_cirurgia_recente', 'resumo_cirurgia_recente', 'possui_febre', 'possui_alteracao_peso_recente', 'quantidade_perca_peso_recente', 'possui_desconforto_oral_gastrointestinal', 'possui_necessidade_dieta_hospitalar', 'resumo_necessidade_dieta_hospitalar', 'possui_suplementacao_nutricional', 'resumo_suplemento_nutricional', 'possui_tabagismo', 'possui_etilismo', 'possui_condicao_funcional', 'resumo_condicao_funcional', 'resumo_medicamentos_vitaminas_minerais_prescritos', 'resumo_exames_laboratoriais', 'resumo_exame_fisico'],
+        'Dados Antropométricos': ['peso_atual', 'peso_usual', 'estatura', 'imc', 'pi', 'cb', 'pct', 'pcb', 'pcse', 'pcsi', 'cmb', 'ca', 'cp', 'aj', 'porcentagem_gc', 'porcentagem_perca_peso_por_tempo', 'diagnostico_nutricional'],
+        'Consumo Alimentar': ['habitual', 'atual', 'ingestao_hidrica', 'evacuacao', 'diurese'],
+        'Requerimentos Nutricionais': ['kcal_dia', 'kcal_kg', 'cho', 'lip', 'Ptn', 'ptn_kg', 'ptn_dia', 'liquido_kg', 'liquido_dia', 'fibras', 'outros_requerimentos_nutricionais'],
+        'Conduta Nutricional': ['estagiario', 'professor', 'proxima_consulta'],
+        'Metadados': ['status_atendimento', 'criado_em', 'data']
+      };
+
+      sections.forEach((sectionName, fields) {
+        sheet.appendRow([TextCellValue('--- $sectionName ---')]);
+        fields.forEach((field) {
+          if (dadosCompletos.containsKey(field)) {
+            sheet.appendRow([
+              TextCellValue(_formatFieldName(field)),
+              TextCellValue(formatValue(dadosCompletos[field])),
+            ]);
+          }
+        });
+      });
+
+      // Gerar e baixar arquivo
+      final excelBytes = excel.encode()!;
+      final base64 = base64Encode(excelBytes);
+      final anchor = AnchorElement(
+        href: 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,$base64',
+      );
+      anchor.setAttribute('download', 'atendimento_${widget.atendimentoId}.xlsx');
+      anchor.click();
+
+      ToastUtil.showToast(
+        context: context,
+        message: 'Arquivo Excel gerado com sucesso!',
+        isError: false,
+      );
+    } catch (e) {
+      ToastUtil.showToast(
+        context: context,
+        message: 'Erro ao gerar Excel: $e',
+        isError: true,
+      );
+    }
+  }
+
+  String _formatFieldName(String field) {
+    return field.split('_').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1);
+    }).join(' ');
   }
 
   @override
@@ -350,6 +438,14 @@ class _RelatorioProfessorCondutaNutricionalPageState
                                 ),
                                 Row(
                                   children: [
+                                    if (isProfessor) 
+                                      CustomButton(
+                                        text: 'Exportar Excel',
+                                        onPressed: _exportToExcel,
+                                        color: Colors.green,
+                                        textColor: Colors.white,
+                                      ),
+                                    const SizedBox(width: 10),
                                     CustomButton(
                                       text: 'Voltar',
                                       onPressed: () => Navigator.pop(context),
