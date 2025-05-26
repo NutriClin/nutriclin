@@ -9,6 +9,7 @@ import 'package:nutri_app/components/custom_stepper.dart';
 import 'package:nutri_app/components/custom_switch.dart';
 import 'package:nutri_app/components/custom_dropdown.dart';
 import 'package:nutri_app/components/observacao_relatorio.dart';
+import 'package:nutri_app/components/toast_util.dart';
 import 'package:nutri_app/pages/relatorios/professor/relatorio_professor_dados_antropometricos.dart';
 import 'package:nutri_app/services/atendimento_service.dart';
 
@@ -391,7 +392,7 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
     if (!_validarCampos()) {
       return;
     }
-    
+
     await _atendimentoService.salvarDadosClinicosNutricionais(
       diagnostico: _diagnosticoController.text,
       prescricao: _prescricaoController.text,
@@ -516,8 +517,10 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                               ],
                               onChanged: podeEditar
                                   ? (value) {
-                                      setState(() => selectedAceitacao = value!);
-                                      if (_aceitacaoError && value != 'Selecione') {
+                                      setState(
+                                          () => selectedAceitacao = value!);
+                                      if (_aceitacaoError &&
+                                          value != 'Selecione') {
                                         setState(() => _aceitacaoError = false);
                                       }
                                     }
@@ -538,7 +541,8 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                               ],
                               onChanged: podeEditar
                                   ? (value) {
-                                      setState(() => selectedAlimentacaoHabitual = value!);
+                                      setState(() =>
+                                          selectedAlimentacaoHabitual = value!);
                                       if (value != 'Inadequada') {
                                         _alimentacaoHabitualController.clear();
                                         _alimentacaoError = false;
@@ -547,7 +551,8 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                                   : null,
                               enabled: podeEditar,
                             ),
-                            if (selectedAlimentacaoHabitual == 'Inadequada') ...[
+                            if (selectedAlimentacaoHabitual ==
+                                'Inadequada') ...[
                               SizedBox(height: espacamentoCards),
                               CustomInput(
                                 label: 'Especificar',
@@ -588,8 +593,10 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                                 error: _doencaAnteriorError,
                                 errorMessage: 'Campo obrigatório',
                                 onChanged: (value) {
-                                  if (_doencaAnteriorError && value.isNotEmpty) {
-                                    setState(() => _doencaAnteriorError = false);
+                                  if (_doencaAnteriorError &&
+                                      value.isNotEmpty) {
+                                    setState(
+                                        () => _doencaAnteriorError = false);
                                   }
                                 },
                               ),
@@ -670,7 +677,8 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                               label: 'Desconfortos Orais/Gastrointestinais',
                               value: _desconforto,
                               onChanged: podeEditar
-                                  ? (value) => setState(() => _desconforto = value)
+                                  ? (value) =>
+                                      setState(() => _desconforto = value)
                                   : null,
                               enabled: podeEditar,
                             ),
@@ -730,8 +738,10 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                                 error: _tipoSuplementacaoError,
                                 errorMessage: 'Campo obrigatório',
                                 onChanged: (value) {
-                                  if (_tipoSuplementacaoError && value.isNotEmpty) {
-                                    setState(() => _tipoSuplementacaoError = false);
+                                  if (_tipoSuplementacaoError &&
+                                      value.isNotEmpty) {
+                                    setState(
+                                        () => _tipoSuplementacaoError = false);
                                   }
                                 },
                               ),
@@ -741,7 +751,8 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                               label: 'Tabagismo',
                               value: _tabagismo,
                               onChanged: podeEditar
-                                  ? (value) => setState(() => _tabagismo = value)
+                                  ? (value) =>
+                                      setState(() => _tabagismo = value)
                                   : null,
                               enabled: podeEditar,
                             ),
@@ -765,7 +776,8 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                               ],
                               onChanged: podeEditar
                                   ? (value) {
-                                      setState(() => selectedCondicaoFuncional = value!);
+                                      setState(() =>
+                                          selectedCondicaoFuncional = value!);
                                       if (value != 'Desfavorável') {
                                         _especificarCondicaoController.clear();
                                         _especificarCondicaoError = false;
@@ -774,7 +786,8 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                                   : null,
                               enabled: podeEditar,
                             ),
-                            if (selectedCondicaoFuncional == 'Desfavorável') ...[
+                            if (selectedCondicaoFuncional ==
+                                'Desfavorável') ...[
                               SizedBox(height: espacamentoCards),
                               CustomInput(
                                 label: 'Especificar',
@@ -784,15 +797,18 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                                 error: _especificarCondicaoError,
                                 errorMessage: 'Campo obrigatório',
                                 onChanged: (value) {
-                                  if (_especificarCondicaoError && value.isNotEmpty) {
-                                    setState(() => _especificarCondicaoError = false);
+                                  if (_especificarCondicaoError &&
+                                      value.isNotEmpty) {
+                                    setState(() =>
+                                        _especificarCondicaoError = false);
                                   }
                                 },
                               ),
                             ],
                             SizedBox(height: espacamentoCards),
                             CustomInput(
-                              label: 'Medicamentos/vitaminas/minerais prescritos',
+                              label:
+                                  'Medicamentos/vitaminas/minerais prescritos',
                               controller: _medicamentosController,
                               enabled: podeEditar,
                             ),
@@ -836,11 +852,11 @@ class _RelatorioProfessorDadosClinicosNutricionaisPageState
                                       onPressed: () async {
                                         if (podeEditar) {
                                           if (!_validarCampos()) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Por favor, verifique o formulário!'),
-                                                backgroundColor: Colors.red,
-                                              ),
+                                            ToastUtil.showToast(
+                                              context: context,
+                                              message:
+                                                  'Por favor, verifique o formulário!',
+                                              isError: true,
                                             );
                                             return;
                                           }
